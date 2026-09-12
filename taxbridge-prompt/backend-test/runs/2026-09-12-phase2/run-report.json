@@ -1,0 +1,1836 @@
+{
+  "run": "2026-09-12-phase2",
+  "metrics": {
+    "backendAccuracy": 1.0,
+    "healthScore": 100,
+    "criticalViolations": 0,
+    "heroViolations": 0,
+    "wrongAutoMatchCount": 0,
+    "revenueInvarianceViolations": 0,
+    "illegalTransitionSucceeded": 0,
+    "moneyExactRate": 1.0,
+    "blockedRate": 0.0,
+    "ruleCoverage": "44/45",
+    "weightRegression": {
+      "w_amount": 0.6,
+      "w_name": 0.3,
+      "w_day": 0.1,
+      "spec": {
+        "w_amount": 0.6,
+        "w_name": 0.3,
+        "w_day": 0.1
+      }
+    }
+  },
+  "variations": [
+    {
+      "key": "SC-CAND/V1-weights",
+      "verdict": "PASS",
+      "pass": 31,
+      "total": 31,
+      "reason": ""
+    },
+    {
+      "key": "SC-CAND/V2-threshold",
+      "verdict": "PASS",
+      "pass": 26,
+      "total": 26,
+      "reason": ""
+    },
+    {
+      "key": "SC-CAND/V3-pool-filter",
+      "verdict": "PASS",
+      "pass": 66,
+      "total": 66,
+      "reason": ""
+    },
+    {
+      "key": "SC-CAND/V4-hero-no-candidate",
+      "verdict": "PASS",
+      "pass": 13,
+      "total": 13,
+      "reason": ""
+    },
+    {
+      "key": "SC-CAND/V5-ambiguous-two-candidates",
+      "verdict": "PASS",
+      "pass": 21,
+      "total": 21,
+      "reason": ""
+    },
+    {
+      "key": "SC-CAND/P1-name-normalize",
+      "verdict": "PROBE",
+      "pass": 23,
+      "total": 23,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/V1-match-effects",
+      "verdict": "PASS",
+      "pass": 23,
+      "total": 23,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/V2-classify-deposit",
+      "verdict": "PASS",
+      "pass": 17,
+      "total": 17,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/V3-classify-owner-money",
+      "verdict": "PASS",
+      "pass": 12,
+      "total": 12,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/V4-bankin-all-status",
+      "verdict": "PASS",
+      "pass": 16,
+      "total": 16,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/V5-state-guards",
+      "verdict": "PASS",
+      "pass": 17,
+      "total": 17,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/V6-invalid-input",
+      "verdict": "PASS",
+      "pass": 10,
+      "total": 10,
+      "reason": ""
+    },
+    {
+      "key": "SC-HERO/P2-match-target",
+      "verdict": "PROBE",
+      "pass": 25,
+      "total": 25,
+      "reason": ""
+    },
+    {
+      "key": "SC-CLOSE/V1-generate-and-resolve",
+      "verdict": "PASS",
+      "pass": 52,
+      "total": 52,
+      "reason": ""
+    },
+    {
+      "key": "SC-CLOSE/V2-classify-keeps-summary",
+      "verdict": "PASS",
+      "pass": 13,
+      "total": 13,
+      "reason": ""
+    },
+    {
+      "key": "SC-CLOSE/V3-reclose-upsert",
+      "verdict": "PASS",
+      "pass": 19,
+      "total": 19,
+      "reason": ""
+    },
+    {
+      "key": "SC-CLOSE/V4-history-and-errors",
+      "verdict": "PASS",
+      "pass": 28,
+      "total": 28,
+      "reason": ""
+    },
+    {
+      "key": "SC-DASH/V1-formula",
+      "verdict": "PASS",
+      "pass": 82,
+      "total": 82,
+      "reason": ""
+    },
+    {
+      "key": "SC-DASH/V2-date-filter",
+      "verdict": "PASS",
+      "pass": 26,
+      "total": 26,
+      "reason": ""
+    },
+    {
+      "key": "SC-DASH/V3-empty-business",
+      "verdict": "PASS",
+      "pass": 10,
+      "total": 10,
+      "reason": ""
+    },
+    {
+      "key": "SC-DATE/V1-image-date-wins",
+      "verdict": "PASS",
+      "pass": 9,
+      "total": 9,
+      "reason": ""
+    },
+    {
+      "key": "SC-DATE/V2-text-without-date-is-today",
+      "verdict": "PASS",
+      "pass": 3,
+      "total": 3,
+      "reason": ""
+    },
+    {
+      "key": "SC-DATE/P3-text-with-date",
+      "verdict": "PROBE",
+      "pass": 1,
+      "total": 1,
+      "reason": ""
+    },
+    {
+      "key": "SC-REPORT/V1-report-totals",
+      "verdict": "PASS",
+      "pass": 50,
+      "total": 50,
+      "reason": ""
+    },
+    {
+      "key": "SC-REPORT/V2-report-validation",
+      "verdict": "PASS",
+      "pass": 6,
+      "total": 6,
+      "reason": ""
+    },
+    {
+      "key": "SC-REPORT/V3-pending-all-days",
+      "verdict": "PASS",
+      "pass": 29,
+      "total": 29,
+      "reason": ""
+    },
+    {
+      "key": "SC-BATCH/V1-batch-and-dedupe",
+      "verdict": "PASS",
+      "pass": 9,
+      "total": 9,
+      "reason": ""
+    },
+    {
+      "key": "SC-BATCH/V2-reject-single-receipt",
+      "verdict": "PASS",
+      "pass": 5,
+      "total": 5,
+      "reason": ""
+    },
+    {
+      "key": "SC-BATCH/V3-batch-then-single",
+      "verdict": "PASS",
+      "pass": 4,
+      "total": 4,
+      "reason": ""
+    },
+    {
+      "key": "SC-BATCH/V4-out-direction-not-in-bankin",
+      "verdict": "PASS",
+      "pass": 2,
+      "total": 2,
+      "reason": ""
+    }
+  ],
+  "byRule": {
+    "CAND-NO-AUTO": {
+      "pass": 8,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "CAND-LIMIT-3": {
+      "pass": 2,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CAND-SCORE-FORMULA": {
+      "pass": 8,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "CAND-SORT-DESC": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "major",
+      "hero": true
+    },
+    "CAND-SHAPE": {
+      "pass": 2,
+      "fail": 0,
+      "severity": "minor",
+      "hero": false
+    },
+    "EVENT-PUT-ECHO": {
+      "pass": 394,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CAND-THRESHOLD": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "CAND-FILTER-ELIGIBLE": {
+      "pass": 10,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "DASH-BANKIN": {
+      "pass": 12,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "DASH-COUNTS": {
+      "pass": 14,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "DASH-REVENUE": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "CAND-ONLY-WHEN-UNMATCHED": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "MATCH-EFFECT-MOVEMENT": {
+      "pass": 7,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "MATCH-EFFECT-EVENT": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "DASH-COLLECTED": {
+      "pass": 4,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "DASH-RECEIVABLE": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "CLS-EFFECT": {
+      "pass": 8,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "CLS-REVENUE-INVARIANT": {
+      "pass": 8,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "STATE-INVALID-409": {
+      "pass": 10,
+      "fail": 0,
+      "severity": "critical",
+      "hero": false
+    },
+    "ERR-CODE-CONFORM": {
+      "pass": 20,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CLOSE-COUNT-OPEN-ONLY": {
+      "pass": 7,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CLOSE-WARNING-ID": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CLOSE-WARNING-SCOPE": {
+      "pass": 6,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CLOSE-SUMMARY": {
+      "pass": 8,
+      "fail": 0,
+      "severity": "critical",
+      "hero": false
+    },
+    "CLOSE-RESOLVE": {
+      "pass": 8,
+      "fail": 0,
+      "severity": "critical",
+      "hero": false
+    },
+    "CLOSE-KEEP-CLOSEDAT": {
+      "pass": 2,
+      "fail": 0,
+      "severity": "minor",
+      "hero": false
+    },
+    "CLOSE-UPSERT": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CLOSE-HISTORY": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "minor",
+      "hero": false
+    },
+    "DASH-EXPENSE": {
+      "pass": 2,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "DASH-SHAPE": {
+      "pass": 4,
+      "fail": 0,
+      "severity": "minor",
+      "hero": false
+    },
+    "DASH-DATE-FILTER": {
+      "pass": 6,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "CAPTURE-RESULT-SHAPE": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "DATE-FROM-DOCUMENT": {
+      "pass": 4,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    },
+    "DASH-PAST-COUNTS": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "REPORT-SUMMARY": {
+      "pass": 11,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "REPORT-BYDAY": {
+      "pass": 7,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "REPORT-BYTYPE": {
+      "pass": 4,
+      "fail": 0,
+      "severity": "minor",
+      "hero": false
+    },
+    "REPORT-VALIDATION": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "PENDING-CONTENT": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "PENDING-SYNC": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "BATCH-RESULT": {
+      "pass": 9,
+      "fail": 0,
+      "severity": "critical",
+      "hero": false
+    },
+    "BATCH-DEDUPE": {
+      "pass": 3,
+      "fail": 0,
+      "severity": "critical",
+      "hero": false
+    },
+    "BATCH-REJECT-NON-LIST": {
+      "pass": 5,
+      "fail": 0,
+      "severity": "major",
+      "hero": false
+    },
+    "DASH-BANKIN-IN-ONLY": {
+      "pass": 1,
+      "fail": 0,
+      "severity": "critical",
+      "hero": true
+    }
+  },
+  "byGroup": {
+    "matching": {
+      "pass": 39,
+      "fail": 0
+    },
+    "events": {
+      "pass": 394,
+      "fail": 0
+    },
+    "dashboard": {
+      "pass": 58,
+      "fail": 0
+    },
+    "money": {
+      "pass": 36,
+      "fail": 0
+    },
+    "errors": {
+      "pass": 20,
+      "fail": 0
+    },
+    "closeday": {
+      "pass": 42,
+      "fail": 0
+    },
+    "date": {
+      "pass": 9,
+      "fail": 0
+    },
+    "report": {
+      "pass": 25,
+      "fail": 0
+    },
+    "pending": {
+      "pass": 8,
+      "fail": 0
+    },
+    "batch": {
+      "pass": 17,
+      "fail": 0
+    }
+  },
+  "failures": [],
+  "latency": [
+    {
+      "endpoint": "GET /api/daily-records",
+      "ai": false,
+      "n": 2,
+      "p50": 230,
+      "p95": 232,
+      "max": 232
+    },
+    {
+      "endpoint": "GET /api/daily-records/2026-09-07",
+      "ai": false,
+      "n": 1,
+      "p50": 218,
+      "p95": 218,
+      "max": 218
+    },
+    {
+      "endpoint": "GET /api/daily-records/2026-09-11",
+      "ai": false,
+      "n": 4,
+      "p50": 230,
+      "p95": 239,
+      "max": 239
+    },
+    {
+      "endpoint": "GET /api/dashboard",
+      "ai": false,
+      "n": 32,
+      "p50": 249,
+      "p95": 357,
+      "max": 465
+    },
+    {
+      "endpoint": "GET /api/events",
+      "ai": false,
+      "n": 8,
+      "p50": 231,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "GET /api/events/ev_39ffb8dbda3d",
+      "ai": false,
+      "n": 1,
+      "p50": 211,
+      "p95": 211,
+      "max": 211
+    },
+    {
+      "endpoint": "GET /api/events/ev_5fb5a0ac5536",
+      "ai": false,
+      "n": 1,
+      "p50": 243,
+      "p95": 243,
+      "max": 243
+    },
+    {
+      "endpoint": "GET /api/events/ev_ce6395390747",
+      "ai": false,
+      "n": 1,
+      "p50": 236,
+      "p95": 236,
+      "max": 236
+    },
+    {
+      "endpoint": "GET /api/events/ev_dc6e94487ad1",
+      "ai": false,
+      "n": 1,
+      "p50": 234,
+      "p95": 234,
+      "max": 234
+    },
+    {
+      "endpoint": "GET /api/money-movements",
+      "ai": false,
+      "n": 6,
+      "p50": 237,
+      "p95": 285,
+      "max": 285
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_07ac6fe04854",
+      "ai": false,
+      "n": 2,
+      "p50": 239,
+      "p95": 240,
+      "max": 240
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_0bf4b96c4740",
+      "ai": false,
+      "n": 2,
+      "p50": 235,
+      "p95": 240,
+      "max": 240
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_2de4aa057d14",
+      "ai": false,
+      "n": 1,
+      "p50": 249,
+      "p95": 249,
+      "max": 249
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_2fd350082450",
+      "ai": false,
+      "n": 2,
+      "p50": 237,
+      "p95": 244,
+      "max": 244
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_49a8b3fd033b",
+      "ai": false,
+      "n": 2,
+      "p50": 243,
+      "p95": 249,
+      "max": 249
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_4ae99d1d133e",
+      "ai": false,
+      "n": 1,
+      "p50": 240,
+      "p95": 240,
+      "max": 240
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_55a1275316fe",
+      "ai": false,
+      "n": 1,
+      "p50": 237,
+      "p95": 237,
+      "max": 237
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_5fc7d435c1ae",
+      "ai": false,
+      "n": 1,
+      "p50": 237,
+      "p95": 237,
+      "max": 237
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_933a4864abc5",
+      "ai": false,
+      "n": 2,
+      "p50": 244,
+      "p95": 245,
+      "max": 245
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_952de9957457",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_9a753d1d199d",
+      "ai": false,
+      "n": 1,
+      "p50": 256,
+      "p95": 256,
+      "max": 256
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_a8c5883e2242",
+      "ai": false,
+      "n": 3,
+      "p50": 251,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_bf2eb1d7b37e",
+      "ai": false,
+      "n": 1,
+      "p50": 230,
+      "p95": 230,
+      "max": 230
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_e2214fa14922",
+      "ai": false,
+      "n": 2,
+      "p50": 276,
+      "p95": 316,
+      "max": 316
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_ff2ad5578a27",
+      "ai": false,
+      "n": 1,
+      "p50": 219,
+      "p95": 219,
+      "max": 219
+    },
+    {
+      "endpoint": "GET /api/money-movements/mov_khong_ton_tai",
+      "ai": false,
+      "n": 1,
+      "p50": 225,
+      "p95": 225,
+      "max": 225
+    },
+    {
+      "endpoint": "GET /api/pending",
+      "ai": false,
+      "n": 2,
+      "p50": 273,
+      "p95": 289,
+      "max": 289
+    },
+    {
+      "endpoint": "GET /api/reports",
+      "ai": false,
+      "n": 5,
+      "p50": 226,
+      "p95": 245,
+      "max": 245
+    },
+    {
+      "endpoint": "POST /api/captures",
+      "ai": true,
+      "n": 91,
+      "p50": 1847,
+      "p95": 3291,
+      "max": 8933
+    },
+    {
+      "endpoint": "POST /api/close-day",
+      "ai": false,
+      "n": 9,
+      "p50": 293,
+      "p95": 483,
+      "max": 483
+    },
+    {
+      "endpoint": "POST /api/events/ev_028bb76e0321/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 254,
+      "p95": 254,
+      "max": 254
+    },
+    {
+      "endpoint": "POST /api/events/ev_0664f00c12be/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 268,
+      "p95": 268,
+      "max": 268
+    },
+    {
+      "endpoint": "POST /api/events/ev_0a57fbe39c21/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 249,
+      "p95": 249,
+      "max": 249
+    },
+    {
+      "endpoint": "POST /api/events/ev_108bc4d9f9a3/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "POST /api/events/ev_1b8f6ccaacc6/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "POST /api/events/ev_1e0f731bd4fc/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 270,
+      "p95": 270,
+      "max": 270
+    },
+    {
+      "endpoint": "POST /api/events/ev_2269e921c367/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 325,
+      "p95": 325,
+      "max": 325
+    },
+    {
+      "endpoint": "POST /api/events/ev_23c45476e5ac/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 252,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "POST /api/events/ev_24eb1b5f19dd/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 299,
+      "p95": 299,
+      "max": 299
+    },
+    {
+      "endpoint": "POST /api/events/ev_3d7c0a5cdbe2/reject",
+      "ai": false,
+      "n": 1,
+      "p50": 239,
+      "p95": 239,
+      "max": 239
+    },
+    {
+      "endpoint": "POST /api/events/ev_3ef03e659308/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 255,
+      "p95": 255,
+      "max": 255
+    },
+    {
+      "endpoint": "POST /api/events/ev_40885e5ef722/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 246,
+      "p95": 246,
+      "max": 246
+    },
+    {
+      "endpoint": "POST /api/events/ev_445753c24071/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 243,
+      "p95": 243,
+      "max": 243
+    },
+    {
+      "endpoint": "POST /api/events/ev_516339f8d3ae/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 269,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "POST /api/events/ev_58d66e39b211/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 262,
+      "p95": 262,
+      "max": 262
+    },
+    {
+      "endpoint": "POST /api/events/ev_5bb5eb1cc6af/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 270,
+      "p95": 270,
+      "max": 270
+    },
+    {
+      "endpoint": "POST /api/events/ev_5cfb543b2d13/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 252,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "POST /api/events/ev_5db87771d6b9/reject",
+      "ai": false,
+      "n": 1,
+      "p50": 298,
+      "p95": 298,
+      "max": 298
+    },
+    {
+      "endpoint": "POST /api/events/ev_5f0e53bb28b5/reject",
+      "ai": false,
+      "n": 1,
+      "p50": 264,
+      "p95": 264,
+      "max": 264
+    },
+    {
+      "endpoint": "POST /api/events/ev_638a11c62eb7/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 261,
+      "p95": 261,
+      "max": 261
+    },
+    {
+      "endpoint": "POST /api/events/ev_66503c34a14c/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 259,
+      "p95": 259,
+      "max": 259
+    },
+    {
+      "endpoint": "POST /api/events/ev_6861a64049f2/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 246,
+      "p95": 246,
+      "max": 246
+    },
+    {
+      "endpoint": "POST /api/events/ev_691ac5ed460c/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "POST /api/events/ev_7044b666777a/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 260,
+      "p95": 260,
+      "max": 260
+    },
+    {
+      "endpoint": "POST /api/events/ev_84bbfbe6eca8/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 269,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "POST /api/events/ev_95fd9f2e4c1a/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 258,
+      "p95": 258,
+      "max": 258
+    },
+    {
+      "endpoint": "POST /api/events/ev_9616ec1dc879/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "POST /api/events/ev_974170864e43/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 265,
+      "p95": 265,
+      "max": 265
+    },
+    {
+      "endpoint": "POST /api/events/ev_a2166cf1d4df/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "POST /api/events/ev_a3f79f5322e7/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 477,
+      "p95": 477,
+      "max": 477
+    },
+    {
+      "endpoint": "POST /api/events/ev_a643d1f6036f/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 260,
+      "p95": 260,
+      "max": 260
+    },
+    {
+      "endpoint": "POST /api/events/ev_acc8c28a6583/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 267,
+      "p95": 267,
+      "max": 267
+    },
+    {
+      "endpoint": "POST /api/events/ev_b10800a54a12/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 245,
+      "p95": 245,
+      "max": 245
+    },
+    {
+      "endpoint": "POST /api/events/ev_b10bbcee7ea2/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 263,
+      "p95": 263,
+      "max": 263
+    },
+    {
+      "endpoint": "POST /api/events/ev_b1d91fc5cfb9/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 291,
+      "p95": 291,
+      "max": 291
+    },
+    {
+      "endpoint": "POST /api/events/ev_b572e5a13993/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 242,
+      "p95": 242,
+      "max": 242
+    },
+    {
+      "endpoint": "POST /api/events/ev_ba61cfc15d63/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 271,
+      "p95": 271,
+      "max": 271
+    },
+    {
+      "endpoint": "POST /api/events/ev_bbc2c552b43c/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 263,
+      "p95": 263,
+      "max": 263
+    },
+    {
+      "endpoint": "POST /api/events/ev_caaed4a65b3a/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 246,
+      "p95": 246,
+      "max": 246
+    },
+    {
+      "endpoint": "POST /api/events/ev_ce6395390747/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "POST /api/events/ev_d0964d1c6d9e/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 248,
+      "p95": 248,
+      "max": 248
+    },
+    {
+      "endpoint": "POST /api/events/ev_d256a05aef38/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 345,
+      "p95": 345,
+      "max": 345
+    },
+    {
+      "endpoint": "POST /api/events/ev_e227115a8008/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 253,
+      "p95": 253,
+      "max": 253
+    },
+    {
+      "endpoint": "POST /api/events/ev_e712a1ad5943/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 261,
+      "p95": 261,
+      "max": 261
+    },
+    {
+      "endpoint": "POST /api/events/ev_edd0e262dc37/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 253,
+      "p95": 253,
+      "max": 253
+    },
+    {
+      "endpoint": "POST /api/events/ev_f0dd31cd5ef8/reject",
+      "ai": false,
+      "n": 1,
+      "p50": 254,
+      "p95": 254,
+      "max": 254
+    },
+    {
+      "endpoint": "POST /api/events/ev_f10a9eca1576/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 262,
+      "p95": 262,
+      "max": 262
+    },
+    {
+      "endpoint": "POST /api/events/ev_f2a498f2643f/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 262,
+      "p95": 262,
+      "max": 262
+    },
+    {
+      "endpoint": "POST /api/events/ev_f2b824e784a1/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 278,
+      "p95": 278,
+      "max": 278
+    },
+    {
+      "endpoint": "POST /api/events/ev_f8169b770ec7/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 259,
+      "p95": 259,
+      "max": 259
+    },
+    {
+      "endpoint": "POST /api/events/ev_f8c992c3bc61/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 252,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "POST /api/events/ev_f925ca727a37/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 250,
+      "p95": 250,
+      "max": 250
+    },
+    {
+      "endpoint": "POST /api/events/ev_ff91bc41977b/confirm",
+      "ai": false,
+      "n": 1,
+      "p50": 256,
+      "p95": 256,
+      "max": 256
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_2de4aa057d14/classify",
+      "ai": false,
+      "n": 3,
+      "p50": 226,
+      "p95": 239,
+      "max": 239
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_2de4aa057d14/match",
+      "ai": false,
+      "n": 2,
+      "p50": 224,
+      "p95": 233,
+      "max": 233
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_4a5bee7455aa/match",
+      "ai": false,
+      "n": 1,
+      "p50": 276,
+      "p95": 276,
+      "max": 276
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_4ae99d1d133e/match",
+      "ai": false,
+      "n": 1,
+      "p50": 290,
+      "p95": 290,
+      "max": 290
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_5f49da72e616/classify",
+      "ai": false,
+      "n": 1,
+      "p50": 303,
+      "p95": 303,
+      "max": 303
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_5fc7d435c1ae/match",
+      "ai": false,
+      "n": 1,
+      "p50": 320,
+      "p95": 320,
+      "max": 320
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_83e7e2ca1e77/match",
+      "ai": false,
+      "n": 1,
+      "p50": 267,
+      "p95": 267,
+      "max": 267
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_8825d3c268d0/classify",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_952de9957457/match",
+      "ai": false,
+      "n": 1,
+      "p50": 335,
+      "p95": 335,
+      "max": 335
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_9a753d1d199d/classify",
+      "ai": false,
+      "n": 1,
+      "p50": 260,
+      "p95": 260,
+      "max": 260
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_b0d8102be65a/match",
+      "ai": false,
+      "n": 1,
+      "p50": 267,
+      "p95": 267,
+      "max": 267
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_cc446ee348a9/classify",
+      "ai": false,
+      "n": 1,
+      "p50": 251,
+      "p95": 251,
+      "max": 251
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_de24df87e204/classify",
+      "ai": false,
+      "n": 1,
+      "p50": 271,
+      "p95": 271,
+      "max": 271
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_e2214fa14922/classify",
+      "ai": false,
+      "n": 1,
+      "p50": 230,
+      "p95": 230,
+      "max": 230
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_e2214fa14922/match",
+      "ai": false,
+      "n": 2,
+      "p50": 248,
+      "p95": 264,
+      "max": 264
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_ff2ad5578a27/classify",
+      "ai": false,
+      "n": 2,
+      "p50": 241,
+      "p95": 246,
+      "max": 246
+    },
+    {
+      "endpoint": "POST /api/money-movements/mov_ff2ad5578a27/match",
+      "ai": false,
+      "n": 1,
+      "p50": 242,
+      "p95": 242,
+      "max": 242
+    },
+    {
+      "endpoint": "POST /api/register",
+      "ai": false,
+      "n": 30,
+      "p50": 433,
+      "p95": 504,
+      "max": 505
+    },
+    {
+      "endpoint": "PUT /api/events/ev_028bb76e0321",
+      "ai": false,
+      "n": 1,
+      "p50": 247,
+      "p95": 247,
+      "max": 247
+    },
+    {
+      "endpoint": "PUT /api/events/ev_0664f00c12be",
+      "ai": false,
+      "n": 1,
+      "p50": 258,
+      "p95": 258,
+      "max": 258
+    },
+    {
+      "endpoint": "PUT /api/events/ev_0a57fbe39c21",
+      "ai": false,
+      "n": 1,
+      "p50": 240,
+      "p95": 240,
+      "max": 240
+    },
+    {
+      "endpoint": "PUT /api/events/ev_108bc4d9f9a3",
+      "ai": false,
+      "n": 1,
+      "p50": 280,
+      "p95": 280,
+      "max": 280
+    },
+    {
+      "endpoint": "PUT /api/events/ev_1b8f6ccaacc6",
+      "ai": false,
+      "n": 1,
+      "p50": 269,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "PUT /api/events/ev_1e0f731bd4fc",
+      "ai": false,
+      "n": 1,
+      "p50": 265,
+      "p95": 265,
+      "max": 265
+    },
+    {
+      "endpoint": "PUT /api/events/ev_2269e921c367",
+      "ai": false,
+      "n": 1,
+      "p50": 239,
+      "p95": 239,
+      "max": 239
+    },
+    {
+      "endpoint": "PUT /api/events/ev_23c45476e5ac",
+      "ai": false,
+      "n": 1,
+      "p50": 255,
+      "p95": 255,
+      "max": 255
+    },
+    {
+      "endpoint": "PUT /api/events/ev_24eb1b5f19dd",
+      "ai": false,
+      "n": 1,
+      "p50": 264,
+      "p95": 264,
+      "max": 264
+    },
+    {
+      "endpoint": "PUT /api/events/ev_3cc04e47b448",
+      "ai": false,
+      "n": 1,
+      "p50": 304,
+      "p95": 304,
+      "max": 304
+    },
+    {
+      "endpoint": "PUT /api/events/ev_3d7c0a5cdbe2",
+      "ai": false,
+      "n": 1,
+      "p50": 255,
+      "p95": 255,
+      "max": 255
+    },
+    {
+      "endpoint": "PUT /api/events/ev_3ef03e659308",
+      "ai": false,
+      "n": 1,
+      "p50": 257,
+      "p95": 257,
+      "max": 257
+    },
+    {
+      "endpoint": "PUT /api/events/ev_40885e5ef722",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "PUT /api/events/ev_445753c24071",
+      "ai": false,
+      "n": 1,
+      "p50": 257,
+      "p95": 257,
+      "max": 257
+    },
+    {
+      "endpoint": "PUT /api/events/ev_4d5581cc403a",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "PUT /api/events/ev_516339f8d3ae",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "PUT /api/events/ev_58d66e39b211",
+      "ai": false,
+      "n": 1,
+      "p50": 290,
+      "p95": 290,
+      "max": 290
+    },
+    {
+      "endpoint": "PUT /api/events/ev_5bb5eb1cc6af",
+      "ai": false,
+      "n": 1,
+      "p50": 256,
+      "p95": 256,
+      "max": 256
+    },
+    {
+      "endpoint": "PUT /api/events/ev_5cfb543b2d13",
+      "ai": false,
+      "n": 1,
+      "p50": 264,
+      "p95": 264,
+      "max": 264
+    },
+    {
+      "endpoint": "PUT /api/events/ev_5db87771d6b9",
+      "ai": false,
+      "n": 1,
+      "p50": 265,
+      "p95": 265,
+      "max": 265
+    },
+    {
+      "endpoint": "PUT /api/events/ev_5f0e53bb28b5",
+      "ai": false,
+      "n": 1,
+      "p50": 260,
+      "p95": 260,
+      "max": 260
+    },
+    {
+      "endpoint": "PUT /api/events/ev_5fb5a0ac5536",
+      "ai": false,
+      "n": 1,
+      "p50": 276,
+      "p95": 276,
+      "max": 276
+    },
+    {
+      "endpoint": "PUT /api/events/ev_638a11c62eb7",
+      "ai": false,
+      "n": 1,
+      "p50": 269,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "PUT /api/events/ev_66503c34a14c",
+      "ai": false,
+      "n": 1,
+      "p50": 265,
+      "p95": 265,
+      "max": 265
+    },
+    {
+      "endpoint": "PUT /api/events/ev_6861a64049f2",
+      "ai": false,
+      "n": 1,
+      "p50": 250,
+      "p95": 250,
+      "max": 250
+    },
+    {
+      "endpoint": "PUT /api/events/ev_691ac5ed460c",
+      "ai": false,
+      "n": 1,
+      "p50": 273,
+      "p95": 273,
+      "max": 273
+    },
+    {
+      "endpoint": "PUT /api/events/ev_69d3a3142ef8",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "PUT /api/events/ev_7044b666777a",
+      "ai": false,
+      "n": 1,
+      "p50": 311,
+      "p95": 311,
+      "max": 311
+    },
+    {
+      "endpoint": "PUT /api/events/ev_84bbfbe6eca8",
+      "ai": false,
+      "n": 1,
+      "p50": 265,
+      "p95": 265,
+      "max": 265
+    },
+    {
+      "endpoint": "PUT /api/events/ev_95fd9f2e4c1a",
+      "ai": false,
+      "n": 1,
+      "p50": 263,
+      "p95": 263,
+      "max": 263
+    },
+    {
+      "endpoint": "PUT /api/events/ev_9616ec1dc879",
+      "ai": false,
+      "n": 1,
+      "p50": 252,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "PUT /api/events/ev_974170864e43",
+      "ai": false,
+      "n": 1,
+      "p50": 269,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "PUT /api/events/ev_97d4ed78cad7",
+      "ai": false,
+      "n": 1,
+      "p50": 247,
+      "p95": 247,
+      "max": 247
+    },
+    {
+      "endpoint": "PUT /api/events/ev_97e15e74739d",
+      "ai": false,
+      "n": 1,
+      "p50": 236,
+      "p95": 236,
+      "max": 236
+    },
+    {
+      "endpoint": "PUT /api/events/ev_a2166cf1d4df",
+      "ai": false,
+      "n": 1,
+      "p50": 242,
+      "p95": 242,
+      "max": 242
+    },
+    {
+      "endpoint": "PUT /api/events/ev_a3f79f5322e7",
+      "ai": false,
+      "n": 1,
+      "p50": 253,
+      "p95": 253,
+      "max": 253
+    },
+    {
+      "endpoint": "PUT /api/events/ev_a643d1f6036f",
+      "ai": false,
+      "n": 1,
+      "p50": 270,
+      "p95": 270,
+      "max": 270
+    },
+    {
+      "endpoint": "PUT /api/events/ev_acc8c28a6583",
+      "ai": false,
+      "n": 1,
+      "p50": 305,
+      "p95": 305,
+      "max": 305
+    },
+    {
+      "endpoint": "PUT /api/events/ev_b10800a54a12",
+      "ai": false,
+      "n": 1,
+      "p50": 269,
+      "p95": 269,
+      "max": 269
+    },
+    {
+      "endpoint": "PUT /api/events/ev_b10bbcee7ea2",
+      "ai": false,
+      "n": 1,
+      "p50": 268,
+      "p95": 268,
+      "max": 268
+    },
+    {
+      "endpoint": "PUT /api/events/ev_b1d91fc5cfb9",
+      "ai": false,
+      "n": 1,
+      "p50": 247,
+      "p95": 247,
+      "max": 247
+    },
+    {
+      "endpoint": "PUT /api/events/ev_b572e5a13993",
+      "ai": false,
+      "n": 1,
+      "p50": 259,
+      "p95": 259,
+      "max": 259
+    },
+    {
+      "endpoint": "PUT /api/events/ev_ba61cfc15d63",
+      "ai": false,
+      "n": 1,
+      "p50": 291,
+      "p95": 291,
+      "max": 291
+    },
+    {
+      "endpoint": "PUT /api/events/ev_bbc2c552b43c",
+      "ai": false,
+      "n": 1,
+      "p50": 266,
+      "p95": 266,
+      "max": 266
+    },
+    {
+      "endpoint": "PUT /api/events/ev_c477ac4b83ea",
+      "ai": false,
+      "n": 1,
+      "p50": 273,
+      "p95": 273,
+      "max": 273
+    },
+    {
+      "endpoint": "PUT /api/events/ev_caaed4a65b3a",
+      "ai": false,
+      "n": 1,
+      "p50": 254,
+      "p95": 254,
+      "max": 254
+    },
+    {
+      "endpoint": "PUT /api/events/ev_ce6395390747",
+      "ai": false,
+      "n": 1,
+      "p50": 253,
+      "p95": 253,
+      "max": 253
+    },
+    {
+      "endpoint": "PUT /api/events/ev_d0964d1c6d9e",
+      "ai": false,
+      "n": 1,
+      "p50": 259,
+      "p95": 259,
+      "max": 259
+    },
+    {
+      "endpoint": "PUT /api/events/ev_d256a05aef38",
+      "ai": false,
+      "n": 1,
+      "p50": 252,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "PUT /api/events/ev_e227115a8008",
+      "ai": false,
+      "n": 1,
+      "p50": 252,
+      "p95": 252,
+      "max": 252
+    },
+    {
+      "endpoint": "PUT /api/events/ev_e712a1ad5943",
+      "ai": false,
+      "n": 1,
+      "p50": 256,
+      "p95": 256,
+      "max": 256
+    },
+    {
+      "endpoint": "PUT /api/events/ev_edd0e262dc37",
+      "ai": false,
+      "n": 1,
+      "p50": 289,
+      "p95": 289,
+      "max": 289
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f0dd31cd5ef8",
+      "ai": false,
+      "n": 1,
+      "p50": 257,
+      "p95": 257,
+      "max": 257
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f10a9eca1576",
+      "ai": false,
+      "n": 1,
+      "p50": 275,
+      "p95": 275,
+      "max": 275
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f2a498f2643f",
+      "ai": false,
+      "n": 1,
+      "p50": 275,
+      "p95": 275,
+      "max": 275
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f2b824e784a1",
+      "ai": false,
+      "n": 1,
+      "p50": 272,
+      "p95": 272,
+      "max": 272
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f8169b770ec7",
+      "ai": false,
+      "n": 1,
+      "p50": 280,
+      "p95": 280,
+      "max": 280
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f8c992c3bc61",
+      "ai": false,
+      "n": 1,
+      "p50": 246,
+      "p95": 246,
+      "max": 246
+    },
+    {
+      "endpoint": "PUT /api/events/ev_f925ca727a37",
+      "ai": false,
+      "n": 1,
+      "p50": 254,
+      "p95": 254,
+      "max": 254
+    },
+    {
+      "endpoint": "PUT /api/events/ev_ff91bc41977b",
+      "ai": false,
+      "n": 1,
+      "p50": 257,
+      "p95": 257,
+      "max": 257
+    }
+  ]
+}

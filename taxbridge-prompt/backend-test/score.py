@@ -25,6 +25,12 @@ UC_MAP = {
     "SC-CLOSE/V3-reclose-upsert": ["UC7"], "SC-CLOSE/V4-history-and-errors": ["UC7"],
     "SC-DASH/V1-formula": ["UC2", "UC6"], "SC-DASH/V2-date-filter": ["UC2"],
     "SC-DASH/V3-empty-business": ["UC1"],
+    "SC-DATE/V1-image-date-wins": ["UC10"], "SC-DATE/V2-text-without-date-is-today": ["UC2", "UC10"],
+    "SC-DATE/P3-text-with-date": ["UC10"],
+    "SC-REPORT/V1-report-totals": ["UC12"], "SC-REPORT/V2-report-validation": ["UC12"],
+    "SC-REPORT/V3-pending-all-days": ["UC13"],
+    "SC-BATCH/V1-batch-and-dedupe": ["UC14"], "SC-BATCH/V2-reject-single-receipt": ["UC14"],
+    "SC-BATCH/V3-batch-then-single": ["UC14"], "SC-BATCH/V4-out-direction-not-in-bankin": ["UC14"],
 }
 
 

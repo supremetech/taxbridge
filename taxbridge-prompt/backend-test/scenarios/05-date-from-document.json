@@ -1,0 +1,66 @@
+{
+  "scenarioId": "SC-DATE",
+  "title": "Ngày giao dịch lấy từ chứng từ (Phase 2 ②)",
+  "intent": "Từ Phase 2, ảnh chứng từ quyết định ngày của bản ghi chứ không phải giờ chụp. Đây là thay đổi đảo ngược rule v1 nên phải có test khoá lại: ảnh 11/09 phải rơi vào sổ 11/09 (và Home phải nhảy về ngày đó), còn text không nêu ngày thì vẫn là hôm nay — nếu backend suy diễn ngày cho text thì giao dịch bán hàng hôm nay sẽ biến mất khỏi Home.",
+  "ruleRefs": ["DATE-FROM-DOCUMENT", "CAPTURE-RESULT-SHAPE", "DASH-BANKIN", "DASH-PAST-COUNTS"],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-image-date-wins",
+      "name": "Ảnh CK in ngày 11/09 ⇒ movement và dashboard đều theo 11/09, không phải hôm nay",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"movId": "$.resultId", "MDATE": "$.occurredAt|date"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"},
+        {"id": "dashDoc", "call": "GET /api/dashboard?date=${MDATE}"},
+        {"id": "dashToday", "call": "GET /api/dashboard?date=${today+1}"}
+      ],
+      "expect": [
+        {"rule": "CAPTURE-RESULT-SHAPE", "target": "up", "path": "occurredAt", "op": "notNull", "note": "CaptureResult phải trả occurredAt để app biết nhảy về ngày nào"},
+        {"rule": "CAPTURE-RESULT-SHAPE", "target": "up", "path": "resultIds", "op": "notNull"},
+        {"rule": "CAPTURE-RESULT-SHAPE", "target": "up", "path": "skippedCount", "op": "eq", "value": 0},
+        {"rule": "DATE-FROM-DOCUMENT", "target": "mov", "path": "occurredAt", "op": "contains", "value": "${MDATE}", "note": "movement mang ngày in trên ảnh"},
+        {"rule": "DATE-FROM-DOCUMENT", "target": "up", "path": "occurredAt", "op": "contains", "value": "${MDATE}", "note": "CaptureResult.occurredAt trùng với bản ghi tạo ra"},
+        {"rule": "DASH-BANKIN", "target": "dashDoc", "path": "bankIn", "op": "eq", "value": 380000, "note": "tiền vào nằm ở sổ ngày trên chứng từ"},
+        {"rule": "DASH-BANKIN", "target": "dashToday", "path": "bankIn", "op": "eq", "value": 0, "note": "và KHÔNG nằm ở ngày khác"},
+        {"rule": "DASH-PAST-COUNTS", "target": "dashToday", "path": "pastUnmatchedCount", "op": "eq", "value": 1, "note": "ngày sau nhìn lại thấy đây là tồn đọng"},
+        {"rule": "DASH-PAST-COUNTS", "target": "dashDoc", "path": "pastUnmatchedCount", "op": "eq", "value": 0, "note": "chính ngày đó thì không phải tồn đọng"}
+      ]
+    },
+    {
+      "variationId": "V2-text-without-date-is-today",
+      "name": "Text không nêu ngày ⇒ hôm nay (không được suy diễn)",
+      "mode": "assert",
+      "act": [
+        {"id": "cap", "capture": {"type": "TEXT", "text": "Bán 2 hộp trà ô long 300 nghìn tiền mặt"}, "save": {"evId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không trích xuất được câu bán hàng cơ bản"}]},
+        {"id": "ev", "call": "GET /api/events/${evId}"},
+        {"id": "dash", "call": "GET /api/dashboard?date=${today}"}
+      ],
+      "expect": [
+        {"rule": "DATE-FROM-DOCUMENT", "target": "ev", "path": "occurredAt", "op": "contains", "value": "${today}", "note": "câu không nêu ngày ⇒ now(); suy diễn ngày ở đây sẽ làm giao dịch biến mất khỏi Home"},
+        {"rule": "CAPTURE-RESULT-SHAPE", "target": "cap", "path": "occurredAt", "op": "contains", "value": "${today}"},
+        {"rule": "DASH-COUNTS", "target": "dash", "path": "draftCount", "op": "eq", "value": 1}
+      ]
+    },
+    {
+      "variationId": "P3-text-with-date",
+      "name": "PROBE — text có nêu ngày (\"hôm qua\") thì backend quy đổi thế nào",
+      "mode": "probe",
+      "probe": {
+        "question": "Câu 'Hôm qua bán ...' có ra occurredAt = hôm qua không, và resolve_occurred_at có kẹp đúng khoảng [now−365d, now+1d] không?",
+        "observe": ["ev.occurredAt", "cap.occurredAt"],
+        "impact": "Quy đổi sai thì giao dịch rơi sang ngày khác, sổ ngày đã đóng bị lệch. Phần đọc ngày là do AI nên chỉ ghi nhận, không chấm."
+      },
+      "act": [
+        {"id": "cap", "capture": {"type": "TEXT", "text": "Hôm qua bán 1 hộp mắc khén 150 nghìn tiền mặt"}, "save": {"evId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không trích xuất được"}]},
+        {"id": "ev", "call": "GET /api/events/${evId}"}
+      ],
+      "expect": [
+        {"rule": "DATE-FROM-DOCUMENT", "target": "ev", "path": "occurredAt", "op": "notNull", "note": "dù quy đổi thế nào cũng không được null"}
+      ]
+    }
+  ]
+}
