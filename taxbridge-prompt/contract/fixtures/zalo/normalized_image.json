@@ -7,7 +7,8 @@
   "text": null,
   "imageUrl": "https://photo-stal-1.zdn.vn/gr/jpg/7b3a978ec3c71e9947d6/2aOboQxeIN4oQSIEhVAhYNDcGf0YYnxp3E2knm0e.jpg",
   "audioUrl": null,
-  "sentAt": "2026-09-10T16:46:12+07:00",
+  "stickerUrl": null,
+  "sentAt": "2026-09-10T16:46:44+07:00",
   "rawPayload": {
     "event_name": "message.image.received",
     "message": {

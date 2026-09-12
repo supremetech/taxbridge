@@ -7,6 +7,7 @@
   "text": "Bán 2 hộp collagen 300 nghìn tiền mặt",
   "imageUrl": null,
   "audioUrl": null,
+  "stickerUrl": null,
   "sentAt": "2026-09-10T16:46:12+07:00",
   "rawPayload": {
     "event_name": "message.text.received",
