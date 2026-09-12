@@ -1,0 +1,52 @@
+{
+  "caseId": "M5",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "UNMATCHED_NO_HINT",
+  "occurredAt": "2026-09-11T15:30:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M5.jpg",
+    "screenshotType": "customer_outgoing",
+    "nameVisibleOnScreen": "DINH QUOC BAO",
+    "memoOnScreen": "ck"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 250000,
+    "memo": "ck",
+    "counterparty": null,
+    "occurredAt": "2026-09-11T15:30:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "none",
+    "mustNotReturn": "DINH QUOC BAO",
+    "why": "Ảnh do khách chụp màn hình chuyển đi nên tên hiển thị là chủ shop; counterparty phải suy từ memo, hoặc để trống nếu memo không có tên."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "type": "OTHER"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "no_change",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "status",
+    "classificationType"
+  ],
+  "softFields_gradedByHuman": [
+    "counterparty",
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "memo": "human — chấp nhận sai khác hoa/thường",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "Memo rỗng nghĩa, ảnh độ phân giải thấp + nén nặng. Không có candidate hợp lý. Kỳ vọng trả candidates=[] và chờ user; AI không được đoán bừa."
+}

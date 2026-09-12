@@ -1,0 +1,193 @@
+{
+  "pass": 11,
+  "total": 21,
+  "cases": [
+    {
+      "caseId": "A1",
+      "tag": "CLEAN_SALE_VOICE",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "A2",
+      "tag": "DIALECT_PLUS_NOISE",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "A3",
+      "tag": "CORRECTION_IN_SPEECH",
+      "result": "FAIL",
+      "diff": "amount: expected 600000 / actual 400000"
+    },
+    {
+      "caseId": "A4",
+      "tag": "NO_BUSINESS_INTENT",
+      "result": "FAIL",
+      "diff": "đã bịa ra event type=SALE amount=11500"
+    },
+    {
+      "caseId": "D1",
+      "tag": "DAILY_ROLLUP",
+      "result": "FAIL",
+      "diff": "revenue: expected 4,940,000 / actual 5190000; expense: expected 1,720,000 / actual 1920000; receivable: expected 2,320,000 / actual 2570000; warningCount: expected 2 / actual 1"
+    },
+    {
+      "caseId": "M1",
+      "tag": "CLEAN_MATCH",
+      "result": "FAIL",
+      "diff": "DÍNH BẪY TÊN: counterparty = 'DINH QUOC BAO' (là chủ shop)"
+    },
+    {
+      "caseId": "M2",
+      "tag": "MATCH_BY_AMOUNT_ONLY",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "M3",
+      "tag": "AMBIGUOUS_CANDIDATES",
+      "result": "FAIL",
+      "diff": "candidates: expected ⊇ ['A3', 'T5'] / actual ['T5']; TỰ GHÉP SAI: đã ghép T5 dù không được phép auto-match"
+    },
+    {
+      "caseId": "M4",
+      "tag": "UNMATCHED_TO_DEPOSIT",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "M5",
+      "tag": "UNMATCHED_NO_HINT",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "M6",
+      "tag": "UNMATCHED_TO_OWNER",
+      "result": "FAIL",
+      "diff": "DÍNH BẪY TÊN: counterparty = 'DINH QUOC BAO' (là chủ shop)"
+    },
+    {
+      "caseId": "M7",
+      "tag": "AMOUNT_MISMATCH_FEE",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "R1",
+      "tag": "CLEAN_RECEIPT",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "R2",
+      "tag": "LOW_QUALITY_RECEIPT",
+      "result": "FAIL",
+      "diff": "amount: expected 185000 / actual 200000"
+    },
+    {
+      "caseId": "R3",
+      "tag": "IMAGE_UNCLASSIFIED",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "T1",
+      "tag": "CLEAN_SALE",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "T2",
+      "tag": "MISSING_PAYMENT_METHOD",
+      "result": "FAIL",
+      "diff": "paymentMethod: expected UNKNOWN / actual CASH; paymentStatus: expected UNKNOWN / actual PAID"
+    },
+    {
+      "caseId": "T3",
+      "tag": "CLEAN_PURCHASE",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "T4",
+      "tag": "OWNER_MONEY_TEXT",
+      "result": "FAIL",
+      "diff": "type: expected OWNER_MONEY / actual SALE"
+    },
+    {
+      "caseId": "T5",
+      "tag": "AMBIGUOUS_PAIR_A",
+      "result": "PASS",
+      "diff": ""
+    },
+    {
+      "caseId": "T6",
+      "tag": "COLLOQUIAL_AMOUNT",
+      "result": "FAIL",
+      "diff": "amount: expected 1250000 / actual 250000"
+    }
+  ],
+  "fieldAccuracy": {
+    "type": {
+      "ok": 10,
+      "total": 11
+    },
+    "amount": {
+      "ok": 15,
+      "total": 18
+    },
+    "paymentMethod": {
+      "ok": 10,
+      "total": 11
+    },
+    "paymentStatus": {
+      "ok": 10,
+      "total": 11
+    },
+    "revenue": {
+      "ok": 0,
+      "total": 1
+    },
+    "expense": {
+      "ok": 0,
+      "total": 1
+    },
+    "collected": {
+      "ok": 1,
+      "total": 1
+    },
+    "receivable": {
+      "ok": 0,
+      "total": 1
+    },
+    "warningCount": {
+      "ok": 0,
+      "total": 1
+    },
+    "direction": {
+      "ok": 7,
+      "total": 7
+    },
+    "status": {
+      "ok": 7,
+      "total": 7
+    },
+    "classificationType": {
+      "ok": 7,
+      "total": 7
+    }
+  },
+  "matching": {
+    "top1_hit": 2,
+    "top1_total": 2,
+    "candset_ok": 2,
+    "candset_total": 3,
+    "wrong_automatch": 1
+  },
+  "counterpartyTrap": {
+    "hit": 2,
+    "total": 6
+  }
+}

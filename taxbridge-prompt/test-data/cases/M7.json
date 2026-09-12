@@ -1,0 +1,52 @@
+{
+  "caseId": "M7",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "AMOUNT_MISMATCH_FEE",
+  "occurredAt": "2026-09-11T17:10:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M7.png",
+    "screenshotType": "shop_incoming",
+    "nameVisibleOnScreen": "HOANG VAN DUNG",
+    "memoOnScreen": "DUNG THANH TOAN DON QUA TANG"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 1242000,
+    "memo": "DUNG THANH TOAN DON QUA TANG",
+    "counterparty": "HOANG VAN DUNG",
+    "occurredAt": "2026-09-11T17:10:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "screen",
+    "mustNotReturn": null,
+    "why": "Ảnh biến động số dư chụp từ máy chủ shop — tên hiển thị đúng là khách."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "none",
+    "leftAs": "UNMATCHED"
+  },
+  "expectedFinalStatus": "UNMATCHED",
+  "effectOnRevenue": "no_change",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "status",
+    "classificationType"
+  ],
+  "softFields_gradedByHuman": [
+    "counterparty",
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "memo": "human — chấp nhận sai khác hoa/thường",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "Ảnh kiểu biến động số dư (chụp từ máy CHỦ SHOP) — ở đây tên trên màn hình ĐÚNG là khách. Số tiền 1.242.000 lệch 8.000 so với đơn T6 (1.250.000) do phí CK. Kỳ vọng KHÔNG tự ghép (amount không khớp tuyệt đối) ⇒ để lại warning cuối ngày."
+}

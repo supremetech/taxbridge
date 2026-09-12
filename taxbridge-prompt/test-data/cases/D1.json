@@ -1,0 +1,55 @@
+{
+  "caseId": "D1",
+  "captureType": "CLOSE_DAY",
+  "scenarioTag": "DAILY_ROLLUP",
+  "input": {
+    "endpoint": "POST /api/close-day",
+    "body": {
+      "date": "2026-09-11"
+    }
+  },
+  "precondition": "Đã xử lý xong 20 case trên đúng theo expectedUserAction của từng case.",
+  "expectedOutput": {
+    "date": "2026-09-11",
+    "summary": {
+      "revenue": 4940000,
+      "expense": 1720000,
+      "collected": 2620000,
+      "receivable": 2320000
+    },
+    "warningCount": 2,
+    "warnings": [
+      {
+        "warningId": "UNMATCHED_MONEY:M7",
+        "type": "UNMATCHED_MONEY",
+        "status": "OPEN",
+        "resourceType": "MONEY_MOVEMENT",
+        "resourceId": "M7",
+        "amount": 1242000
+      },
+      {
+        "warningId": "DRAFT_EVENT:R2",
+        "type": "DRAFT_EVENT",
+        "status": "OPEN",
+        "resourceType": "EVENT",
+        "resourceId": "R2",
+        "amount": 185000
+      }
+    ]
+  },
+  "heroAssertions": [
+    "Tổng tiền vào KHÔNG phải doanh thu trong ngày = 6,130,000 đ (đặt cọc + tiền chủ hộ + khoản khác) — không được cộng vào revenue.",
+    "revenue = 4,940,000 đ chỉ gồm SALE đã CONFIRMED.",
+    "collected = 2,620,000 đ gồm 1 đơn thu tiền mặt và 3 đơn được ghép từ chuyển khoản.",
+    "R2 vẫn ở DRAFT nên 185.000đ KHÔNG được tính vào expense.",
+    "M7 chưa ghép nên phải sinh warning UNMATCHED_MONEY."
+  ],
+  "criticalFields": [
+    "revenue",
+    "expense",
+    "collected",
+    "receivable",
+    "warningCount"
+  ],
+  "notes": "Chốt lại toàn bộ: sai ở đây nghĩa là một trong các case trước bị map sai, hoặc logic recompute/đóng ngày sai."
+}

@@ -1,0 +1,38 @@
+{
+  "caseId": "R2",
+  "captureType": "IMAGE_RECEIPT",
+  "scenarioTag": "LOW_QUALITY_RECEIPT",
+  "occurredAt": "2026-09-11T14:25:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_receipt_R2.jpg",
+    "referenceTranscript": null
+  },
+  "expectedOutput": {
+    "type": "PURCHASE",
+    "amount": 185000,
+    "description": "Mua túi zip, tem nhãn, băng dính, túi giấy",
+    "counterparty": "Cửa hàng bao bì Minh Long",
+    "paymentMethod": "CASH",
+    "paymentStatus": "PAID",
+    "occurredAt": "2026-09-11T14:25:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "DRAFT",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "Hóa đơn nhiệt in mờ, ảnh chụp thiếu sáng. BẪY: trên phiếu có 200.000 (tiền khách đưa) và 15.000 (tiền thối) — phải lấy TỔNG CỘNG 185.000. Kỳ vọng confidence giảm rõ so với R1. Case này CỐ Ý để nguyên DRAFT để sinh warning DRAFT_EVENT ở D1."
+}

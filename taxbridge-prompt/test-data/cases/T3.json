@@ -1,0 +1,37 @@
+{
+  "caseId": "T3",
+  "captureType": "TEXT",
+  "scenarioTag": "CLEAN_PURCHASE",
+  "occurredAt": "2026-09-11T07:30:00+07:00",
+  "input": {
+    "text": "Mua thùng carton với băng dính đóng hàng hết 220 nghìn, trả tiền mặt"
+  },
+  "expectedOutput": {
+    "type": "PURCHASE",
+    "amount": 220000,
+    "description": "Mua thùng carton và băng dính đóng hàng",
+    "counterparty": null,
+    "paymentMethod": "CASH",
+    "paymentStatus": "PAID",
+    "occurredAt": "2026-09-11T07:30:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "Baseline chi phí."
+}

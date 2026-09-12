@@ -1,0 +1,184 @@
+{
+ "T1": {
+  "type": "SALE",
+  "amount": 900000,
+  "description": "Bán 2 hộp thịt trâu gác bếp",
+  "counterparty": "chị Lan",
+  "paymentMethod": "BANK",
+  "paymentStatus": "UNPAID"
+ },
+ "T2": {
+  "type": "SALE",
+  "amount": 470000,
+  "description": "Măng rối + chè dây",
+  "counterparty": "khách lẻ",
+  "paymentMethod": "CASH",
+  "paymentStatus": "PAID"
+ },
+ "T3": {
+  "type": "PURCHASE",
+  "amount": 220000,
+  "description": "Thùng carton, băng dính",
+  "counterparty": null,
+  "paymentMethod": "CASH",
+  "paymentStatus": "PAID"
+ },
+ "T4": {
+  "type": "SALE",
+  "amount": 500000,
+  "description": "Bỏ thêm tiền vào quỹ",
+  "counterparty": null,
+  "paymentMethod": "CASH",
+  "paymentStatus": "PAID"
+ },
+ "T5": {
+  "type": "SALE",
+  "amount": 600000,
+  "description": "2kg macca",
+  "counterparty": "chị Hà",
+  "paymentMethod": "BANK",
+  "paymentStatus": "UNPAID"
+ },
+ "T6": {
+  "type": "SALE",
+  "amount": 250000,
+  "description": "Set quà tặng Tết",
+  "counterparty": "anh Dũng",
+  "paymentMethod": "BANK",
+  "paymentStatus": "UNPAID"
+ },
+ "A1": {
+  "type": "SALE",
+  "amount": 720000,
+  "description": "3 hộp tỏi đen",
+  "counterparty": "anh Minh",
+  "paymentMethod": "CASH",
+  "paymentStatus": "PAID"
+ },
+ "A2": {
+  "type": "SALE",
+  "amount": 400000,
+  "description": "1kg mắc khén",
+  "counterparty": "Hương",
+  "paymentMethod": "BANK",
+  "paymentStatus": "UNPAID"
+ },
+ "A3": {
+  "type": "SALE",
+  "amount": 400000,
+  "description": "2 hộp trà ô long",
+  "counterparty": "chị Thu",
+  "paymentMethod": "BANK",
+  "paymentStatus": "UNPAID"
+ },
+ "A4": {
+  "type": "SALE",
+  "amount": 11500,
+  "description": "Ăn cơm",
+  "counterparty": null,
+  "paymentMethod": "CASH",
+  "paymentStatus": "PAID"
+ },
+ "R1": {
+  "type": "PURCHASE",
+  "amount": 1500000,
+  "description": "Nhập hạt điều",
+  "counterparty": "Cơ sở hạt điều Bình Phước",
+  "paymentMethod": "BANK",
+  "paymentStatus": "PAID"
+ },
+ "R2": {
+  "type": "PURCHASE",
+  "amount": 200000,
+  "description": "Bao bì",
+  "counterparty": "Minh Long",
+  "paymentMethod": "CASH",
+  "paymentStatus": "PAID"
+ },
+ "R3": null,
+ "M1": {
+  "direction": "IN",
+  "amount": 900000,
+  "memo": "LAN 2HOP TRAU GAC BEP",
+  "counterparty": "DINH QUOC BAO",
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "candidates": [
+   {
+    "eventId": "T1"
+   }
+  ]
+ },
+ "M2": {
+  "direction": "IN",
+  "amount": 400000,
+  "memo": "CK HUONG MK",
+  "counterparty": "Hương",
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "candidates": [
+   {
+    "eventId": "A2"
+   }
+  ]
+ },
+ "M3": {
+  "direction": "IN",
+  "amount": 600000,
+  "memo": "CHUYEN TIEN",
+  "counterparty": null,
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "matchedEventId": "T5",
+  "candidates": [
+   {
+    "eventId": "T5"
+   }
+  ]
+ },
+ "M4": {
+  "direction": "IN",
+  "amount": 380000,
+  "memo": "COC MINH DAT HANG TET",
+  "counterparty": "Minh",
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "candidates": []
+ },
+ "M5": {
+  "direction": "IN",
+  "amount": 250000,
+  "memo": "ck",
+  "counterparty": null,
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "candidates": []
+ },
+ "M6": {
+  "direction": "IN",
+  "amount": 5000000,
+  "memo": "CHUYEN QUY BAN HANG",
+  "counterparty": "DINH QUOC BAO",
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "candidates": []
+ },
+ "M7": {
+  "direction": "IN",
+  "amount": 1242000,
+  "memo": "DUNG THANH TOAN DON QUA TANG",
+  "counterparty": "HOANG VAN DUNG",
+  "status": "UNMATCHED",
+  "classificationType": null,
+  "candidates": []
+ },
+ "D1": {
+  "summary": {
+   "revenue": 5190000,
+   "expense": 1920000,
+   "collected": 2620000,
+   "receivable": 2570000
+  },
+  "warningCount": 1
+ }
+}

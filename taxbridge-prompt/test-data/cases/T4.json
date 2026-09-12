@@ -1,0 +1,37 @@
+{
+  "caseId": "T4",
+  "captureType": "TEXT",
+  "scenarioTag": "OWNER_MONEY_TEXT",
+  "occurredAt": "2026-09-11T07:45:00+07:00",
+  "input": {
+    "text": "Sáng nay tôi bỏ thêm 500 nghìn tiền túi vào quỹ để có tiền lẻ trả khách"
+  },
+  "expectedOutput": {
+    "type": "OWNER_MONEY",
+    "amount": 500000,
+    "description": "Chủ hộ bỏ thêm tiền vào quỹ",
+    "counterparty": null,
+    "paymentMethod": "CASH",
+    "paymentStatus": "PAID",
+    "occurredAt": "2026-09-11T07:45:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "HERO: tiền vào quỹ nhưng KHÔNG phải doanh thu. Nếu ra SALE là sai nghiêm trọng."
+}

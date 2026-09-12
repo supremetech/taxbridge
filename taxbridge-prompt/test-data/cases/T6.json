@@ -1,0 +1,37 @@
+{
+  "caseId": "T6",
+  "captureType": "TEXT",
+  "scenarioTag": "COLLOQUIAL_AMOUNT",
+  "occurredAt": "2026-09-11T13:05:00+07:00",
+  "input": {
+    "text": "Anh Dũng lấy 1 set quà tặng Tết 1 triệu 250, chuyển khoản"
+  },
+  "expectedOutput": {
+    "type": "SALE",
+    "amount": 1250000,
+    "description": "Bán 1 set quà tặng Tết",
+    "counterparty": "anh Dũng",
+    "paymentMethod": "BANK",
+    "paymentStatus": "UNPAID",
+    "occurredAt": "2026-09-11T13:05:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "BẪY số tiền khẩu ngữ: '1 triệu 250' = 1.250.000, không phải 1.250 hay 250.000."
+}

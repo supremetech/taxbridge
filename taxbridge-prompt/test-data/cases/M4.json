@@ -1,0 +1,52 @@
+{
+  "caseId": "M4",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "UNMATCHED_TO_DEPOSIT",
+  "occurredAt": "2026-09-11T14:45:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M4.png",
+    "screenshotType": "customer_outgoing",
+    "nameVisibleOnScreen": "DINH QUOC BAO",
+    "memoOnScreen": "COC MINH DAT HANG TET"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 380000,
+    "memo": "COC MINH DAT HANG TET",
+    "counterparty": "Minh",
+    "occurredAt": "2026-09-11T14:45:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "memo",
+    "mustNotReturn": "DINH QUOC BAO",
+    "why": "Ảnh do khách chụp màn hình chuyển đi nên tên hiển thị là chủ shop; counterparty phải suy từ memo, hoặc để trống nếu memo không có tên."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "type": "DEPOSIT"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "no_change",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "status",
+    "classificationType"
+  ],
+  "softFields_gradedByHuman": [
+    "counterparty",
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "memo": "human — chấp nhận sai khác hoa/thường",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "HERO: không khớp đơn nào, memo có 'COC' ⇒ đặt cọc. Sau khi classify DEPOSIT, doanh thu PHẢI không đổi."
+}

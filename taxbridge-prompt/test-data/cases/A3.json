@@ -1,0 +1,38 @@
+{
+  "caseId": "A3",
+  "captureType": "AUDIO",
+  "scenarioTag": "CORRECTION_IN_SPEECH",
+  "occurredAt": "2026-09-11T11:15:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_voice_A3.m4a",
+    "referenceTranscript": "Chị Thu lấy hai hộp trà ô long... à không, ba hộp, tổng sáu trăm nghìn, chị ấy chuyển khoản sau."
+  },
+  "expectedOutput": {
+    "type": "SALE",
+    "amount": 600000,
+    "description": "Bán 3 hộp trà ô long",
+    "counterparty": "chị Thu",
+    "paymentMethod": "BANK",
+    "paymentStatus": "UNPAID",
+    "occurredAt": "2026-09-11T11:15:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "BẪY tự sửa giữa câu: phải lấy SỐ CHỐT CUỐI (3 hộp / 600.000), không phải 'hai hộp' nghe đầu tiên."
+}

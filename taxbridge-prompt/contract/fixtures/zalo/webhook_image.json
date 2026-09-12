@@ -1,0 +1,19 @@
+{
+  "event_name": "message.image.received",
+  "message": {
+    "date": 1789033604043,
+    "chat": {
+      "chat_type": "PRIVATE",
+      "id": "a1b2c3d4e5f60718293a"
+    },
+    "message_id": "m2b3c4d5e6f708192031",
+    "from": {
+      "id": "a1b2c3d4e5f60718293a",
+      "is_bot": false,
+      "display_name": "Nguyễn Văn A"
+    },
+    "caption": "",
+    "message_type": "CHAT_PHOTO",
+    "photo_url": "https://photo-stal-1.zdn.vn/gr/jpg/7b3a978ec3c71e9947d6/2aOboQxeIN4oQSIEhVAhYNDcGf0YYnxp3E2knm0e.jpg"
+  }
+}

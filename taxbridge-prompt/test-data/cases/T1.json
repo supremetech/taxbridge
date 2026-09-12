@@ -1,0 +1,37 @@
+{
+  "caseId": "T1",
+  "captureType": "TEXT",
+  "scenarioTag": "CLEAN_SALE",
+  "occurredAt": "2026-09-11T08:20:00+07:00",
+  "input": {
+    "text": "Bán chị Lan 2 hộp thịt trâu gác bếp 900 nghìn, chị ấy chuyển khoản sau"
+  },
+  "expectedOutput": {
+    "type": "SALE",
+    "amount": 900000,
+    "description": "Bán 2 hộp thịt trâu gác bếp",
+    "counterparty": "chị Lan",
+    "paymentMethod": "BANK",
+    "paymentStatus": "UNPAID",
+    "occurredAt": "2026-09-11T08:20:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "Baseline text. Mọi field phải đúng 100%. 'chuyển khoản sau' ⇒ UNPAID, không phải PAID."
+}

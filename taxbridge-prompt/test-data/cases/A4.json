@@ -1,0 +1,22 @@
+{
+  "caseId": "A4",
+  "captureType": "AUDIO",
+  "scenarioTag": "NO_BUSINESS_INTENT",
+  "occurredAt": "2026-09-11T12:10:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_voice_A4.m4a",
+    "referenceTranscript": "Ừ trưa nay ăn cơm chỗ cũ đi, tầm mười một giờ rưỡi nhé, để tí nữa tính."
+  },
+  "expectedOutput": null,
+  "expectNoEvent": true,
+  "expectedFinalStatus": null,
+  "criticalFields": [],
+  "softFields_gradedByHuman": [],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "BẪY: không có nghiệp vụ nào. Kỳ vọng type=UNKNOWN + confidence thấp, hoặc capture FAILED — KHÔNG được bịa ra giao dịch. Câu có chứa số ('mười một giờ rưỡi') để bẫy việc bắt nhầm thành số tiền."
+}

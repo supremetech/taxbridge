@@ -1,0 +1,54 @@
+{
+  "caseId": "M1",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "CLEAN_MATCH",
+  "occurredAt": "2026-09-11T10:05:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M1.png",
+    "screenshotType": "customer_outgoing",
+    "nameVisibleOnScreen": "DINH QUOC BAO",
+    "memoOnScreen": "LAN 2HOP TRAU GAC BEP"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 900000,
+    "memo": "LAN 2HOP TRAU GAC BEP",
+    "counterparty": "Lan",
+    "occurredAt": "2026-09-11T10:05:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "memo",
+    "mustNotReturn": "DINH QUOC BAO",
+    "why": "Ảnh do khách chụp màn hình chuyển đi nên tên hiển thị là chủ shop; counterparty phải suy từ memo, hoặc để trống nếu memo không có tên."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [
+      "T1"
+    ],
+    "autoMatchAllowed": true,
+    "expectedTop1": "T1"
+  },
+  "expectedUserAction": {
+    "action": "match",
+    "toEventId": "T1"
+  },
+  "expectedFinalStatus": "MATCHED",
+  "effectOnRevenue": "collected_increases",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "status",
+    "classificationType"
+  ],
+  "softFields_gradedByHuman": [
+    "counterparty",
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "memo": "human — chấp nhận sai khác hoa/thường",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "Khớp sạch: đúng số tiền + memo có tên khách. Top-1 candidate phải là T1. BẪY TÊN: tên trên màn hình là DINH QUOC BAO (chủ shop) — counterparty đúng là 'Lan' lấy từ memo, KHÔNG phải chủ shop."
+}

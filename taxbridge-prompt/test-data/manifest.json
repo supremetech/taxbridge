@@ -1,0 +1,72 @@
+{
+  "name": "TaxBridge PoC — bộ eval AI extraction",
+  "simulatedDate": "2026-09-11",
+  "timezone": "Asia/Ho_Chi_Minh",
+  "vertical": "Đặc sản Tây Bắc (bán lẻ, ít SKU)",
+  "business": "Hộ kinh doanh Đặc sản Tây Bắc Hương Núi",
+  "ownerNameOnTransferScreenshots": "DINH QUOC BAO",
+  "synthetic": true,
+  "caseCount": 21,
+  "byCaptureType": {
+    "TEXT": 6,
+    "AUDIO": 4,
+    "IMAGE_RECEIPT": 3,
+    "IMAGE_TRANSFER": 7,
+    "CLOSE_DAY": 1
+  },
+  "scenarioTags": {
+    "AMBIGUOUS_CANDIDATES": 1,
+    "AMBIGUOUS_PAIR_A": 1,
+    "AMOUNT_MISMATCH_FEE": 1,
+    "CLEAN_MATCH": 1,
+    "CLEAN_PURCHASE": 1,
+    "CLEAN_RECEIPT": 1,
+    "CLEAN_SALE": 1,
+    "CLEAN_SALE_VOICE": 1,
+    "COLLOQUIAL_AMOUNT": 1,
+    "CORRECTION_IN_SPEECH": 1,
+    "DIALECT_PLUS_NOISE": 1,
+    "IMAGE_UNCLASSIFIED": 1,
+    "LOW_QUALITY_RECEIPT": 1,
+    "MATCH_BY_AMOUNT_ONLY": 1,
+    "MISSING_PAYMENT_METHOD": 1,
+    "NO_BUSINESS_INTENT": 1,
+    "OWNER_MONEY_TEXT": 1,
+    "UNMATCHED_NO_HINT": 1,
+    "UNMATCHED_TO_DEPOSIT": 1,
+    "UNMATCHED_TO_OWNER": 1
+  },
+  "expectedDailyTotals": {
+    "revenue": 4940000,
+    "expense": 1720000,
+    "collected": 2620000,
+    "receivable": 2320000
+  },
+  "nonRevenueInflowTotal": 6130000,
+  "notice": "Toàn bộ ảnh/audio là fixture tổng hợp, thương hiệu ngân hàng và mọi tên/số tài khoản/mã giao dịch đều hư cấu. Không dùng ngoài mục đích test.",
+  "audioStatus": {
+    "recorded": true,
+    "recordedBy": "giọng người thật (team)",
+    "files": {
+      "A1": "synthetic_voice_A1.m4a",
+      "A2": "synthetic_voice_A2.m4a (đã trộn nhiễu, SNR 12dB — file chấm chính thức)",
+      "A3": "synthetic_voice_A3.m4a",
+      "A4": "synthetic_voice_A4.m4a"
+    },
+    "extraFiles": {
+      "synthetic_voice_A2_clean.m4a": "bản thu gốc chưa trộn nhiễu, giữ để trộn lại khi cần",
+      "synthetic_voice_A2_snr18.m4a": "biến thể ồn nhẹ — dò ngưỡng, KHÔNG tính vào 21 case",
+      "synthetic_voice_A2_snr06.m4a": "biến thể rất ồn — dò ngưỡng, KHÔNG tính vào 21 case"
+    },
+    "snrMethod": "EBU R128 gated (LUFS), đã kiểm chứng lệch ≤0.1dB so với mức đặt"
+  },
+  "remainingWork": [
+    "Chạy lại 21 case trên backend mới rồi chấm bằng score.py, so với baseline 11/21"
+  ],
+  "baselineRun": {
+    "dir": "runs/2026-09-11-old-backend",
+    "pass": 11,
+    "total": 21,
+    "note": "backend cũ trước khi làm lại theo plan; chỉ có report.md"
+  }
+}

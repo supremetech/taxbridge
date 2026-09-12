@@ -1,0 +1,29 @@
+{
+  "zaloId": "a1b2c3d4e5f60718293a",
+  "displayName": "Nguyễn Văn A",
+  "chatId": "a1b2c3d4e5f60718293a",
+  "messageId": "m3c4d5e6f70819203142",
+  "messageType": "AUDIO",
+  "text": null,
+  "imageUrl": null,
+  "audioUrl": "https://f2-voice-aac-dl.zdn.vn/2019236892853799970/c627c0a7304ad3148a5b.aac",
+  "sentAt": "2026-09-10T16:46:12+07:00",
+  "rawPayload": {
+    "event_name": "message.voice.received",
+    "message": {
+      "date": 1789033634950,
+      "chat": {
+        "chat_type": "PRIVATE",
+        "id": "a1b2c3d4e5f60718293a"
+      },
+      "message_id": "m3c4d5e6f70819203142",
+      "from": {
+        "id": "a1b2c3d4e5f60718293a",
+        "is_bot": false,
+        "display_name": "Nguyễn Văn A"
+      },
+      "message_type": "CHAT_VOICE",
+      "voice_url": "https://f2-voice-aac-dl.zdn.vn/2019236892853799970/c627c0a7304ad3148a5b.aac"
+    }
+  }
+}

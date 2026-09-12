@@ -1,0 +1,37 @@
+{
+  "caseId": "T5",
+  "captureType": "TEXT",
+  "scenarioTag": "AMBIGUOUS_PAIR_A",
+  "occurredAt": "2026-09-11T12:50:00+07:00",
+  "input": {
+    "text": "Chị Hà đặt 2 cân macca 600 nghìn, chuyển khoản sau"
+  },
+  "expectedOutput": {
+    "type": "SALE",
+    "amount": 600000,
+    "description": "Bán 2kg hạt macca",
+    "counterparty": "chị Hà",
+    "paymentMethod": "BANK",
+    "paymentStatus": "UNPAID",
+    "occurredAt": "2026-09-11T12:50:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "Cùng số tiền 600.000 với A3 — tạo tình huống nhập nhằng cho M3."
+}

@@ -1,0 +1,52 @@
+{
+  "caseId": "M6",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "UNMATCHED_TO_OWNER",
+  "occurredAt": "2026-09-11T16:20:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M6.png",
+    "screenshotType": "customer_outgoing",
+    "nameVisibleOnScreen": "DINH QUOC BAO",
+    "memoOnScreen": "CHUYEN QUY BAN HANG"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 5000000,
+    "memo": "CHUYEN QUY BAN HANG",
+    "counterparty": null,
+    "occurredAt": "2026-09-11T16:20:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "none",
+    "mustNotReturn": "DINH QUOC BAO",
+    "why": "Ảnh do khách chụp màn hình chuyển đi nên tên hiển thị là chủ shop; counterparty phải suy từ memo, hoặc để trống nếu memo không có tên."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "type": "OWNER_MONEY"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "no_change",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "status",
+    "classificationType"
+  ],
+  "softFields_gradedByHuman": [
+    "counterparty",
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "memo": "human — chấp nhận sai khác hoa/thường",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "HERO: chủ hộ tự chuyển từ tài khoản cá nhân sang tài khoản bán hàng. Số tiền lớn (5tr) rất dễ bị nhầm thành doanh thu — phải là OWNER_MONEY."
+}

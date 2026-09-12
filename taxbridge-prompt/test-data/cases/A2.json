@@ -1,0 +1,44 @@
+{
+  "caseId": "A2",
+  "captureType": "AUDIO",
+  "scenarioTag": "DIALECT_PLUS_NOISE",
+  "occurredAt": "2026-09-11T10:30:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_voice_A2.m4a",
+    "referenceTranscript": "Bán cho o Hương một cân mắc khén, bốn trăm nghìn, o nớ nói chút nữa chuyển khoản.",
+    "noiseCondition": "nền cửa hàng mặt phố, SNR 12dB (đo gated EBU R128)",
+    "thresholdProbeVariants": {
+      "snr18": "evidence/synthetic_voice_A2_snr18.m4a",
+      "snr06": "evidence/synthetic_voice_A2_snr06.m4a",
+      "clean": "evidence/synthetic_voice_A2_clean.m4a"
+    }
+  },
+  "expectedOutput": {
+    "type": "SALE",
+    "amount": 400000,
+    "description": "Bán 1kg mắc khén",
+    "counterparty": "Hương",
+    "paymentMethod": "BANK",
+    "paymentStatus": "UNPAID",
+    "occurredAt": "2026-09-11T10:30:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "Giọng miền Trung + ồn nền (SNR 12dB). Từ địa phương 'o' = 'cô', 'o nớ' = 'cô ấy'. counterparty đúng là Hương. Bản chấm chính thức là file SNR 12dB. Ba biến thể còn lại (clean/18/06) chỉ dùng để dò ngưỡng gãy của ASR, không tính vào 21 case."
+}

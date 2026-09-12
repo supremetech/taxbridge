@@ -1,0 +1,37 @@
+{
+  "caseId": "T2",
+  "captureType": "TEXT",
+  "scenarioTag": "MISSING_PAYMENT_METHOD",
+  "occurredAt": "2026-09-11T09:05:00+07:00",
+  "input": {
+    "text": "Khách lẻ mua 1 cân măng rối với 1 cân chè dây, 470 nghìn"
+  },
+  "expectedOutput": {
+    "type": "SALE",
+    "amount": 470000,
+    "description": "Bán 1kg măng rối và 1kg chè dây",
+    "counterparty": null,
+    "paymentMethod": "UNKNOWN",
+    "paymentStatus": "UNKNOWN",
+    "occurredAt": "2026-09-11T09:05:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "BẪY: không nói hình thức thanh toán. AI phải trả UNKNOWN, tuyệt đối không mặc định CASH chỉ vì là khách lẻ."
+}

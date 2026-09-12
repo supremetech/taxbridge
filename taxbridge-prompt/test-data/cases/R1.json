@@ -1,0 +1,38 @@
+{
+  "caseId": "R1",
+  "captureType": "IMAGE_RECEIPT",
+  "scenarioTag": "CLEAN_RECEIPT",
+  "occurredAt": "2026-09-11T14:10:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_receipt_R1.png",
+    "referenceTranscript": null
+  },
+  "expectedOutput": {
+    "type": "PURCHASE",
+    "amount": 1500000,
+    "description": "Nhập 5kg hạt điều",
+    "counterparty": "Cơ sở chế biến hạt điều Bình Phước",
+    "paymentMethod": "BANK",
+    "paymentStatus": "PAID",
+    "occurredAt": "2026-09-11T14:10:00+07:00"
+  },
+  "expectNoEvent": false,
+  "expectedFinalStatus": "CONFIRMED",
+  "criticalFields": [
+    "type",
+    "amount",
+    "paymentMethod",
+    "paymentStatus"
+  ],
+  "softFields_gradedByHuman": [
+    "description",
+    "counterparty"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "occurredAt": "±5 phút; nếu input không nêu giờ thì lấy thời điểm tạo capture",
+    "description": "human — chấp nhận diễn đạt khác nếu đúng ý",
+    "counterparty": "human — chấp nhận thiếu/thừa tiền tố (chị/anh/o)"
+  },
+  "notes": "Hóa đơn in rõ. Phải lấy TỔNG CỘNG 1.500.000, không lấy dòng lẻ 1.200.000."
+}

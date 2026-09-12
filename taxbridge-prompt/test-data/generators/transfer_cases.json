@@ -1,0 +1,87 @@
+[
+  {
+    "id": "M1", "variant": "A", "file": "synthetic_transfer_M1.png", "scale": 2,
+    "clock": "10:05",
+    "bank_brand": "DEMOBANK",
+    "to_name": "DINH QUOC BAO",
+    "amount_text": "VND 900,000",
+    "dest_bank": "Ngân hàng TMCP Thử Nghiệm A",
+    "dest_acct": "1900****4412",
+    "memo": "LAN 2HOP TRAU GAC BEP",
+    "date_text": "11 thg 9, 2026 lúc 10:05",
+    "ftid": "FT26254881003"
+  },
+  {
+    "id": "M2", "variant": "B", "file": "synthetic_transfer_M2.png", "scale": 2,
+    "clock": "11:40",
+    "bank_brand": "TESTBANK",
+    "to_name": "DINH QUOC BAO",
+    "amount_text": "400.000 VND",
+    "dest_bank": "Ngân hàng TMCP Thử Nghiệm A",
+    "dest_acct": "1900****4412",
+    "memo": "CK HUONG MK",
+    "date_text": "11/09/2026 11:40",
+    "ftid": "FT26254881277"
+  },
+  {
+    "id": "M3", "variant": "A", "file": "synthetic_transfer_M3.png", "scale": 2,
+    "clock": "13:20",
+    "bank_brand": "DEMOBANK",
+    "to_name": "DINH QUOC BAO",
+    "amount_text": "VND 600,000",
+    "dest_bank": "Ngân hàng TMCP Thử Nghiệm A",
+    "dest_acct": "1900****4412",
+    "memo": "CHUYEN TIEN",
+    "date_text": "11 tháng 09, 2026 13:20",
+    "ftid": "FT26254883915"
+  },
+  {
+    "id": "M4", "variant": "C", "file": "synthetic_transfer_M4.png", "scale": 2,
+    "clock": "14:45",
+    "bank_brand": "MAUBANK",
+    "to_name": "DINH QUOC BAO",
+    "amount_text": "380,000₫",
+    "dest_bank": "Ngân hàng TMCP Thử Nghiệm A",
+    "dest_acct": "1900****4412",
+    "memo": "COC MINH DAT HANG TET",
+    "date_text": "11/09/2026 14:45",
+    "ftid": "FT26254885520"
+  },
+  {
+    "id": "M5", "variant": "B", "file": "synthetic_transfer_M5.png", "scale": 1,
+    "clock": "15:30",
+    "bank_brand": "TESTBANK",
+    "to_name": "DINH QUOC BAO",
+    "amount_text": "250.000 VND",
+    "dest_bank": "Ngân hàng TMCP Thử Nghiệm A",
+    "dest_acct": "1900****4412",
+    "memo": "ck",
+    "date_text": "11/09/2026 15:30",
+    "ftid": "FT26254886104"
+  },
+  {
+    "id": "M6", "variant": "A", "file": "synthetic_transfer_M6.png", "scale": 2,
+    "clock": "16:20",
+    "bank_brand": "DEMOBANK",
+    "to_name": "DINH QUOC BAO",
+    "amount_text": "VND 5,000,000",
+    "dest_bank": "Ngân hàng TMCP Thử Nghiệm A",
+    "dest_acct": "1900****4412",
+    "memo": "CHUYEN QUY BAN HANG",
+    "date_text": "11 thg 9, 2026 lúc 16:20",
+    "ftid": "FT26254887733"
+  },
+  {
+    "id": "M7", "variant": "D", "file": "synthetic_transfer_M7.png", "scale": 2,
+    "clock": "17:10",
+    "bank_brand": "Ngân hàng TMCP Thử Nghiệm A",
+    "to_name": "HOANG VAN DUNG",
+    "amount_text": "+1,242,000 VND",
+    "dest_bank": "Ngân hàng TMCP Mẫu Số 2",
+    "dest_acct": "1900****4412",
+    "memo": "DUNG THANH TOAN DON QUA TANG",
+    "date_text": "11/09/2026 17:10",
+    "ftid": "FT26254888291",
+    "balance": "12.480.000 VND"
+  }
+]

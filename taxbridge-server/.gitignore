@@ -1,0 +1,20 @@
+functions/venv/
+functions/__pycache__/
+functions/**/__pycache__/
+functions/.env.local
+functions/.secret.local
+# Cấu hình máy dev. `.env.example` VẪN commit (mẫu). `functions/.env` bị chặn vì
+# Firebase CLI nạp nó vào function lúc deploy — giá trị dev sẽ theo lên prod.
+.env
+functions/.env
+.emulator-data/
+.pytest_cache/
+*.pyc
+.DS_Store
+out/
+
+# Bundle artifact: sync bằng `make prepackage`, source of truth ở repo root
+functions/policies/
+functions/seed/
+firestore-debug.log
+.firebase/

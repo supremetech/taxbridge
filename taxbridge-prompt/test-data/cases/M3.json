@@ -1,0 +1,55 @@
+{
+  "caseId": "M3",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "AMBIGUOUS_CANDIDATES",
+  "occurredAt": "2026-09-11T13:20:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M3.png",
+    "screenshotType": "customer_outgoing",
+    "nameVisibleOnScreen": "DINH QUOC BAO",
+    "memoOnScreen": "CHUYEN TIEN"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 600000,
+    "memo": "CHUYEN TIEN",
+    "counterparty": null,
+    "occurredAt": "2026-09-11T13:20:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "none",
+    "mustNotReturn": "DINH QUOC BAO",
+    "why": "Ảnh do khách chụp màn hình chuyển đi nên tên hiển thị là chủ shop; counterparty phải suy từ memo, hoặc để trống nếu memo không có tên."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [
+      "A3",
+      "T5"
+    ],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "match",
+    "toEventId": "A3"
+  },
+  "expectedFinalStatus": "MATCHED",
+  "effectOnRevenue": "collected_increases",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "status",
+    "classificationType"
+  ],
+  "softFields_gradedByHuman": [
+    "counterparty",
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "memo": "human — chấp nhận sai khác hoa/thường",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "HERO: memo vô nghĩa, 600.000 khớp CẢ A3 (chị Thu) và T5 (chị Hà). Kỳ vọng trả về ĐỦ 2 candidate và KHÔNG tự ghép. Trạng thái cuối giả định user chọn A3."
+}
