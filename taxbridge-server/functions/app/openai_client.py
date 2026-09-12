@@ -15,6 +15,7 @@ from pydantic import BaseModel
 
 from .config import (REASONING_EFFORT, TRANSCRIBE_FALLBACK_MODEL, TRANSCRIBE_MODEL,
                      VISION_FALLBACK_MODEL, VISION_MODEL)
+from .firestore import today
 
 _client: OpenAI | None = None
 
@@ -35,6 +36,7 @@ class EventExtraction(BaseModel):
     counterparty: Optional[str]
     paymentMethod: Literal["CASH", "BANK", "UNKNOWN"]
     paymentStatus: Literal["UNPAID", "PAID", "UNKNOWN"]
+    occurredDate: Optional[str]       # ngày in trên chứng từ, "YYYY-MM-DD[THH:MM]" (§12)
     confidence: float
 
 
@@ -43,7 +45,13 @@ class TransferExtraction(BaseModel):
     amount: int
     counterparty: Optional[str]
     memo: Optional[str]
-    # Không có occurredAt: movement luôn lấy now() (plan BE §4.1).
+    occurredDate: Optional[str]       # ngày in trên biên lai (§12)
+
+
+class BankHistoryExtraction(BaseModel):
+    """Ảnh danh sách giao dịch ngân hàng: mỗi dòng là một transfer (§15)."""
+
+    transfers: list[TransferExtraction]
 
 
 class ImageExtraction(BaseModel):     # IMAGE_UNKNOWN (ảnh Zalo)
@@ -95,7 +103,11 @@ Hóa đơn, phiếu thu (ảnh):
   Ảnh chỉ hiện tên người nhận mà không hiện tên người gửi → lấy tên người từ nội dung
   chuyển khoản (ví dụ "LAN 3HOP" → "LAN"); nội dung không có tên người → null.
 - memo = nội dung chuyển khoản, giữ nguyên như in trên ảnh.
-- KHÔNG đọc ngày giờ trên ảnh.
+
+Ngày giao dịch (occurredDate):
+- Ảnh: lấy ngày (và giờ nếu có) IN TRÊN chứng từ, đổi "11/09/2026 11:02" → "2026-09-11T11:02".
+- Câu nói / text: chỉ khi nêu rõ ("hôm qua", "sáng 10/9", "tuần trước thứ hai"); quy đổi theo
+  "Hôm nay là {today}". Không nêu → null. Không đoán.
 
 description: một câu ngắn tiếng Việt mô tả giao dịch. Không chắc thì confidence thấp.\
 """
@@ -140,7 +152,7 @@ def extract_event(text: str | None = None, image: bytes | None = None) -> EventE
     if image is not None:
         instruction = "Đây là ảnh chứng từ của hộ kinh doanh. Trích xuất giao dịch."
     else:
-        instruction = f"Câu chủ hộ vừa ghi lại:\n{text}"
+        instruction = f"Hôm nay là {today()}.\nCâu chủ hộ vừa ghi lại:\n{text}"
     return _parse(EventExtraction, instruction, image)
 
 
@@ -161,6 +173,19 @@ def extract_image(image: bytes) -> ImageExtraction:
                   "chứng từ mua bán), TRANSFER (biên lai / màn hình chuyển khoản), OTHER "
                   "(mọi ảnh khác). RECEIPT → điền event; TRANSFER → điền transfer; "
                   "OTHER → cả hai null.", image)
+
+
+def extract_bank_history(image: bytes) -> BankHistoryExtraction:
+    return _parse(BankHistoryExtraction,
+                  "Ảnh danh sách giao dịch trong app ngân hàng / sao kê của CHỦ SHOP. "
+                  "Mỗi dòng = một transfer: amount (int), direction ('+' / 'nhận' / 'báo có' "
+                  "→ IN; '-' / 'chuyển đi' / 'thanh toán' → OUT), memo nguyên văn, "
+                  "counterparty nếu có, occurredDate lấy từ cột ngày. "
+                  "Bỏ dòng số dư, dòng tiêu đề, dòng không có số tiền. "
+                  "Không gộp dòng, không bịa dòng.\n"
+                  "CHỈ đọc ảnh là DANH SÁCH nhiều giao dịch. Hóa đơn, phiếu thu, biên lai của "
+                  "một giao dịch, màn hình 'chuyển khoản thành công', hay ảnh bất kỳ khác → "
+                  "trả transfers RỖNG, không suy diễn thành một dòng.", image)
 
 
 def transcribe(m4a: bytes) -> str:

@@ -179,7 +179,8 @@ paths:
         Hai cách gửi:
 
         - **JSON** `{ "type": "TEXT", "text": "..." }`
-        - **multipart** đúng hai field `type` + `file` với `AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER`.
+        - **multipart** đúng hai field `type` + `file` với
+          `AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER | IMAGE_BANK_HISTORY`.
           Ảnh JPEG/PNG ≤ 10 MB; audio M4A ≤ 10 MB và ≤ 60 giây.
 
         Kết quả theo `type`:
@@ -190,8 +191,16 @@ paths:
         | `AUDIO` | transcribe → extract | `BusinessEvent` DRAFT |
         | `IMAGE_RECEIPT` | đọc hoá đơn | `BusinessEvent` DRAFT (thường `PURCHASE`) |
         | `IMAGE_TRANSFER` | đọc biên lai CK | `MoneyMovement` UNMATCHED |
+        | `IMAGE_BANK_HISTORY` | đọc danh sách giao dịch ngân hàng | N `MoneyMovement` UNMATCHED |
 
-        `occurredAt` luôn là `now()`, **không** lấy ngày trên ảnh.
+        `occurredAt` = **ngày in trên chứng từ** (Phase 2 ②); text/voice chỉ khi người nói nêu rõ
+        ("hôm qua", "sáng 10/9"). Không đọc được / ngoài `[hôm nay − 365 ngày, hôm nay + 1]` →
+        `now()`. Ảnh có ngày mà không có giờ → `12:00:00+07:00`.
+
+        `IMAGE_BANK_HISTORY` (Phase 2 ①) trả `resultType: MONEY_MOVEMENT_BATCH` với `resultIds`
+        và `skippedCount` — dòng trùng movement đã có (cùng `direction` + `amount` + ngày, memo
+        trùng token) bị bỏ. Không dòng nào đọc được → `FAILED UNRECOGNIZED_IMAGE`; đọc được nhưng
+        trùng hết → `DONE` với `resultIds: []`.
 
         **AI lỗi vẫn trả `200`** với `status: FAILED` và `error`:
         `AI_EXTRACTION_FAILED` (exception), `NO_TRANSACTION` (text/voice không có giao dịch),
@@ -208,7 +217,7 @@ paths:
               properties:
                 type:
                   type: string
-                  enum: [AUDIO, IMAGE_RECEIPT, IMAGE_TRANSFER]
+                  enum: [AUDIO, IMAGE_RECEIPT, IMAGE_TRANSFER, IMAGE_BANK_HISTORY]
                 file:
                   type: string
                   format: binary
@@ -223,13 +232,21 @@ paths:
               examples:
                 event:
                   summary: Ra bản nháp giao dịch
-                  value: { captureId: cap_001, status: DONE, resultType: EVENT, resultId: ev_001, error: null }
+                  value: { captureId: cap_001, status: DONE, resultType: EVENT, resultId: ev_001,
+                           resultIds: [], skippedCount: 0, occurredAt: "2026-09-11T09:20:00+07:00", error: null }
                 movement:
                   summary: Ra khoản tiền vào
-                  value: { captureId: cap_002, status: DONE, resultType: MONEY_MOVEMENT, resultId: mov_001, error: null }
+                  value: { captureId: cap_002, status: DONE, resultType: MONEY_MOVEMENT, resultId: mov_001,
+                           resultIds: [], skippedCount: 0, occurredAt: "2026-09-11T09:33:00+07:00", error: null }
+                batch:
+                  summary: Ảnh lịch sử CK — 3 khoản mới, 2 dòng đã có trong sổ
+                  value: { captureId: cap_020, status: DONE, resultType: MONEY_MOVEMENT_BATCH, resultId: null,
+                           resultIds: [mov_101, mov_102, mov_103], skippedCount: 2,
+                           occurredAt: "2026-09-11T12:00:00+07:00", error: null }
                 failed:
                   summary: AI không đọc được
-                  value: { captureId: cap_012, status: FAILED, resultType: null, resultId: null, error: AI_EXTRACTION_FAILED }
+                  value: { captureId: cap_012, status: FAILED, resultType: null, resultId: null,
+                           resultIds: [], skippedCount: 0, occurredAt: null, error: AI_EXTRACTION_FAILED }
         "400": { $ref: "#/components/responses/ValidationError" }
         "401": { $ref: "#/components/responses/Unauthorized" }
         "413":
@@ -518,6 +535,8 @@ paths:
                 bankIn: 4950000
                 draftCount: 1
                 unmatchedMoneyCount: 1
+                pastDraftCount: 0
+                pastUnmatchedCount: 0
         "400": { $ref: "#/components/responses/ValidationError" }
         "401": { $ref: "#/components/responses/Unauthorized" }
 
@@ -605,6 +624,78 @@ paths:
         "401": { $ref: "#/components/responses/Unauthorized" }
         "404": { $ref: "#/components/responses/NotFound" }
 
+  /api/reports:
+    get:
+      tags: [Reports]
+      summary: Báo cáo theo khoảng ngày (Phase 2 ④)
+      description: |
+        Tính trong Python từ `events` + `money_movements` lọc theo `occurredAt`, không ledger.
+
+        - `summary` = cả kỳ; `byDay` chỉ gồm ngày có ≥ 1 event hoặc movement, **mới nhất trước**;
+          `byType` = event `CONFIRMED` gộp theo `type`, bỏ loại không có bản ghi.
+        - Số của một ngày trong `byDay` khớp `GET /api/dashboard?date=` của ngày đó.
+      parameters:
+        - name: from
+          in: query
+          required: true
+          schema: { type: string, format: date, examples: ["2026-09-09"] }
+        - name: to
+          in: query
+          required: true
+          description: "`to >= from`, khoảng tối đa 92 ngày."
+          schema: { type: string, format: date, examples: ["2026-09-11"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/pending:
+    get:
+      tags: [Reports]
+      summary: Tồn đọng mọi ngày (Phase 2 ③)
+      description: |
+        Mọi event `DRAFT` và movement `UNMATCHED` **không giới hạn ngày**, sắp xếp `occurredAt`
+        **tăng dần** (cũ nhất trước) để xử lý từ cũ tới mới. Movement kèm `candidates` như
+        `GET /api/money-movements`. `byDate` đếm theo ngày, tăng dần.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Pending" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/zalo-users/{zaloId}/replay:
+    post:
+      tags: [Zalo]
+      summary: Xử lý lại tin nhắn Zalo gửi trước khi liên kết (Phase 2 ③b)
+      description: |
+        App gọi ngay sau khi đăng ký có `zaloId`. Chạy `process_capture` cho mọi
+        `zalo_unlinked_messages` của `zaloId` có `messageType ∈ {TEXT, IMAGE, AUDIO}` và chưa
+        được replay, theo `sentAt` tăng dần.
+
+        - `zaloId` phải liên kết với chính account đang gọi, không thì `404`.
+        - Media URL của Zalo có thể đã hết hạn → capture `FAILED`, đếm vào `failed`.
+        - Message đã replay được đánh dấu, gọi lại **không** xử lý lần hai.
+        - Bot **không** trả lời trong Zalo khi replay.
+      parameters:
+        - name: zaloId
+          in: path
+          required: true
+          schema: { type: string, examples: ["a1b2c3d4e5f60718293a"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReplayResult" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
   /api/zalo/webhook:
     post:
       tags: [Zalo]
@@ -618,6 +709,9 @@ paths:
           `IMAGE_UNKNOWN` (AI tự phân loại RECEIPT / TRANSFER / OTHER), voice `.aac`
           được remux sang `.m4a` trước khi transcribe.
         - **Luôn trả `200`** kể cả khi AI lỗi, để Zalo không gửi lại.
+        - Bot **trả lời ngay trong Zalo** (`sendMessage`, Phase 2 ⑤) trước khi trả `200`: đã ghi
+          nháp gì / tiền vào bao nhiêu / hướng dẫn liên kết nếu chưa link. Sticker và loại lạ
+          không được trả lời. `ZALO_BOT_TOKEN` rỗng hoặc gọi lỗi → chỉ ghi log, webhook vẫn `200`.
 
         `messageType` suy từ field có mặt: `voice_url` → `AUDIO`, `photo_url` → `IMAGE`,
         `sticker` → `STICKER`, `text` → `TEXT`, còn lại → `OTHER`.
@@ -770,7 +864,7 @@ components:
       description: Nguồn capture — app dùng để hiện chip 💬 Zalo.
     CaptureType:
       type: string
-      enum: [TEXT, AUDIO, IMAGE_RECEIPT, IMAGE_TRANSFER]
+      enum: [TEXT, AUDIO, IMAGE_RECEIPT, IMAGE_TRANSFER, IMAGE_BANK_HISTORY]
       description: |
         Copy từ capture. Ảnh từ Zalo đi đường `IMAGE_UNKNOWN` nội bộ nhưng **lưu type sau khi
         đã phân loại**, nên DTO không bao giờ trả `IMAGE_UNKNOWN`.
@@ -822,12 +916,28 @@ components:
       properties:
         captureId: { type: string }
         status: { type: string, enum: [PROCESSING, DONE, FAILED] }
-        resultType: { type: [string, "null"], enum: [EVENT, MONEY_MOVEMENT, null] }
-        resultId: { type: [string, "null"] }
+        resultType:
+          type: [string, "null"]
+          enum: [EVENT, MONEY_MOVEMENT, MONEY_MOVEMENT_BATCH, null]
+        resultId: { type: [string, "null"], description: "`null` khi BATCH — xem `resultIds`." }
+        resultIds:
+          type: array
+          description: Luôn có key; chỉ khác `[]` với `MONEY_MOVEMENT_BATCH`.
+          items: { type: string }
+        skippedCount:
+          type: integer
+          description: Số dòng bị bỏ vì đã có trong sổ (chỉ `IMAGE_BANK_HISTORY`).
+        occurredAt:
+          type: [string, "null"]
+          format: date-time
+          description: |
+            Ngày nghiệp vụ của bản ghi vừa tạo (BATCH: bản ghi mới nhất) để app mở Home đúng
+            ngày. `null` khi `FAILED`.
         error:
           type: [string, "null"]
           enum: [AI_EXTRACTION_FAILED, NO_TRANSACTION, UNRECOGNIZED_IMAGE, null]
-      required: [captureId, status, resultType, resultId, error]
+      required: [captureId, status, resultType, resultId, resultIds, skippedCount,
+                 occurredAt, error]
 
     BusinessEvent:
       type: object
@@ -932,7 +1042,10 @@ components:
         bankIn: { type: integer, format: int64, description: Mọi movement IN, bất kể status }
         draftCount: { type: integer }
         unmatchedMoneyCount: { type: integer }
-      required: [date, revenue, expense, collected, receivable, bankIn, draftCount, unmatchedMoneyCount]
+        pastDraftCount: { type: integer, description: DRAFT của các ngày trước `date` }
+        pastUnmatchedCount: { type: integer, description: UNMATCHED của các ngày trước `date` }
+      required: [date, revenue, expense, collected, receivable, bankIn, draftCount,
+                 unmatchedMoneyCount, pastDraftCount, pastUnmatchedCount]
 
     DailySummary:
       type: object
@@ -955,6 +1068,117 @@ components:
         message: { type: string }
         resolvedAt: { type: [string, "null"], format: date-time }
       required: [warningId, type, status, resourceType, resourceId, amount, message, resolvedAt]
+
+    ReportSummary:
+      type: object
+      properties:
+        revenue: { type: integer, format: int64 }
+        expense: { type: integer, format: int64 }
+        collected: { type: integer, format: int64 }
+        receivable: { type: integer, format: int64 }
+        bankIn: { type: integer, format: int64 }
+        saleCount: { type: integer, description: SALE CONFIRMED }
+        purchaseCount: { type: integer, description: PURCHASE CONFIRMED }
+        draftCount: { type: integer }
+        unmatchedMoneyCount: { type: integer }
+      required: [revenue, expense, collected, receivable, bankIn, saleCount, purchaseCount,
+                 draftCount, unmatchedMoneyCount]
+
+    ReportDay:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        revenue: { type: integer, format: int64 }
+        expense: { type: integer, format: int64 }
+        collected: { type: integer, format: int64 }
+        bankIn: { type: integer, format: int64 }
+        saleCount: { type: integer }
+        draftCount: { type: integer }
+        unmatchedMoneyCount: { type: integer }
+      required: [date, revenue, expense, collected, bankIn, saleCount, draftCount,
+                 unmatchedMoneyCount]
+
+    ReportType:
+      type: object
+      properties:
+        type: { $ref: "#/components/schemas/EventType" }
+        amount: { type: integer, format: int64 }
+        count: { type: integer }
+      required: [type, amount, count]
+
+    Report:
+      type: object
+      properties:
+        from: { type: string, format: date }
+        to: { type: string, format: date }
+        days: { type: integer, description: Số ngày trong khoảng, tính cả hai đầu }
+        summary: { $ref: "#/components/schemas/ReportSummary" }
+        byDay:
+          type: array
+          items: { $ref: "#/components/schemas/ReportDay" }
+        byType:
+          type: array
+          items: { $ref: "#/components/schemas/ReportType" }
+      required: [from, to, days, summary, byDay, byType]
+      example:
+        from: "2026-09-09"
+        to: "2026-09-11"
+        days: 3
+        summary:
+          revenue: 4820000
+          expense: 1230000
+          collected: 4570000
+          receivable: 250000
+          bankIn: 4950000
+          saleCount: 4
+          purchaseCount: 2
+          draftCount: 1
+          unmatchedMoneyCount: 1
+        byDay:
+          - date: "2026-09-11"
+            revenue: 4820000
+            expense: 1230000
+            collected: 4570000
+            bankIn: 4950000
+            saleCount: 4
+            draftCount: 1
+            unmatchedMoneyCount: 1
+        byType:
+          - { type: SALE, amount: 4820000, count: 4 }
+          - { type: PURCHASE, amount: 1230000, count: 2 }
+
+    PendingDate:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        draftCount: { type: integer }
+        unmatchedCount: { type: integer }
+      required: [date, draftCount, unmatchedCount]
+
+    Pending:
+      type: object
+      properties:
+        draftEvents:
+          type: array
+          items: { $ref: "#/components/schemas/BusinessEvent" }
+        unmatchedMovements:
+          type: array
+          items: { $ref: "#/components/schemas/MoneyMovement" }
+        byDate:
+          type: array
+          items: { $ref: "#/components/schemas/PendingDate" }
+      required: [draftEvents, unmatchedMovements, byDate]
+
+    ReplayResult:
+      type: object
+      properties:
+        zaloId: { type: string }
+        replayed: { type: integer, description: "Số message đã đẩy vào pipeline = `done + failed`" }
+        done: { type: integer }
+        failed: { type: integer, description: Media hết hạn hoặc AI lỗi }
+        skipped: { type: integer, description: Sticker / loại không có giao dịch }
+      required: [zaloId, replayed, done, failed, skipped]
+      example: { zaloId: a1b2c3d4e5f60718293a, replayed: 2, done: 2, failed: 0, skipped: 1 }
 
     DailyRecord:
       type: object

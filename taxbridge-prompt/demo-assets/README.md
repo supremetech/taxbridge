@@ -20,6 +20,7 @@ Raw `.aac` gửi thẳng: `400 Unsupported file format aac`. Đổi tên `.m4a` 
 
 | `transfer_match.jpg` | Màn "Chuyển khoản thành công" 450.000 VND, nguồn `NGUYEN THI LAN`, người nhận `MAI ANH TUAN`, nội dung `LAN 3HOP` (1800×3200, render AppKit 11/09) | UC4: app `assets/demo/`, smoke `type=IMAGE_TRANSFER` |
 | `transfer_deposit.jpg` | Cùng layout, 380.000 VND, nguồn `NGUYEN VAN MINH`, nội dung `COC MINH` | UC5 (hero) |
+| `bank_history.jpg` | Màn "Lịch sử giao dịch" Vietcombank, 5 dòng theo `feature-map/bank-history-reconcile.md`: +380.000 `COC MINH` 11:02, +450.000 `LAN 3HOP` 09:33, +250.000 `THAO 1HOP` 08:40 (11/09/2026); +1.200.000 `HUE 2 COLLAGEN` 16:20, **−**2.000.000 `TRA TIEN HANG` 09:05 (10/09/2026). Hai dòng đầu trùng `transfer_deposit.jpg` / `transfer_match.jpg` (1800×3200, render PIL 12/09) | UC14: `type=IMAGE_BANK_HISTORY` → 3 movement mới, `skippedCount: 2` |
 | `receipt.jpg` | Hóa đơn bán lẻ "Cửa hàng bao bì ABC": túi giấy + hộp carton + băng keo, tổng 220.000đ, **TIỀN MẶT** (1800×2600) | UC6: `type=IMAGE_RECEIPT` → PURCHASE 220k CASH |
 
 Ảnh chưa test qua vision model; nếu AI đọc sai thì chỉnh font/cỡ chữ rồi render lại.

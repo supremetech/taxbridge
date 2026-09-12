@@ -1,6 +1,7 @@
-"""Zalo Bot Platform: normalize payload, tải media, remux voice (contract/README §6)."""
+"""Zalo Bot Platform: normalize payload, tải media, remux voice, bot trả lời (contract §6)."""
 
 import logging
+import os
 import subprocess
 import tempfile
 from datetime import datetime
@@ -8,7 +9,10 @@ from datetime import datetime
 import imageio_ffmpeg
 import requests
 
+from . import errors, event_service, reconciliation_service
 from .capture_service import process_capture
+from .config import ZALO_BOT_API
+from .dashboard_service import money
 from .firestore import TZ, db, now_iso
 
 # Message đẩy được vào pipeline capture; còn lại (STICKER, OTHER) chỉ ghi nhận người gửi.
@@ -94,6 +98,65 @@ def aac_to_m4a(aac_bytes: bytes) -> bytes:
             return f.read()
 
 
+# --- Bot trả lời (contract §6.1) ------------------------------------------
+
+EVENT_LABELS = {"SALE": "Bán hàng", "PURCHASE": "Mua hàng", "DEPOSIT": "Đặt cọc",
+                "OWNER_MONEY": "Tiền cá nhân", "UNKNOWN": "Giao dịch"}
+PAYMENT_LABELS = {("BANK", "UNPAID"): "CK, chưa thu", ("BANK", "PAID"): "CK, đã thu",
+                  ("CASH", "PAID"): "tiền mặt", ("CASH", "UNPAID"): "tiền mặt",
+                  ("CASH", "UNKNOWN"): "tiền mặt"}
+
+
+def reply(chat_id: str, text: str) -> None:
+    """Gửi trong request webhook, trước khi trả 200. Không bao giờ raise."""
+    token = os.environ.get("ZALO_BOT_TOKEN", "")
+    if not token:
+        logging.warning("ZALO_BOT_TOKEN rỗng — bỏ qua reply")
+        return
+    try:
+        r = requests.post(ZALO_BOT_API.format(token=token, method="sendMessage"),
+                          json={"chat_id": chat_id, "text": text}, timeout=10)
+        logging.info("sendMessage → %s %s", r.status_code, r.text[:200])
+    except Exception as e:
+        logging.warning("sendMessage lỗi: %s", e)
+
+
+def reply_text(result: dict | None, business_id: str | None, message: dict) -> str | None:
+    """Câu trả lời theo kết quả capture; None = không trả lời (sticker / loại lạ)."""
+    if result is None:
+        if message["messageType"] not in CAPTURE_TYPES:
+            return None
+        name = message.get("displayName") or "tài khoản Zalo của bạn"
+        return (f'TaxBridge chưa liên kết Zalo này. Mở app → Đăng ký → chọn "{name}" '
+                f"ở mục Zalo account.")
+
+    if result["status"] == "FAILED":
+        return ('❌ Chưa đọc được giao dịch. Nhắn rõ hơn, ví dụ: '
+                '"bán 3 hộp collagen 450 nghìn ck".')
+
+    if result["resultType"] == "EVENT":
+        event = event_service.get(business_id, result["resultId"])
+        parts = [f"{EVENT_LABELS.get(event['type'], 'Giao dịch')} {money(event['amount'])}"]
+        if event.get("counterparty"):
+            parts.append(event["counterparty"])
+        payment = PAYMENT_LABELS.get((event.get("paymentMethod"), event.get("paymentStatus")))
+        if payment:
+            parts.append(payment)
+        return f"✅ Đã ghi nháp: {' · '.join(parts)}. Mở app để xác nhận."
+
+    if result["resultType"] == "MONEY_MOVEMENT":
+        movement = reconciliation_service.get_dto(business_id, result["resultId"])
+        label = "Tiền vào" if movement["direction"] == "IN" else "Tiền ra"
+        who = movement.get("counterparty") or movement.get("memo")
+        head = f"🏦 {label} {money(movement['amount'])}" + (f" từ {who}" if who else "")
+        n = len(movement["candidates"])
+        if n:
+            return f"{head} — có {n} đơn có thể khớp. Mở app để ghép."
+        return f"{head} — chưa rõ là khoản gì. Mở app để phân loại."
+
+    return None
+
+
 def _upsert_user(message: dict) -> dict:
     ref = db.collection("zalo_users").document(message["zaloId"])
     doc = ref.get()
@@ -108,6 +171,27 @@ def _upsert_user(message: dict) -> dict:
     return user
 
 
+def _capture_message(business_id: str, message: dict) -> dict | None:
+    """Đẩy một message Zalo vào pipeline capture. Sticker / loại lạ → None (§14)."""
+    if message["messageType"] not in CAPTURE_TYPES:
+        # Sticker / loại chưa biết: không có giao dịch để trích. Không gọi AI (tốn tiền, dễ ra
+        # draft rác), không tạo capture. `lastSeenAt` đã cập nhật ở _upsert_user là đủ.
+        logging.info("Zalo message %s loại %s — bỏ qua, không phải giao dịch",
+                     message["messageId"], message["messageType"])
+        return None
+
+    if message["messageType"] == "TEXT":
+        return process_capture(business_id, "ZALO", "TEXT", text=message["text"],
+                               zalo_message_id=message["messageId"])
+    if message["messageType"] == "IMAGE":
+        return process_capture(business_id, "ZALO", "IMAGE_UNKNOWN",
+                               file_bytes=download(message["imageUrl"]),
+                               zalo_message_id=message["messageId"])
+    return process_capture(business_id, "ZALO", "AUDIO",
+                           file_bytes=aac_to_m4a(download(message["audioUrl"])),
+                           zalo_message_id=message["messageId"])
+
+
 def handle(payload: dict | None) -> None:
     """Webhook luôn trả 200; mọi lỗi nuốt tại đây (capture.error đã ghi trong pipeline)."""
     message = normalize(payload)
@@ -117,29 +201,55 @@ def handle(payload: dict | None) -> None:
     user = _upsert_user(message)
     business_id = user.get("linkedBusinessId")
     if not business_id:
-        # Chưa link: lưu lại để hiện trong dropdown Register (UC8). Không xử lý lại sau khi link.
+        # Chưa link: lưu lại để hiện trong dropdown Register (UC8) và replay sau khi link (§14).
         db.collection("zalo_unlinked_messages").document(message["messageId"]).set(
-            {**message, "receivedAt": now_iso()})
-        return
+            {**message, "receivedAt": now_iso(), "replayedAt": None})
 
-    if message["messageType"] not in CAPTURE_TYPES:
-        # Sticker / loại chưa biết: không có giao dịch để trích. Không gọi AI (tốn tiền, dễ ra
-        # draft rác), không tạo capture. `lastSeenAt` đã cập nhật ở _upsert_user là đủ.
-        logging.info("Zalo message %s loại %s — bỏ qua, không phải giao dịch",
-                     message["messageId"], message["messageType"])
-        return
+    result = None
+    if business_id:
+        try:
+            result = _capture_message(business_id, message)
+        except Exception:
+            logging.exception("xử lý message Zalo %s lỗi", message["messageId"])
+            result = {"status": "FAILED", "resultType": None, "resultId": None}
 
+    # Trả lời trong chính request webhook, trước khi trả 200 (CPU đóng băng sau response).
     try:
-        if message["messageType"] == "TEXT":
-            process_capture(business_id, "ZALO", "TEXT", text=message["text"],
-                            zalo_message_id=message["messageId"])
-        elif message["messageType"] == "IMAGE":
-            process_capture(business_id, "ZALO", "IMAGE_UNKNOWN",
-                            file_bytes=download(message["imageUrl"]),
-                            zalo_message_id=message["messageId"])
-        else:
-            process_capture(business_id, "ZALO", "AUDIO",
-                            file_bytes=aac_to_m4a(download(message["audioUrl"])),
-                            zalo_message_id=message["messageId"])
+        text = reply_text(result, business_id, message)
     except Exception:
-        logging.exception("xử lý message Zalo %s lỗi", message["messageId"])
+        logging.exception("dựng câu trả lời cho %s lỗi", message["messageId"])
+        text = None
+    if text:
+        reply(message["chatId"], text)
+
+
+def replay(account_id: str, business_id: str, zalo_id: str) -> dict:
+    """Xử lý lại message gửi TRƯỚC khi link (contract §6.2). Không bot reply khi replay."""
+    user = db.collection("zalo_users").document(zalo_id).get()
+    if not user.exists or user.to_dict().get("linkedAccountId") != account_id:
+        raise errors.not_found("Zalo user chưa liên kết với tài khoản này.")
+
+    # Đọc cả collection rồi lọc trong Python: tránh composite index (CLAUDE.md §6).
+    messages = [(d.reference, d.to_dict()) for d in
+                db.collection("zalo_unlinked_messages").stream()]
+    messages = [(ref, m) for ref, m in messages
+                if m.get("zaloId") == zalo_id and not m.get("replayedAt")]
+    messages.sort(key=lambda item: item[1].get("sentAt") or "")
+
+    done = failed = skipped = 0
+    for ref, message in messages:
+        try:
+            result = _capture_message(business_id, message)
+        except Exception:          # media URL Zalo hết hạn, AI lỗi…
+            logging.exception("replay message Zalo %s lỗi", message.get("messageId"))
+            result = {"status": "FAILED"}
+        if result is None:
+            skipped += 1
+        elif result["status"] == "DONE":
+            done += 1
+        else:
+            failed += 1
+        ref.update({"replayedAt": now_iso()})   # kể cả failed: không thử lại
+
+    return {"zaloId": zalo_id, "replayed": done + failed,
+            "done": done, "failed": failed, "skipped": skipped}
