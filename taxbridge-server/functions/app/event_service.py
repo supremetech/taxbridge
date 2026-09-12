@@ -1,8 +1,10 @@
 """BusinessEvent: list / get / update / confirm / reject (plan BE §5)."""
 
+from datetime import datetime
+
 from . import errors
-from .dashboard_service import resolve_warnings
-from .firestore import business, now_iso
+from .dashboard_service import sync_record
+from .firestore import business, date_of, now_iso
 
 EVENT_TYPES = {"SALE", "PURCHASE", "DEPOSIT", "OWNER_MONEY", "UNKNOWN"}
 PAYMENT_METHODS = {"CASH", "BANK", "UNKNOWN"}
@@ -75,9 +77,17 @@ def update(business_id: str, event_id: str, body: dict) -> dict:
     if "amount" in patch and (not isinstance(patch["amount"], int)
                               or isinstance(patch["amount"], bool) or patch["amount"] < 0):
         raise errors.validation("amount phải là số nguyên VND >= 0.")
+    if "occurredAt" in patch:
+        try:
+            datetime.fromisoformat(patch["occurredAt"])
+        except (TypeError, ValueError):
+            raise errors.validation("occurredAt phải là ISO-8601 có timezone.")
 
     patch["updatedAt"] = now_iso()
     events_ref(business_id).document(event_id).update(patch)
+    # Đổi ngày → sổ ngày cũ lẫn ngày mới đều phải đồng bộ lại (§12).
+    for date in {date_of(event.get("occurredAt")), date_of(patch.get("occurredAt"))}:
+        sync_record(business_id, date)
     return to_dto({**event, **patch})
 
 
@@ -87,7 +97,7 @@ def _set_status(business_id: str, event_id: str, status: str) -> dict:
         raise errors.invalid_state("Giao dịch không còn ở trạng thái nháp.")
     patch = {"status": status, "updatedAt": now_iso()}
     events_ref(business_id).document(event_id).update(patch)
-    resolve_warnings(business_id, event_id)
+    sync_record(business_id, date_of(event.get("occurredAt")))
     return to_dto({**event, **patch})
 
 

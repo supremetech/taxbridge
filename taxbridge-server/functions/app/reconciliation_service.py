@@ -8,7 +8,7 @@ import unicodedata
 
 from . import errors, event_service
 from .config import CANDIDATE_MIN_SCORE, MAX_CANDIDATES
-from .dashboard_service import resolve_warnings
+from .dashboard_service import sync_record
 from .firestore import business, date_of, now_iso
 
 CLASSIFICATION_TYPES = {"DEPOSIT", "OWNER_MONEY", "OTHER", "UNKNOWN"}
@@ -112,7 +112,9 @@ def match(business_id: str, movement_id: str, event_id: str) -> dict:
     movements_ref(business_id).document(movement_id).update(patch)
     event_service.events_ref(business_id).document(event["eventId"]).update(
         {"paymentStatus": "PAID", "updatedAt": now_iso()})
-    resolve_warnings(business_id, movement_id)
+    # Event có thể ở ngày khác movement (ngày trên chứng từ, §12) → đồng bộ cả hai sổ.
+    for date in {date_of(movement.get("occurredAt")), date_of(event.get("occurredAt"))}:
+        sync_record(business_id, date)
     return to_dto({**movement, **patch})
 
 
@@ -127,5 +129,5 @@ def classify(business_id: str, movement_id: str, classification_type: str) -> di
     patch = {"status": "CLASSIFIED", "classificationType": classification_type,
              "classifiedAt": now_iso()}
     movements_ref(business_id).document(movement_id).update(patch)
-    resolve_warnings(business_id, movement_id)
+    sync_record(business_id, date_of(movement.get("occurredAt")))
     return to_dto({**movement, **patch})

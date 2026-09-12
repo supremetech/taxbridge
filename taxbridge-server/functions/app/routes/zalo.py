@@ -3,7 +3,7 @@
 import logging
 import os
 
-from flask import request
+from flask import g, request
 
 from .. import errors, zalo_service
 from . import bp
@@ -22,3 +22,9 @@ def webhook():
     # Health probe gọi với body rỗng, không content-type → trả 200, không parse.
     zalo_service.handle(request.get_json(silent=True))
     return {"ok": True}
+
+
+@bp.post("/zalo-users/<zalo_id>/replay")
+def replay(zalo_id):
+    """Xử lý lại message Zalo gửi trước khi link (contract §6.2)."""
+    return zalo_service.replay(g.account_id, g.business_id, zalo_id)

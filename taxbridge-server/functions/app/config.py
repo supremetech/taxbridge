@@ -8,6 +8,9 @@ REASONING_EFFORT = "low"
 TRANSCRIBE_MODEL = "gpt-transcribe"
 TRANSCRIBE_FALLBACK_MODEL = "gpt-4o-transcribe"
 
+# --- Zalo Bot Platform ----------------------------------------------------
+ZALO_BOT_API = "https://bot-api.zapps.me/bot{token}/{method}"
+
 # --- Upload ---------------------------------------------------------------
 MAX_FILE_BYTES = 10 * 1024 * 1024
 MAX_AUDIO_SECONDS = 60
