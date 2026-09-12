@@ -12,7 +12,8 @@ def create_capture():
     if request.files:
         capture_type = (request.form.get("type") or "").strip()
         if capture_type not in UPLOAD_TYPES:
-            raise errors.validation("type phải là AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER.")
+            raise errors.validation("type phải là AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER "
+                                    "| IMAGE_BANK_HISTORY.")
         file = request.files.get("file")
         if file is None:
             raise errors.validation("Thiếu field file.")

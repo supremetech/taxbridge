@@ -8,16 +8,17 @@ import logging
 import re
 import subprocess
 import tempfile
+from datetime import datetime, timedelta
 
 import imageio_ffmpeg
 
-from . import errors, openai_client, storage
+from . import dashboard_service, errors, openai_client, reconciliation_service, storage
 from .config import (AUDIO_CONTENT_TYPES, IMAGE_CONTENT_TYPES, MAX_AUDIO_SECONDS,
                      MAX_FILE_BYTES)
-from .firestore import business, new_id, now_iso
+from .firestore import TZ, business, date_of, new_id, now, now_iso
 
-CAPTURE_TYPES = {"TEXT", "AUDIO", "IMAGE_RECEIPT", "IMAGE_TRANSFER"}
-UPLOAD_TYPES = {"AUDIO", "IMAGE_RECEIPT", "IMAGE_TRANSFER"}
+CAPTURE_TYPES = {"TEXT", "AUDIO", "IMAGE_RECEIPT", "IMAGE_TRANSFER", "IMAGE_BANK_HISTORY"}
+UPLOAD_TYPES = {"AUDIO", "IMAGE_RECEIPT", "IMAGE_TRANSFER", "IMAGE_BANK_HISTORY"}
 
 
 # --- Validate upload (route gọi trước khi vào pipeline) -------------------
@@ -80,12 +81,79 @@ def _file_kind(capture_type: str, data: bytes) -> tuple[str, str]:
     return ("png", "image/png") if _is_png(data) else ("jpg", "image/jpeg")
 
 
-def _result(ref, capture_id: str, result_type=None, result_id=None, error=None) -> dict:
+def resolve_occurred_at(raw: str | None) -> str:
+    """Ngày AI đọc được → ISO +07:00; không hợp lệ / ngoài [now−365d, now+1d] → now() (§12)."""
+    if not raw:
+        return now_iso()
+    try:
+        dt = datetime.fromisoformat(raw)
+    except ValueError:
+        return now_iso()
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=TZ)
+    if len(raw) == 10:                           # chỉ có ngày, không giờ → 12:00
+        dt = dt.replace(hour=12, minute=0, second=0)
+    if not (now() - timedelta(days=365) <= dt <= now() + timedelta(days=1)):
+        return now_iso()
+    return dt.isoformat(timespec="seconds")
+
+
+def _result(ref, capture_id: str, result_type=None, result_id=None, error=None,
+            occurred_at=None, result_ids=None, skipped=0) -> dict:
     status = "FAILED" if error else "DONE"
-    ref.update({"status": status, "resultType": result_type,
-                "resultId": result_id, "error": error})
-    return {"captureId": capture_id, "status": status, "resultType": result_type,
-            "resultId": result_id, "error": error}
+    result = {"captureId": capture_id, "status": status, "resultType": result_type,
+              "resultId": result_id, "resultIds": result_ids or [], "skippedCount": skipped,
+              "occurredAt": occurred_at, "error": error}
+    ref.update({k: v for k, v in result.items() if k != "captureId"})
+    return result
+
+
+def _movement(business_id: str, transfer, common: dict) -> str:
+    movement_id = new_id("mov")
+    business(business_id).collection("money_movements").document(movement_id).set({
+        "movementId": movement_id, "direction": transfer.direction, "amount": transfer.amount,
+        "memo": transfer.memo, "counterparty": transfer.counterparty, "status": "UNMATCHED",
+        "matchedEventId": None, "classificationType": None, "classifiedAt": None, **common,
+    })
+    return movement_id
+
+
+def _is_duplicate(existing: list[dict], transfer, ts: str) -> bool:
+    """Đã có movement cùng chiều + số tiền + ngày, memo trùng token (hoặc cả hai rỗng)."""
+    return any(m["direction"] == transfer.direction and m["amount"] == transfer.amount
+               and date_of(m.get("occurredAt")) == date_of(ts)
+               and (reconciliation_service.similar(m.get("memo"), transfer.memo)
+                    or not (m.get("memo") or transfer.memo))
+               for m in existing)
+
+
+def _bank_history(ref, capture_id: str, business_id: str, source: str, rows: list,
+                  file_url: str | None) -> dict:
+    """Ảnh danh sách giao dịch → N movement, bỏ dòng đã có trong sổ (plan BE §15)."""
+    rows = [r for r in rows if r.amount > 0]
+    if not rows:
+        return _result(ref, capture_id, error="UNRECOGNIZED_IMAGE")
+
+    existing = reconciliation_service.all_movements(business_id)
+    ids, skipped, dates, latest = [], 0, set(), None
+    for row in rows:
+        ts = resolve_occurred_at(row.occurredDate)
+        if _is_duplicate(existing, row, ts):
+            skipped += 1
+            continue
+        created = now_iso()
+        ids.append(_movement(business_id, row, {
+            "source": source, "captureType": "IMAGE_BANK_HISTORY", "evidenceText": None,
+            "evidenceUrl": file_url, "occurredAt": ts, "sourceCaptureId": capture_id,
+            "createdAt": created, "updatedAt": created}))
+        dates.add(date_of(ts))
+        latest = max(latest or ts, ts)
+
+    for date in sorted(dates):
+        dashboard_service.sync_record(business_id, date)
+    # DONE kể cả khi trùng hết (ids rỗng) — app hiện "không có khoản nào mới".
+    return _result(ref, capture_id, "MONEY_MOVEMENT_BATCH", occurred_at=latest,
+                   result_ids=ids, skipped=skipped)
 
 
 def process_capture(business_id: str, source: str, capture_type: str, text: str | None = None,
@@ -100,8 +168,8 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
                                   file_bytes, content_type)
     ref.set({"captureId": capture_id, "source": source, "type": capture_type, "text": text,
              "transcript": None, "fileUrl": file_url, "zaloMessageId": zalo_message_id,
-             "status": "PROCESSING", "resultType": None, "resultId": None, "error": None,
-             "createdAt": now_iso()})
+             "status": "PROCESSING", "resultType": None, "resultId": None, "resultIds": [],
+             "skippedCount": 0, "occurredAt": None, "error": None, "createdAt": now_iso()})
 
     transcript = None
     try:
@@ -115,6 +183,8 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
             extraction = openai_client.extract_event(image=file_bytes)
         elif capture_type == "IMAGE_TRANSFER":
             extraction = openai_client.extract_transfer(file_bytes)
+        elif capture_type == "IMAGE_BANK_HISTORY":
+            extraction = openai_client.extract_bank_history(file_bytes)
         else:                                   # IMAGE_UNKNOWN — ảnh từ Zalo
             out = openai_client.extract_image(file_bytes)
             if out.kind == "RECEIPT" and out.event:
@@ -129,8 +199,11 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
         logging.exception("AI lỗi khi xử lý capture %s", capture_id)
         return _result(ref, capture_id, error="AI_EXTRACTION_FAILED")
 
+    if isinstance(extraction, openai_client.BankHistoryExtraction):
+        return _bank_history(ref, capture_id, business_id, source, extraction.transfers, file_url)
+
     is_image = capture_type.startswith("IMAGE_")
-    ts = now_iso()                               # occurredAt = now(), không lấy từ AI
+    ts = resolve_occurred_at(extraction.occurredDate)     # ngày trên chứng từ (§12)
     common = {"source": source, "captureType": capture_type,
               "evidenceText": text or transcript, "evidenceUrl": file_url,
               "occurredAt": ts, "sourceCaptureId": capture_id, "createdAt": ts, "updatedAt": ts}
@@ -138,14 +211,9 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
     if isinstance(extraction, openai_client.TransferExtraction):
         if extraction.amount <= 0:
             return _result(ref, capture_id, error="UNRECOGNIZED_IMAGE")
-        movement_id = new_id("mov")
-        business(business_id).collection("money_movements").document(movement_id).set({
-            "movementId": movement_id, "direction": extraction.direction,
-            "amount": extraction.amount, "memo": extraction.memo,
-            "counterparty": extraction.counterparty, "status": "UNMATCHED",
-            "matchedEventId": None, "classificationType": None, "classifiedAt": None, **common,
-        })
-        return _result(ref, capture_id, "MONEY_MOVEMENT", movement_id)
+        movement_id = _movement(business_id, extraction, common)
+        dashboard_service.sync_record(business_id, date_of(ts))
+        return _result(ref, capture_id, "MONEY_MOVEMENT", movement_id, occurred_at=ts)
 
     if extraction.type == "UNKNOWN" and extraction.amount == 0:
         # Câu chào hỏi, ảnh nhãn sản phẩm… → không tạo draft rác (eval A4/R3).
@@ -159,4 +227,5 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
         "counterparty": extraction.counterparty, "paymentMethod": extraction.paymentMethod,
         "paymentStatus": extraction.paymentStatus, "confidence": extraction.confidence, **common,
     })
-    return _result(ref, capture_id, "EVENT", event_id)
+    dashboard_service.sync_record(business_id, date_of(ts))
+    return _result(ref, capture_id, "EVENT", event_id, occurred_at=ts)

@@ -1,0 +1,40 @@
+{
+  "from": "2026-09-09",
+  "to": "2026-09-11",
+  "days": 3,
+  "summary": {
+    "revenue": 4820000,
+    "expense": 1230000,
+    "collected": 4570000,
+    "receivable": 250000,
+    "bankIn": 4950000,
+    "saleCount": 4,
+    "purchaseCount": 2,
+    "draftCount": 1,
+    "unmatchedMoneyCount": 1
+  },
+  "byDay": [
+    {
+      "date": "2026-09-11",
+      "revenue": 4820000,
+      "expense": 1230000,
+      "collected": 4570000,
+      "bankIn": 4950000,
+      "saleCount": 4,
+      "draftCount": 1,
+      "unmatchedMoneyCount": 1
+    }
+  ],
+  "byType": [
+    {
+      "type": "SALE",
+      "amount": 4820000,
+      "count": 4
+    },
+    {
+      "type": "PURCHASE",
+      "amount": 1230000,
+      "count": 2
+    }
+  ]
+}

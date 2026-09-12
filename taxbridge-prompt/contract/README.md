@@ -56,9 +56,9 @@ Cách dùng:
 | 200 | — | thành công |
 | 201 | — | `POST /api/register` |
 | 204 | — | `POST /api/logout` |
-| 400 | `VALIDATION_ERROR` | body/query sai, thiếu field, enum không hợp lệ, `date` sai format |
+| 400 | `VALIDATION_ERROR` | body/query sai, thiếu field, enum không hợp lệ, `date` sai format, `reports` thiếu `from`/`to`, `to < from` hoặc > 92 ngày |
 | 401 | `UNAUTHORIZED` | sai username/password, thiếu hoặc sai token, sai `X-Bot-Api-Secret-Token` |
-| 404 | `NOT_FOUND` | event/movement/daily record/zalo user không tồn tại trong business |
+| 404 | `NOT_FOUND` | event/movement/daily record/zalo user không tồn tại trong business; `replay` với zaloId không link với account gọi |
 | 409 | `USERNAME_TAKEN` | username đã có |
 | 409 | `ZALO_USER_LINKED` | `zaloId` đã liên kết account khác |
 | 409 | `INVALID_STATE` | confirm event không phải DRAFT, match movement không phải UNMATCHED… |
@@ -74,10 +74,10 @@ từ / chuyển khoản). App hiển thị chung "Không xử lý được. Th�
 ## 4. Enum canonical
 
 ```text
-Capture.type:          TEXT | AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER
+Capture.type:          TEXT | AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER | IMAGE_BANK_HISTORY
                        (+ IMAGE_UNKNOWN chỉ nội bộ backend, cho ảnh từ Zalo)
 Capture.status:        PROCESSING | DONE | FAILED
-Capture.resultType:    EVENT | MONEY_MOVEMENT
+Capture.resultType:    EVENT | MONEY_MOVEMENT | MONEY_MOVEMENT_BATCH   (BATCH: Phase 2 ①, resultIds[])
 BusinessEvent.type:    SALE | PURCHASE | DEPOSIT | OWNER_MONEY | UNKNOWN
 BusinessEvent.status:  DRAFT | CONFIRMED | REJECTED
 paymentMethod:         CASH | BANK | UNKNOWN
@@ -89,7 +89,7 @@ Warning.type:          UNMATCHED_MONEY | DRAFT_EVENT
 Warning.status:        OPEN | RESOLVED
 Warning.resourceType:  EVENT | MONEY_MOVEMENT
 source:                APP | ZALO          (BusinessEvent, MoneyMovement — nguồn capture)
-captureType:           TEXT | AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER
+captureType:           TEXT | AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER | IMAGE_BANK_HISTORY
                        (BusinessEvent, MoneyMovement — copy từ capture; ảnh Zalo lưu type sau khi
                        đã phân loại kind, không lưu IMAGE_UNKNOWN)
 ```
@@ -112,6 +112,8 @@ ngày trước khi đóng ngày. `dashboard.json` được tính từ `events.js
 | bankIn | 4.950.000 | mọi movement IN: 450k + 380k + 1.200k + 2.920k |
 | draftCount | 1 | `ev_007` |
 | unmatchedMoneyCount | 1 | `mov_002` (380k `COC MINH`) |
+| pastDraftCount | 0 | DRAFT có ngày < `date` (Phase 2 ③); fixture không có |
+| pastUnmatchedCount | 0 | UNMATCHED có ngày < `date` (Phase 2 ③) |
 
 Fixture "trạng thái tại một thời điểm" (không phải snapshot cuối ngày):
 
@@ -121,6 +123,18 @@ Fixture "trạng thái tại một thời điểm" (không phải snapshot cuố
 - `money_movement_classified.json` — `mov_002` sau `classify DEPOSIT`.
 - `daily_records.json` — 3 ngày: 11/09 (2 warning OPEN), 10/09 (sạch), 09/09 (1 OPEN +
   1 RESOLVED để thấy lịch sử bổ sung sau khi đóng ngày).
+
+Phase 2 (xem `requirements-phase2.md`):
+
+- `report.json` — `GET /api/reports?from=2026-09-09&to=2026-09-11`: `summary` = tổng 3 ngày,
+  `byDay` mới nhất trước, `byType` CONFIRMED. Số ngày 11/09 khớp `dashboard.json`.
+- `pending.json` — `GET /api/pending` với đúng bộ dữ liệu này: `ev_007` DRAFT + `mov_002` UNMATCHED
+  (kèm `candidates`), `byDate` 1 dòng 11/09.
+- `capture_result_batch.json` — ảnh `bank_history.jpg` sau khi đã có `mov_001`/`mov_002`:
+  `resultType: MONEY_MOVEMENT_BATCH`, 3 `resultIds`, `skippedCount: 2`.
+- `replay_result.json` — `POST /api/zalo-users/{zaloId}/replay`.
+- `capture_result_*.json` có thêm `occurredAt` (Phase 2 ②; `null` khi FAILED) và `resultIds`,
+  `skippedCount` (luôn có key; `[]` / `0` khi không phải BATCH).
 
 ### 5.1 Bằng chứng — `evidenceText`, `evidenceUrl`
 
@@ -141,6 +155,18 @@ lúc tạo, `PUT` không sửa được. App hiện khối **Bằng chứng** �
   `transfer_match.jpg`, `transfer_deposit.jpg`, `sale_voice.m4a`) để mock hiển thị offline;
   app: `http` → network, `asset://` → asset. Bản ghi không có file demo tương ứng
   (`ev_003`, `ev_006`, `ev_007`, `mov_003`, `mov_004`) → `evidenceUrl: null` (`ev_003` vẫn có transcript).
+
+### 5.2 Ngày nghiệp vụ — `occurredAt` (Phase 2 ②)
+
+| Nguồn | `occurredAt` |
+|---|---|
+| `IMAGE_RECEIPT`, `IMAGE_TRANSFER`, ảnh Zalo, mỗi dòng `IMAGE_BANK_HISTORY` | ngày (+ giờ nếu có) **in trên chứng từ**; không có giờ → `12:00:00+07:00` |
+| `TEXT`, `AUDIO` | chỉ khi người nói nêu rõ ("hôm qua", "sáng 10/9"); còn lại `now()` |
+| Không đọc được / sai format / > hôm nay + 1 / < hôm nay − 365 ngày | `now()` |
+
+`CaptureResult.occurredAt` = `occurredAt` của event/movement vừa tạo (BATCH: dòng mới nhất) để app
+mở Home đúng ngày. `PUT /api/events/{id}` đổi `occurredAt` được (đã có từ v1); backend đồng bộ
+`daily_records` của cả ngày cũ lẫn ngày mới nếu đã đóng.
 
 ## 6. Zalo Bot Platform — payload thật
 
@@ -212,3 +238,38 @@ payload thật thì thay lại và chỉnh `_sticker_url` nếu tên field khác
 
 Payload `user_send_text` + `app_id` là format **Zalo OA API** (bản cũ hỗ trợ song song);
 PoC **không** dùng OA, bỏ qua nếu gặp.
+
+### 6.1 Bot trả lời — `sendMessage` (Phase 2 ⑤)
+
+```bash
+curl -s "https://bot-api.zapps.me/bot$ZALO_BOT_TOKEN/sendMessage" \
+  -H 'Content-Type: application/json' \
+  -d '{"chat_id": "<chatId>", "text": "✅ Đã ghi nháp: Bán hàng 450.000đ · chị Lan · CK, chưa thu. Mở app để xác nhận."}'
+```
+
+- `chat_id` = `chatId` sau normalize (= `message.chat.id`, với chat PRIVATE = `from.id`).
+- Kiểu Telegram Bot API (xác nhận qua SDK python-zalo-bot / zalo-bot-sdk 12/09). Lỗi cũng trả
+  **HTTP 200**, phân biệt bằng `ok` trong body — đừng đọc status code. Shape thật đo 12/09 với
+  `chat_id` giả: `{"ok":false,"description":"The chat_id is invaild","error_code":410}` (lỗi
+  chính tả là của Zalo). Ca thành công (`{"ok":true,"result":{…}}`) chờ ghi lại từ máy thật.
+- Gọi trong request webhook, trước khi trả `200`. Lỗi / token rỗng → log, webhook vẫn `200`.
+- Nội dung theo kết quả (`zalo_service.reply_text`, plan BE §16):
+
+| Tình huống | Text |
+|---|---|
+| Chưa link | `TaxBridge chưa liên kết Zalo này. Mở app → Đăng ký → chọn "<displayName>" ở mục Zalo account.` |
+| DONE · EVENT | `✅ Đã ghi nháp: <Loại> <amount>đ · <counterparty> · <thanh toán>. Mở app để xác nhận.` |
+| DONE · MOVEMENT có candidate | `🏦 Tiền vào <amount>đ từ <counterparty> — có <n> đơn có thể khớp. Mở app để ghép.` |
+| DONE · MOVEMENT không candidate | `🏦 Tiền vào <amount>đ từ <counterparty> — chưa rõ là khoản gì. Mở app để phân loại.` |
+| FAILED | `❌ Chưa đọc được giao dịch. Nhắn rõ hơn, ví dụ: "bán 3 hộp collagen 450 nghìn ck".` |
+| STICKER / OTHER | không trả lời |
+
+Loại: SALE → `Bán hàng`, PURCHASE → `Mua hàng`, DEPOSIT → `Đặt cọc`, OWNER_MONEY → `Tiền cá nhân`,
+UNKNOWN → `Giao dịch`. Thanh toán: `CK, chưa thu` / `CK, đã thu` / `tiền mặt` / bỏ khi UNKNOWN.
+
+### 6.2 Xử lý lại message trước khi link — `replay` (Phase 2 ③b)
+
+`POST /api/zalo-users/{zaloId}/replay` (cần token; `zaloId` phải `linkedAccountId == g.account_id`,
+không thì `404`). Chạy `process_capture` cho mọi `zalo_unlinked_messages` của `zaloId` có
+`messageType ∈ {TEXT, IMAGE, AUDIO}` và chưa `replayedAt`, theo `sentAt` tăng dần; media URL Zalo
+hết hạn → capture `FAILED` (đếm vào `failed`). Trả `replay_result.json`. Không bot reply khi replay.

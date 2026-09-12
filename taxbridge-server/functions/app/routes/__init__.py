@@ -30,4 +30,4 @@ def health():
 
 
 from . import (auth, captures, close_day, dashboard, docs, events,  # noqa: E402,F401
-               reconciliation, zalo)
+               pending, reconciliation, reports, zalo)

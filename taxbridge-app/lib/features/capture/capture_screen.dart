@@ -6,12 +6,13 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../core/config.dart';
+import '../../core/format.dart';
 import '../../core/providers.dart';
 import '../../core/widgets.dart';
 import '../../models/capture_result.dart';
 import 'capture_controller.dart';
 
-/// Một màn, 4 mode: text | voice | receipt | transfer.
+/// Một màn, 5 mode: text | voice | receipt | transfer | history (Phase 2 ①).
 class CaptureScreen extends ConsumerStatefulWidget {
   const CaptureScreen({super.key, required this.mode});
   final String mode;
@@ -28,6 +29,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     'voice' => 'Nói giao dịch',
     'receipt' => 'Chụp chứng từ',
     'transfer' => 'Chụp chuyển khoản',
+    'history' => 'Đối soát lịch sử chuyển khoản',
     _ => 'Nhập giao dịch',
   };
 
@@ -35,10 +37,14 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     'voice' => 'AUDIO',
     'receipt' => 'IMAGE_RECEIPT',
     'transfer' => 'IMAGE_TRANSFER',
+    'history' => 'IMAGE_BANK_HISTORY',
     _ => 'TEXT',
   };
 
-  bool get _isImage => widget.mode == 'receipt' || widget.mode == 'transfer';
+  bool get _isImage =>
+      widget.mode == 'receipt' ||
+      widget.mode == 'transfer' ||
+      widget.mode == 'history';
 
   CaptureController get _ctl => ref.read(captureControllerProvider.notifier);
 
@@ -48,7 +54,8 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     super.dispose();
   }
 
-  /// Sau `DONE`: EVENT → Event Detail; MONEY_MOVEMENT → Movement Detail. FAILED → ở lại.
+  /// Sau `DONE`: EVENT → Event Detail; MONEY_MOVEMENT → Movement Detail;
+  /// MONEY_MOVEMENT_BATCH → Đối soát (rỗng → ở lại). FAILED → ở lại.
   Future<void> _handle(Future<CaptureResult> fut) async {
     try {
       final r = await fut;
@@ -58,6 +65,24 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
         return;
       }
       invalidateAll(ref);
+      if (r.isBatch) {
+        if (r.resultIds.isEmpty) {
+          showInfo(
+            context,
+            'Không có giao dịch mới (${r.skippedCount} dòng đã có trong sổ)',
+          );
+          return;
+        }
+        context.go(
+          '/reconcile?ids=${r.resultIds.join(',')}&skipped=${r.skippedCount}',
+        );
+        return;
+      }
+      // Phase 2 ②: chứng từ in ngày khác hôm nay.
+      final at = r.occurredAt?.toLocal();
+      if (at != null && dateKey(at) != todayKey()) {
+        showInfo(context, 'Ghi vào ngày ${displayDate(dateKey(at))}');
+      }
       final route = r.resultType == 'MONEY_MOVEMENT'
           ? '/movements/${r.resultId}'
           : '/events/${r.resultId}';
@@ -116,6 +141,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     String? name = switch (widget.mode) {
       'voice' => 'sale_voice.m4a',
       'receipt' => 'receipt.jpg',
+      'history' => 'bank_history.jpg',
       _ => null,
     };
     if (widget.mode == 'transfer') {
@@ -143,7 +169,14 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
       );
     }
     if (name == null) return;
-    await _ctl.useDemoAsset(name);
+    try {
+      await _ctl.useDemoAsset(name);
+    } catch (_) {
+      if (mounted) {
+        showInfo(context, 'Chưa có file demo $name trong assets/demo.');
+      }
+      return;
+    }
     if (widget.mode == 'voice' && mounted) await _sendFile();
   }
 
@@ -248,11 +281,11 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
           ),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Text(
-          widget.mode == 'transfer'
-              ? 'Chụp màn hình báo có / chuyển khoản'
-              : 'Chụp hóa đơn, phiếu mua hàng',
-        ),
+        child: Text(switch (widget.mode) {
+          'transfer' => 'Chụp màn hình báo có / chuyển khoản',
+          'history' => 'Chụp màn hình lịch sử giao dịch trong app ngân hàng',
+          _ => 'Chụp hóa đơn, phiếu mua hàng',
+        }),
       ),
     const SizedBox(height: 12),
     Row(

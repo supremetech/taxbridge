@@ -111,7 +111,8 @@ process_capture(business_id, source, type, text=None, file_bytes=None, zalo_mess
    IMAGE_UNKNOWN  → extract_image(image) → kind RECEIPT/TRANSFER/OTHER → nhánh tương ứng
 3. Event → events/{id} DRAFT (resultType=EVENT); transfer → money_movements/{id} UNMATCHED
    (resultType=MONEY_MOVEMENT); OTHER → FAILED error=UNRECOGNIZED_IMAGE.
-   `occurredAt` của cả event lẫn movement = now() (`Asia/Ho_Chi_Minh`), không lấy từ AI.
+   `occurredAt`: **Phase 2 ②** (mục 12) — ảnh lấy ngày in trên chứng từ, text/voice chỉ khi nói
+   rõ, còn lại = now() (`Asia/Ho_Chi_Minh`). (v1 luôn now().)
    Ghi thêm `source` (APP|ZALO) và `captureType` lên event/movement — copy từ capture;
    `IMAGE_UNKNOWN` ghi type sau khi đã biết `kind` (IMAGE_RECEIPT | IMAGE_TRANSFER).
    App dùng 2 field này để hiện chip nguồn (plan FE §6).
@@ -141,14 +142,16 @@ class EventExtraction(BaseModel):
     paymentMethod: Literal["CASH", "BANK", "UNKNOWN"]
     paymentStatus: Literal["UNPAID", "PAID", "UNKNOWN"]
     confidence: float
+    occurredDate: Optional[str]      # Phase 2 ②, như TransferExtraction
 
 class TransferExtraction(BaseModel):
     direction: Literal["IN", "OUT"]
     amount: int
     counterparty: Optional[str]
     memo: Optional[str]
-    # Không có occurredAt: movement luôn lấy now(). Ảnh demo tạo tối 11/09 in ngày 11/09,
-    # nếu đọc ngày trên ảnh thì movement rơi khỏi dashboard hôm nay (12/09) → hero hỏng.
+    occurredDate: Optional[str]      # Phase 2 ②: "YYYY-MM-DD" | "YYYY-MM-DDTHH:MM" in trên chứng từ, null nếu không có
+    # v1 cố ý không đọc ngày (ảnh demo in 11/09 → rơi khỏi dashboard hôm nay). Phase 2 đổi:
+    # app về Home của ngày bản ghi (plan FE §10) nên hero vẫn giữ; xem requirements-phase2.md ②.
 
 class ImageExtraction(BaseModel):     # IMAGE_UNKNOWN (ảnh Zalo)
     kind: Literal["RECEIPT", "TRANSFER", "OTHER"]
@@ -191,7 +194,8 @@ chạy `test-data/` trên backend cũ 11/09 (11/21 pass,
     Người thụ hưởng" là chủ shop — không bao giờ lấy làm `counterparty` *(eval M1/M6 — đo 12/09:
     model từng trả `MAI ANH TUAN` = chủ shop)*. Ảnh không hiện tên người gửi → lấy tên từ nội dung
     CK ("LAN 3HOP" → "LAN"); nội dung không có tên người → `null`.
-  - Không đọc ngày giờ trên ảnh (`occurredAt = now()`, mục 4).
+  - Ngày: **Phase 2 ②** đọc ngày (+ giờ) in trên ảnh → `occurredDate`; text/voice chỉ khi nói rõ
+    (prompt nhận `Hôm nay là YYYY-MM-DD` để quy đổi "hôm qua"); không có → `null` (mục 12).
 - Không chắc → `UNKNOWN`, `confidence` thấp; không bịa số, không biến số lượng / mã vạch /
   giờ thành số tiền *(eval A4/R3)*.
 
@@ -408,3 +412,208 @@ python-dotenv requests imageio-ffmpeg`. Không thêm thư viện khác.
       `tests/seed_demo.py`, warning rỗng để không có nút Xử lý trỏ vào resource ma).
 - [x] `smoke.sh` chạy đủ 9 UC trên URL thật (12/09: **86 pass · 0 fail**, có
       `evidenceUrl` Storage trả 200). **14:30 feature freeze.**
+
+---
+
+# Phase 2 — bổ sung 12/09 (`requirements-phase2.md`)
+
+Thứ tự: 12 → 16 → 13 → 14 → 15. Mỗi mục ghi đúng file bị đụng; không thêm module mới ngoài
+`report_service.py` và `bank_history` trong `capture_service.py`.
+
+## 12. Ngày trên chứng từ (②) — `capture_service`, `openai_client`, `dashboard_service`, `event_service`
+
+Schema: `EventExtraction.occurredDate`, `TransferExtraction.occurredDate` (mục 4.1). Prompt:
+bỏ dòng "KHÔNG đọc ngày giờ"; thêm
+
+```text
+Ngày giao dịch (occurredDate):
+- Ảnh: lấy ngày (và giờ nếu có) IN TRÊN chứng từ, đổi "11/09/2026 11:02" → "2026-09-11T11:02".
+- Câu nói / text: chỉ khi nêu rõ ("hôm qua", "sáng 10/9", "tuần trước thứ hai"); quy đổi theo
+  "Hôm nay là {today}". Không nêu → null. Không đoán.
+```
+
+`instruction` của `extract_event(text=…)` thêm dòng `Hôm nay là {today()}.`
+
+```python
+def resolve_occurred_at(raw: str | None) -> str:
+    """Ngày AI đọc được → ISO +07:00; không hợp lệ / ngoài [now-365d, now+1d] → now_iso()."""
+    if not raw:
+        return now_iso()
+    try:
+        dt = datetime.fromisoformat(raw)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=TZ)
+        if len(raw) == 10:                                  # chỉ ngày → 12:00
+            dt = dt.replace(hour=12, minute=0, second=0)
+    except ValueError:
+        return now_iso()
+    if not (now() - timedelta(days=365) <= dt <= now() + timedelta(days=1)):
+        return now_iso()
+    return dt.isoformat(timespec="seconds")
+```
+
+`process_capture` bước 3: `ts = resolve_occurred_at(extraction.occurredDate)`; `createdAt`/`updatedAt`
+vẫn `now_iso()`. `CaptureResult` thêm `occurredAt` (= `ts`; `None` khi FAILED), `resultIds: []`,
+`skippedCount: 0` (mục 15 dùng). Sau khi ghi event/movement → `sync_record(business_id, date_of(ts))`.
+
+`dashboard_service.sync_record(business_id, date)` thay `resolve_warnings`:
+
+```text
+record = daily_records/{date}; không tồn tại → return (ngày chưa đóng, không tạo).
+events, movements của ngày → warnings mới cho DRAFT / UNMATCHED (setdefault như close_day);
+warning OPEN mà resource không còn DRAFT / UNMATCHED (hoặc bị xóa) → RESOLVED + resolvedAt;
+summary, warningCount, updatedAt → set lại.
+```
+
+`close_day` = tạo record nếu chưa có rồi gọi `sync_record`. `confirm/reject/match/classify` gọi
+`sync_record(business_id, date_of(resource.occurredAt))` thay vì quét mọi record. `event_service.update`
+đổi `occurredAt` → validate ISO, sync **cả ngày cũ và mới**. `seed_demo.py` không đổi.
+
+Smoke UC10 (`contract/endpoints.md`): ảnh `transfer_deposit.jpg` → `occurredAt` bắt đầu
+`2026-09-11`; `daily-records/2026-09-11` (seed) có warning mới; classify → RESOLVED.
+
+## 13. Báo cáo theo khoảng (④) — `report_service.py`, `routes/reports.py`
+
+`GET /api/reports?from&to` → DTO `contract/fixtures/report.json`.
+
+```python
+def report(business_id, from_, to):
+    from_, to = check_date(from_), check_date(to)
+    if to < from_ or (date.fromisoformat(to) - date.fromisoformat(from_)).days >= 92:
+        raise errors.validation("Khoảng tối đa 92 ngày, to >= from.")
+    events = [e for e in all events if from_ <= date_of(e["occurredAt"]) <= to]
+    movements = ... cùng lọc
+    summary = _summary(events) + bankIn + saleCount/purchaseCount (CONFIRMED) + draftCount + unmatchedMoneyCount
+    byDay: group theo date_of, chỉ ngày có dữ liệu, sort desc; mỗi dòng revenue/expense/collected/bankIn/saleCount/draftCount/unmatchedMoneyCount
+    byType: CONFIRMED gộp theo type, bỏ type count=0
+    return {"from": from_, "to": to, "days": (to-from_).days+1, "summary", "byDay", "byType"}
+```
+
+Dùng lại `dashboard_service._summary` (đổi thành public `summary()`). Không index Firestore:
+đọc cả collection rồi lọc (PoC, vài trăm doc).
+
+## 14. Tồn đọng + replay Zalo (③) — `dashboard_service`, `report_service`, `routes/pending.py`, `zalo_service`, `routes/zalo.py`
+
+`dashboard()` thêm `pastDraftCount` / `pastUnmatchedCount`: đếm DRAFT / UNMATCHED có
+`date_of(occurredAt) < date` (đọc cả collection một lần, tách 2 nhóm; tránh đọc 2 lần).
+
+`GET /api/pending` → `pending.json` (hàm `pending()` đặt ở `report_service`, không ở
+`dashboard_service`: nó cần `to_dto` của event / movement mà hai module đó lại import
+`dashboard_service` → vòng import): `draftEvents` = `to_dto` mọi DRAFT sort `occurredAt` **tăng**;
+`unmatchedMovements` = `list_movements(status="UNMATCHED")` đảo chiều sort (kèm candidates);
+`byDate` = đếm theo ngày, sort tăng.
+
+`POST /api/zalo-users/<zalo_id>/replay` (auth):
+
+```text
+1. zalo_users/{zalo_id}.linkedAccountId != g.account_id → 404.
+2. zalo_unlinked_messages where zaloId == zalo_id (đọc rồi lọc Python), sort sentAt tăng.
+3. Mỗi message chưa có replayedAt:
+   TEXT / IMAGE / AUDIO → process_capture(...) như handle() (download có thể 4xx → try/except →
+   đếm failed); capture.status FAILED cũng đếm failed. STICKER / OTHER → skipped.
+   Ghi replayedAt = now_iso() (kể cả failed, không thử lại).
+4. Trả {zaloId, replayed, done, failed, skipped}. Không gọi reply() khi replay.
+```
+
+Tách `zalo_service._capture_message(business_id, message) -> dict | None` để `handle()` và
+`replay()` dùng chung. Register **không** tự replay — app gọi endpoint sau khi có session (plan FE §12).
+
+## 15. Đối soát lịch sử CK (①) — `openai_client`, `capture_service`, `reconciliation_service`
+
+```python
+class BankHistoryExtraction(BaseModel):
+    transfers: list[TransferExtraction]       # mỗi dòng có occurredDate; dòng thiếu số tiền → bỏ
+```
+
+`extract_bank_history(image)` instruction: "Ảnh danh sách giao dịch trong app ngân hàng / sao kê
+của CHỦ SHOP. Mỗi dòng = một transfer: amount (int), direction (`+`/"nhận"/"báo có" → IN;
+`-`/"chuyển đi"/"thanh toán" → OUT), memo nguyên văn, counterparty nếu có, occurredDate từ cột
+ngày. Bỏ dòng số dư / tiêu đề / dòng không có số tiền. Không gộp, không bịa." Thêm (đo 12/09:
+thiếu câu này thì `receipt.jpg` gửi nhầm type ra 1 dòng thay vì FAILED): "CHỈ đọc ảnh là DANH
+SÁCH nhiều giao dịch; hóa đơn / biên lai một giao dịch / màn hình 'chuyển khoản thành công' →
+`transfers` rỗng."
+
+`process_capture` nhánh `IMAGE_BANK_HISTORY`:
+
+```text
+rows = extract_bank_history(file).transfers; rows rỗng → FAILED UNRECOGNIZED_IMAGE.
+existing = all_movements(business_id)
+for r in rows (amount > 0):
+    ts = resolve_occurred_at(r.occurredDate)
+    dup = any(m.direction == r.direction and m.amount == r.amount and date_of(m.occurredAt) == date_of(ts)
+              and (similar(m.memo, r.memo) or (not m.memo and not r.memo)) for m in existing)
+    dup → skipped += 1; else tạo movement (captureType=IMAGE_BANK_HISTORY, evidenceUrl = ảnh, sourceCaptureId) → ids.append
+sync_record cho mỗi ngày có movement mới (set ngày, gọi 1 lần / ngày).
+capture: resultType=MONEY_MOVEMENT_BATCH, resultId=None, resultIds=ids, skippedCount=skipped,
+occurredAt = max ts của movement mới (None nếu ids rỗng). DONE kể cả ids rỗng.
+```
+
+`check_upload`: `IMAGE_BANK_HISTORY` validate như ảnh. `CAPTURE_TYPES` / `UPLOAD_TYPES` thêm.
+Dedupe chỉ ở nhánh này; ảnh CK đơn lẻ (`IMAGE_TRANSFER`) không dedupe (giữ v1).
+
+## 16. Zalo bot trả lời (⑤) — `zalo_service`, `main.py`, `config.py`
+
+`main.py`: thêm `"ZALO_BOT_TOKEN"` vào tuple `secrets=[...]` (IAM đã cấp 12/09 12:05 cho
+`495996584842-compute@developer.gserviceaccount.com`; xóa comment cũ). Local: `.env` root.
+
+```python
+ZALO_BOT_API = "https://bot-api.zapps.me/bot{token}/{method}"     # config.py
+
+def reply(chat_id: str, text: str) -> None:
+    """Gửi trong request webhook, trước khi trả 200. Không bao giờ raise."""
+    token = os.environ.get("ZALO_BOT_TOKEN", "")
+    if not token:
+        logging.warning("ZALO_BOT_TOKEN rỗng — bỏ qua reply"); return
+    try:
+        r = requests.post(ZALO_BOT_API.format(token=token, method="sendMessage"),
+                          json={"chat_id": chat_id, "text": text}, timeout=10)
+        logging.info("sendMessage → %s %s", r.status_code, r.text[:200])   # ghi shape thật vào contract §6.1
+    except Exception as e:
+        logging.warning("sendMessage lỗi: %s", e)
+```
+
+`reply_text(result: dict | None, business_id, message) -> str | None` theo bảng contract §6.1:
+`result is None` (chưa link) → hướng dẫn kèm `displayName`; EVENT → đọc event để lấy loại /
+amount / counterparty / thanh toán; MOVEMENT → `get_dto` để biết số candidate; FAILED → câu mẫu;
+STICKER/OTHER → `None`. `handle()`: sau khi có `result` → `text = reply_text(...)`; `text` →
+`reply(message["chatId"], text)`. Smoke: token rỗng → log "bỏ qua reply" là đủ (UC11); test thật
+bằng Zalo trên điện thoại.
+
+## 17. Phases Phase 2 (build day chiều 12/09)
+
+### Phase 7 — ② ngày chứng từ + ⑤ Zalo reply (~45 phút)
+
+- [x] Mục 12: schema + prompt + `resolve_occurred_at`; `CaptureResult` thêm 3 field; `sync_record`
+      thay `resolve_warnings`; `update` đổi ngày sync 2 ngày.
+- [x] Mục 16: `reply` / `reply_text`; `main.py` thêm secret; `.env` local có `ZALO_BOT_TOKEN`.
+- [x] `smoke.sh` UC10 + UC11; chạy lại UC1–9 (số cũ không đổi vì fixture/ảnh cùng ngày 11/09 →
+      **dashboard trong smoke đọc `date=2026-09-11` cho UC4–6**, còn text/voice vẫn hôm nay).
+      `match` sync cả ngày của movement lẫn ngày của event (hai ngày có thể khác nhau).
+- [x] `openapi.yaml` cập nhật (CaptureResult, prompt không đổi spec).
+
+### Phase 8 — ④ báo cáo + ③ tồn đọng / replay (~40 phút)
+
+- [x] Mục 13: `report_service` + route; smoke UC12.
+- [x] Mục 14: `dashboard` 2 field; `/api/pending`; `replay`; smoke UC13.
+- [x] `openapi.yaml`: `Report`, `Pending`, `ReplayResult`, `Dashboard`.
+
+### Phase 9 — ① lịch sử CK (~40 phút + ảnh demo 20 phút)
+
+- [x] `demo-assets/bank_history.jpg` (5 dòng đúng `feature-map/bank-history-reconcile.md`:
+      380k `COC MINH` + 450k `LAN 3HOP` + 250k `THAO 1HOP` ngày 11/09; 1.200k `HUE 2 COLLAGEN`
+      + 2.000k OUT `TRA TIEN HANG` ngày 10/09 → 3 mới, 2 trùng UC4/UC5).
+- [x] Mục 15: schema, nhánh capture, dedupe; smoke UC14 (gửi 2 lần).
+- [x] `openapi.yaml`: `IMAGE_BANK_HISTORY`, `MONEY_MOVEMENT_BATCH`.
+
+Kết quả 12/09: `smoke.sh` **145 pass · 0 fail** local (Firestore emulator + `flask run`) và
+**146 pass · 0 fail** trên prod sau khi deploy (thêm 1 assert `evidenceUrl` mở được — emulator
+không có Storage).
+
+### Deploy
+
+- [x] Deploy cả Phase 7–9 một lần (12/09 12:55): `firebase deploy --only functions:api` OK,
+      CLI tự cấp `roles/secretmanager.secretAccessor` trên `ZALO_BOT_TOKEN` cho
+      `495996584842-compute@…` trong lúc deploy. Prod smoke 146 pass · 0 fail.
+- [ ] **Nhắn Zalo thật từ điện thoại → bot trả lời** (chỉ việc này còn lại; `firebase
+      functions:log` không in được phần text của log nên phải kiểm bằng máy thật).
+- [ ] Deploy lại trước khi quay video nếu còn sửa code.

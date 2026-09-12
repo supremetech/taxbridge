@@ -8,6 +8,8 @@ class Dashboard {
     required this.bankIn,
     required this.draftCount,
     required this.unmatchedMoneyCount,
+    this.pastDraftCount = 0,
+    this.pastUnmatchedCount = 0,
   });
 
   final String date;
@@ -18,6 +20,10 @@ class Dashboard {
   final int bankIn;
   final int draftCount;
   final int unmatchedMoneyCount;
+  final int pastDraftCount; // DRAFT ngày < date (Phase 2 ③)
+  final int pastUnmatchedCount; // UNMATCHED ngày < date
+
+  int get pendingCount => pastDraftCount + pastUnmatchedCount;
 
   factory Dashboard.fromJson(Map<String, dynamic> j) => Dashboard(
     date: j['date'] as String,
@@ -28,6 +34,8 @@ class Dashboard {
     bankIn: (j['bankIn'] as num).toInt(),
     draftCount: (j['draftCount'] as num).toInt(),
     unmatchedMoneyCount: (j['unmatchedMoneyCount'] as num).toInt(),
+    pastDraftCount: (j['pastDraftCount'] as num?)?.toInt() ?? 0,
+    pastUnmatchedCount: (j['pastUnmatchedCount'] as num?)?.toInt() ?? 0,
   );
 
   Map<String, dynamic> toJson() => {
@@ -39,7 +47,26 @@ class Dashboard {
     'bankIn': bankIn,
     'draftCount': draftCount,
     'unmatchedMoneyCount': unmatchedMoneyCount,
+    'pastDraftCount': pastDraftCount,
+    'pastUnmatchedCount': pastUnmatchedCount,
   };
+
+  Dashboard copyWith({
+    int? bankIn,
+    int? unmatchedMoneyCount,
+    int? draftCount,
+  }) => Dashboard(
+    date: date,
+    revenue: revenue,
+    expense: expense,
+    collected: collected,
+    receivable: receivable,
+    bankIn: bankIn ?? this.bankIn,
+    draftCount: draftCount ?? this.draftCount,
+    unmatchedMoneyCount: unmatchedMoneyCount ?? this.unmatchedMoneyCount,
+    pastDraftCount: pastDraftCount,
+    pastUnmatchedCount: pastUnmatchedCount,
+  );
 
   bool sameAs(Dashboard o) =>
       revenue == o.revenue &&
@@ -48,5 +75,7 @@ class Dashboard {
       receivable == o.receivable &&
       bankIn == o.bankIn &&
       draftCount == o.draftCount &&
-      unmatchedMoneyCount == o.unmatchedMoneyCount;
+      unmatchedMoneyCount == o.unmatchedMoneyCount &&
+      pastDraftCount == o.pastDraftCount &&
+      pastUnmatchedCount == o.pastUnmatchedCount;
 }

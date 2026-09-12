@@ -22,7 +22,9 @@ class _CloseDayScreenState extends ConsumerState<CloseDayScreen> {
   Future<void> _close() async {
     setState(() => _busy = true);
     try {
-      final r = await ref.read(apiProvider).closeDay(todayKey());
+      final r = await ref
+          .read(apiProvider)
+          .closeDay(ref.read(selectedDateProvider));
       ref.invalidate(dailyHistoryProvider);
       ref.invalidate(dailyRecordProvider);
       if (mounted) setState(() => _record = r);
@@ -36,9 +38,9 @@ class _CloseDayScreenState extends ConsumerState<CloseDayScreen> {
   @override
   Widget build(BuildContext context) {
     final r = _record;
-    final today = todayKey();
+    final date = ref.watch(selectedDateProvider);
     return Scaffold(
-      appBar: AppBar(title: Text('Đóng ngày ${displayDate(today)}')),
+      appBar: AppBar(title: Text('Đóng ngày ${displayDate(date)}')),
       body: BusyOverlay(
         busy: _busy,
         text: 'Đang tổng kết…',
@@ -54,7 +56,7 @@ class _CloseDayScreenState extends ConsumerState<CloseDayScreen> {
               ),
               const SizedBox(height: 16),
               const Text(
-                'Tổng kết doanh thu, chi phí và những khoản còn dang dở của hôm nay.',
+                'Tổng kết doanh thu, chi phí và những khoản còn dang dở của ngày đang xem.',
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),

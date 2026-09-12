@@ -3,6 +3,8 @@ import '../models/capture_result.dart';
 import '../models/daily_record.dart';
 import '../models/dashboard.dart';
 import '../models/money_movement.dart';
+import '../models/pending.dart';
+import '../models/report.dart';
 import '../models/session.dart';
 import '../models/zalo_user.dart';
 
@@ -15,7 +17,7 @@ abstract class TaxBridgeApi {
   Future<void> logout();
   Future<CaptureResult> captureText(String text);
 
-  /// [type]: AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER
+  /// [type]: AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER | IMAGE_BANK_HISTORY
   Future<CaptureResult> captureFile(String type, String path);
   Future<List<BusinessEvent>> events({String? status});
   Future<BusinessEvent> event(String id);
@@ -30,4 +32,9 @@ abstract class TaxBridgeApi {
   Future<DailyRecord> closeDay(String date);
   Future<List<DailyRecord>> dailyRecords();
   Future<DailyRecord> dailyRecord(String date);
+
+  // ---- Phase 2 ----
+  Future<Report> report(String from, String to);
+  Future<Pending> pending();
+  Future<ReplayResult> replayZalo(String zaloId);
 }

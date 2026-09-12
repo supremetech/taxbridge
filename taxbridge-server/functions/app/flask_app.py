@@ -46,6 +46,9 @@ def _init_firebase():
 
 
 def create_app() -> Flask:
+    # INFO để thấy log `sendMessage → …` khi chạy local (Functions đã bắt INFO sẵn).
+    logging.basicConfig(level=logging.INFO)
+
     root = Path(__file__).resolve().parents[2]   # taxbridge-server/
     load_dotenv(root / ".env")                   # dev local; không tạo functions/.env
     load_dotenv(root / "functions" / ".env.local")
