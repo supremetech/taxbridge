@@ -29,4 +29,5 @@ def health():
     return {"ok": True}
 
 
-from . import auth, captures, close_day, dashboard, events, reconciliation, zalo  # noqa: E402,F401
+from . import (auth, captures, close_day, dashboard, docs, events,  # noqa: E402,F401
+               reconciliation, zalo)

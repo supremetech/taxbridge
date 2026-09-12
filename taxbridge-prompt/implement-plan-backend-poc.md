@@ -28,8 +28,10 @@ taxbridge-server/
 │       ├── reconciliation_service.py  # candidates / match / classify
 │       ├── dashboard_service.py       # dashboard + close day + resolve_warnings
 │       ├── zalo_service.py            # normalize, download media, aac_to_m4a
+│       ├── openapi.yaml   # spec viết tay theo contract/; serve ở /api/openapi.yaml
 │       └── routes/
-│           auth.py  captures.py  events.py  dashboard.py  reconciliation.py  close_day.py  zalo.py
+│           auth.py  captures.py  events.py  dashboard.py  reconciliation.py  close_day.py
+│           zalo.py  docs.py   # docs.py: Swagger UI (/api/docs) + spec, Swagger UI lấy từ CDN
 ├── tests/smoke/smoke.sh    # 9 UC bằng curl + Zalo simulator (contract/endpoints.md)
 └── tests/seed_demo.py      # account demo + 3 daily record cũ cho prod (Phase 6)
 ```

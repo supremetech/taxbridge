@@ -1,0 +1,954 @@
+openapi: 3.1.0
+info:
+  title: TaxBridge API (PoC)
+  version: "1.0.0"
+  description: |
+    API cho TaxBridge — agent ghi nhận giao dịch cho hộ kinh doanh Việt Nam.
+
+    Nguồn canonical là `contract/` trong repo `taxbridge-prompt`; file này viết tay theo
+    contract đó, **đổi contract thì sửa file này luôn**.
+
+    ### Quy ước
+    - JSON field `camelCase`; tiền là `int` VND (không float); thời gian ISO-8601 `+07:00`.
+    - Ngày nghiệp vụ theo `Asia/Ho_Chi_Minh`, dạng `YYYY-MM-DD`.
+    - Success trả thẳng DTO, không bọc `data`. Lỗi trả `{code, message}` — `code` là contract,
+      `message` thì không (đừng parse `message`).
+    - Field optional không có giá trị trả `null`, **không bỏ key**.
+    - Mọi mutation trả về DTO mới nhất.
+
+    ### Auth
+    Gửi header `X-Session-Token: <token>` lấy từ `/register` hoặc `/login`. Backend tự resolve
+    `accountId` / `businessId`, **client không bao giờ gửi `businessId`**. Token không hết hạn
+    trong PoC. Gặp `401` thì app xoá session và quay về màn Login.
+
+    ### Capture xử lý đồng bộ
+    `POST /captures` gọi AI ngay trong request (2–9 s). **AI lỗi không trả 5xx**: vẫn `200` với
+    `status: FAILED` và `error` là mã ngắn, để app hiện "Không xử lý được. Thử lại."
+servers:
+  - url: https://asia-southeast1-hackathon-42790.cloudfunctions.net/api
+    description: Prod (Firebase Functions gen2, asia-southeast1)
+  - url: http://localhost:8787
+    description: Local (flask run)
+
+tags:
+  - name: Auth
+    description: Đăng ký, đăng nhập, session
+  - name: Capture
+    description: Ghi nhận giao dịch bằng text / voice / ảnh
+  - name: Events
+    description: Bản nháp giao dịch và xác nhận
+  - name: Money
+    description: Tiền vào ngân hàng — ghép hoặc phân loại
+  - name: Reports
+    description: Dashboard, đóng ngày, lịch sử ngày
+  - name: Zalo
+    description: Webhook Zalo Bot Platform
+  - name: Meta
+    description: Health check và tài liệu
+
+paths:
+  /api/health:
+    get:
+      tags: [Meta]
+      summary: Health check
+      description: App gọi lúc khởi động để warm function (cold start ~17 s).
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, const: true }
+                required: [ok]
+
+  /api/docs:
+    get:
+      tags: [Meta]
+      summary: Swagger UI
+      security: []
+      responses:
+        "200":
+          description: Trang HTML Swagger UI
+          content:
+            text/html:
+              schema: { type: string }
+
+  /api/openapi.yaml:
+    get:
+      tags: [Meta]
+      summary: Chính file spec này
+      security: []
+      responses:
+        "200":
+          description: OpenAPI spec
+          content:
+            application/yaml:
+              schema: { type: string }
+
+  /api/register:
+    post:
+      tags: [Auth]
+      summary: Đăng ký tài khoản (tạo luôn business)
+      description: |
+        Mỗi account đúng một business, tên `Hộ kinh doanh của {username}`.
+        Truyền `zaloId` để link luôn Zalo user đã nhắn bot (lấy từ `/zalo-users/unlinked`).
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/RegisterRequest" }
+            example: { username: tuan, password: "123456", zaloId: a1b2c3d4e5f60718293a }
+      responses:
+        "201":
+          description: Tạo thành công
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "404":
+          description: '`zaloId` không tồn tại (`NOT_FOUND`)'
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "409":
+          description: '`USERNAME_TAKEN` hoặc `ZALO_USER_LINKED`'
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              examples:
+                usernameTaken:
+                  value: { code: USERNAME_TAKEN, message: Tên đăng nhập đã tồn tại. }
+                zaloLinked:
+                  value: { code: ZALO_USER_LINKED, message: Zalo user đã liên kết với account khác. }
+
+  /api/login:
+    post:
+      tags: [Auth]
+      summary: Đăng nhập
+      description: Mỗi lần login tạo session mới, không thu hồi session cũ.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/LoginRequest" }
+            example: { username: tuan, password: "123456" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Session" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/logout:
+    post:
+      tags: [Auth]
+      summary: Đăng xuất (xoá session)
+      responses:
+        "204": { description: Đã xoá session }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/zalo-users/unlinked:
+    get:
+      tags: [Auth, Zalo]
+      summary: Danh sách Zalo user đã nhắn bot nhưng chưa link account
+      description: Dùng cho dropdown ở màn Register. Sort `lastSeenAt` giảm dần.
+      security: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ZaloUser" }
+              example:
+                - { zaloId: a1b2c3d4e5f60718293a, displayName: Nguyễn Văn A, lastSeenAt: "2026-09-11T09:40:00+07:00" }
+
+  /api/captures:
+    post:
+      tags: [Capture]
+      summary: Ghi nhận giao dịch (text / voice / ảnh)
+      description: |
+        Hai cách gửi:
+
+        - **JSON** `{ "type": "TEXT", "text": "..." }`
+        - **multipart** đúng hai field `type` + `file` với `AUDIO | IMAGE_RECEIPT | IMAGE_TRANSFER`.
+          Ảnh JPEG/PNG ≤ 10 MB; audio M4A ≤ 10 MB và ≤ 60 giây.
+
+        Kết quả theo `type`:
+
+        | type | AI | Tạo ra |
+        |---|---|---|
+        | `TEXT` | extract event từ câu | `BusinessEvent` DRAFT |
+        | `AUDIO` | transcribe → extract | `BusinessEvent` DRAFT |
+        | `IMAGE_RECEIPT` | đọc hoá đơn | `BusinessEvent` DRAFT (thường `PURCHASE`) |
+        | `IMAGE_TRANSFER` | đọc biên lai CK | `MoneyMovement` UNMATCHED |
+
+        `occurredAt` luôn là `now()`, **không** lấy ngày trên ảnh.
+
+        **AI lỗi vẫn trả `200`** với `status: FAILED` và `error`:
+        `AI_EXTRACTION_FAILED` (exception), `NO_TRANSACTION` (text/voice không có giao dịch),
+        `UNRECOGNIZED_IMAGE` (ảnh không phải chứng từ).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CaptureTextRequest" }
+            example: { type: TEXT, text: Bán 3 hộp collagen 450 nghìn chuyển khoản }
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                  enum: [AUDIO, IMAGE_RECEIPT, IMAGE_TRANSFER]
+                file:
+                  type: string
+                  format: binary
+                  description: JPEG/PNG hoặc M4A, ≤ 10 MB
+              required: [type, file]
+      responses:
+        "200":
+          description: Đã xử lý xong (kể cả khi AI thất bại)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CaptureResult" }
+              examples:
+                event:
+                  summary: Ra bản nháp giao dịch
+                  value: { captureId: cap_001, status: DONE, resultType: EVENT, resultId: ev_001, error: null }
+                movement:
+                  summary: Ra khoản tiền vào
+                  value: { captureId: cap_002, status: DONE, resultType: MONEY_MOVEMENT, resultId: mov_001, error: null }
+                failed:
+                  summary: AI không đọc được
+                  value: { captureId: cap_012, status: FAILED, resultType: null, resultId: null, error: AI_EXTRACTION_FAILED }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "413":
+          description: File > 10 MB hoặc audio > 60 s (`FILE_TOO_LARGE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "415":
+          description: Không phải JPEG/PNG/M4A (`UNSUPPORTED_FILE_TYPE`)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+  /api/events:
+    get:
+      tags: [Events]
+      summary: Danh sách giao dịch
+      description: Sort `occurredAt` giảm dần. Bỏ `status` = lấy tất cả.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/EventStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BusinessEvent" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/events/{eventId}:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    get:
+      tags: [Events]
+      summary: Chi tiết một giao dịch
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BusinessEvent" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+    put:
+      tags: [Events]
+      summary: Sửa bản nháp
+      description: |
+        Chỉ sửa được khi `status = DRAFT`, và **chỉ 7 field** dưới đây. Gửi field khác
+        (kể cả `evidenceText` / `evidenceUrl`) → `400`. Body là partial, gửi field nào sửa field đó.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EventUpdateRequest" }
+            example: { amount: 480000, counterparty: chị Lan }
+      responses:
+        "200":
+          description: DTO sau khi sửa
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BusinessEvent" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidState" }
+
+  /api/events/{eventId}/confirm:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags: [Events]
+      summary: Xác nhận bản nháp
+      description: |
+        `DRAFT` → `CONFIRMED`. Giữ nguyên `paymentStatus` (chỉ `match` mới chuyển sang `PAID`).
+        Sau khi confirm, warning `DRAFT_EVENT` trỏ tới event này chuyển sang `RESOLVED`.
+        Body rỗng.
+      responses:
+        "200":
+          description: DTO sau khi xác nhận
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BusinessEvent" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidState" }
+
+  /api/events/{eventId}/reject:
+    parameters:
+      - $ref: "#/components/parameters/EventId"
+    post:
+      tags: [Events]
+      summary: Từ chối bản nháp
+      description: '`DRAFT` → `REJECTED`. Không tính vào doanh thu / chi phí. Body rỗng.'
+      responses:
+        "200":
+          description: DTO sau khi từ chối
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BusinessEvent" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidState" }
+
+  /api/money-movements:
+    get:
+      tags: [Money]
+      summary: Danh sách tiền vào
+      description: Sort `occurredAt` giảm dần. `candidates` chỉ có giá trị khi `UNMATCHED`.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { $ref: "#/components/schemas/MovementStatus" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/MoneyMovement" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/money-movements/{movementId}:
+    parameters:
+      - $ref: "#/components/parameters/MovementId"
+    get:
+      tags: [Money]
+      summary: Chi tiết khoản tiền vào (kèm candidates)
+      description: |
+        `candidates` được tính lúc đọc, **không lưu**: các event `SALE` + `CONFIRMED` +
+        `UNPAID` của business, tối đa 3, điểm giảm dần và chỉ giữ `score >= 0.3`.
+
+        ```text
+        +0.6  nếu số tiền khớp
+        +0.3  nếu tên/nội dung CK trùng token với khách hoặc mô tả
+        +0.1  nếu cùng ngày
+        ```
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MoneyMovement" }
+              examples:
+                withCandidate:
+                  summary: Có gợi ý ghép
+                  value:
+                    movementId: mov_001
+                    direction: IN
+                    amount: 450000
+                    memo: LAN 3HOP
+                    counterparty: NGUYEN THI LAN
+                    occurredAt: "2026-09-11T09:33:00+07:00"
+                    source: APP
+                    captureType: IMAGE_TRANSFER
+                    evidenceText: null
+                    evidenceUrl: https://firebasestorage.googleapis.com/v0/b/.../mov.jpg
+                    status: UNMATCHED
+                    matchedEventId: null
+                    classificationType: null
+                    candidates:
+                      - { eventId: ev_001, description: Bán 3 hộp collagen, amount: 450000, score: 1.0 }
+                noCandidate:
+                  summary: Không có gợi ý — phải phân loại
+                  value:
+                    movementId: mov_002
+                    direction: IN
+                    amount: 380000
+                    memo: COC MINH
+                    counterparty: NGUYEN VAN MINH
+                    occurredAt: "2026-09-11T11:02:00+07:00"
+                    source: APP
+                    captureType: IMAGE_TRANSFER
+                    evidenceText: null
+                    evidenceUrl: null
+                    status: UNMATCHED
+                    matchedEventId: null
+                    classificationType: null
+                    candidates: []
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/money-movements/{movementId}/match:
+    parameters:
+      - $ref: "#/components/parameters/MovementId"
+    post:
+      tags: [Money]
+      summary: Ghép khoản tiền với một đơn bán
+      description: |
+        Movement `UNMATCHED` → `MATCHED` + `matchedEventId`; event tương ứng chuyển
+        `paymentStatus = PAID` (⇒ `collected` tăng, `receivable` giảm).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eventId: { type: string }
+              required: [eventId]
+            example: { eventId: ev_001 }
+      responses:
+        "200":
+          description: DTO sau khi ghép (`candidates` rỗng)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MoneyMovement" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidState" }
+
+  /api/money-movements/{movementId}/classify:
+    parameters:
+      - $ref: "#/components/parameters/MovementId"
+    post:
+      tags: [Money]
+      summary: Phân loại khoản tiền không phải doanh thu
+      description: |
+        Movement `UNMATCHED` → `CLASSIFIED` + `classificationType`.
+
+        **Không tạo event, không đổi `revenue`** — đây là hero moment: tiền vào ngân hàng
+        tăng nhưng doanh thu đứng yên.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type: { $ref: "#/components/schemas/ClassificationType" }
+              required: [type]
+            example: { type: DEPOSIT }
+      responses:
+        "200":
+          description: DTO sau khi phân loại
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MoneyMovement" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { $ref: "#/components/responses/InvalidState" }
+
+  /api/dashboard:
+    get:
+      tags: [Reports]
+      summary: 7 số của một ngày
+      description: |
+        Tính khi đọc, không ledger. Lọc theo `occurredAt` trong ngày.
+
+        ```text
+        revenue             = Σ SALE     CONFIRMED
+        expense             = Σ PURCHASE CONFIRMED
+        collected           = Σ SALE     CONFIRMED và PAID
+        receivable          = revenue − collected
+        bankIn              = Σ mọi money movement IN (bất kể status)
+        draftCount          = số event DRAFT
+        unmatchedMoneyCount = số movement UNMATCHED
+        ```
+      parameters:
+        - name: date
+          in: query
+          required: false
+          description: Mặc định là hôm nay theo `Asia/Ho_Chi_Minh`.
+          schema: { type: string, format: date, examples: ["2026-09-11"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Dashboard" }
+              example:
+                date: "2026-09-11"
+                revenue: 4820000
+                expense: 1230000
+                collected: 4570000
+                receivable: 250000
+                bankIn: 4950000
+                draftCount: 1
+                unmatchedMoneyCount: 1
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/close-day:
+    post:
+      tags: [Reports]
+      summary: Đóng ngày (upsert sổ ngày)
+      description: |
+        Tính summary + warning tại thời điểm gọi rồi **upsert** `daily_records/{date}`.
+        Gọi lại cùng ngày: cập nhật record, warning đã `RESOLVED` giữ nguyên, warning mới thêm vào.
+
+        Warning sinh ra: mỗi event `DRAFT` → `DRAFT_EVENT:{eventId}`;
+        mỗi movement `UNMATCHED` → `UNMATCHED_MONEY:{movementId}`.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                date: { type: string, format: date }
+            example: { date: "2026-09-11" }
+      responses:
+        "200":
+          description: Sổ ngày sau khi đóng
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyRecord" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/daily-records:
+    get:
+      tags: [Reports]
+      summary: Lịch sử ngày (mới nhất trước)
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/DailyRecord" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+
+  /api/daily-records/{date}:
+    get:
+      tags: [Reports]
+      summary: Sổ của một ngày
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema: { type: string, format: date, examples: ["2026-09-11"] }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DailyRecord" }
+              example:
+                date: "2026-09-11"
+                summary: { revenue: 4820000, expense: 1230000, collected: 4570000, receivable: 250000 }
+                warningCount: 2
+                warnings:
+                  - warningId: UNMATCHED_MONEY:mov_002
+                    type: UNMATCHED_MONEY
+                    status: OPEN
+                    resourceType: MONEY_MOVEMENT
+                    resourceId: mov_002
+                    amount: 380000
+                    message: Khoản tiền 380.000đ chưa được phân loại.
+                    resolvedAt: null
+                  - warningId: DRAFT_EVENT:ev_007
+                    type: DRAFT_EVENT
+                    status: OPEN
+                    resourceType: EVENT
+                    resourceId: ev_007
+                    amount: 180000
+                    message: Giao dịch 180.000đ chưa được xác nhận.
+                    resolvedAt: null
+                closedAt: "2026-09-11T21:00:00+07:00"
+                updatedAt: "2026-09-11T21:00:00+07:00"
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "404": { $ref: "#/components/responses/NotFound" }
+
+  /api/zalo/webhook:
+    post:
+      tags: [Zalo]
+      summary: Webhook Zalo Bot Platform
+      description: |
+        Xác thực bằng header `X-Bot-Api-Secret-Token` so khớp thẳng với `ZALO_WEBHOOK_SECRET`.
+
+        - Body rỗng (health probe) → `200`, không parse.
+        - Zalo user chưa link account → lưu vào `zalo_unlinked_messages` để hiện ở màn Register.
+        - Đã link → đẩy vào chung pipeline capture với `source=ZALO`; ảnh đi đường
+          `IMAGE_UNKNOWN` (AI tự phân loại RECEIPT / TRANSFER / OTHER), voice `.aac`
+          được remux sang `.m4a` trước khi transcribe.
+        - **Luôn trả `200`** kể cả khi AI lỗi, để Zalo không gửi lại.
+      security:
+        - zaloWebhookSecret: []
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { type: object }
+            examples:
+              text:
+                value:
+                  event_name: message.text.received
+                  message:
+                    date: 1789033572455
+                    chat: { chat_type: PRIVATE, id: a1b2c3d4e5f60718293a }
+                    message_id: m1a2b3c4d5e6f7081920
+                    from: { id: a1b2c3d4e5f60718293a, is_bot: false, display_name: Nguyễn Văn A }
+                    text: Bán 2 hộp collagen 300 nghìn tiền mặt
+              image:
+                value:
+                  event_name: message.image.received
+                  message:
+                    date: 1789033604043
+                    chat: { chat_type: PRIVATE, id: a1b2c3d4e5f60718293a }
+                    message_id: m2b3c4d5e6f708192031
+                    from: { id: a1b2c3d4e5f60718293a, is_bot: false, display_name: Nguyễn Văn A }
+                    message_type: CHAT_PHOTO
+                    photo_url: https://photo-stal-1.zdn.vn/gr/jpg/xxx.jpg
+      responses:
+        "200":
+          description: Đã nhận
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean, const: true }
+        "401":
+          description: Sai `X-Bot-Api-Secret-Token`
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+
+components:
+  securitySchemes:
+    sessionToken:
+      type: apiKey
+      in: header
+      name: X-Session-Token
+      description: Token lấy từ `/api/register` hoặc `/api/login`.
+    zaloWebhookSecret:
+      type: apiKey
+      in: header
+      name: X-Bot-Api-Secret-Token
+      description: Secret cấu hình cùng lúc với `setWebhook` bên Zalo.
+
+  parameters:
+    EventId:
+      name: eventId
+      in: path
+      required: true
+      schema: { type: string, examples: ["ev_001"] }
+    MovementId:
+      name: movementId
+      in: path
+      required: true
+      schema: { type: string, examples: ["mov_001"] }
+
+  responses:
+    ValidationError:
+      description: Body/query sai, thiếu field, enum không hợp lệ (`VALIDATION_ERROR`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { code: VALIDATION_ERROR, message: Dữ liệu không hợp lệ. }
+    Unauthorized:
+      description: Thiếu hoặc sai token (`UNAUTHORIZED`) — app xoá session, về Login
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { code: UNAUTHORIZED, message: Token không hợp lệ. }
+    NotFound:
+      description: Không tồn tại trong business này (`NOT_FOUND`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { code: NOT_FOUND, message: Không tìm thấy giao dịch. }
+    InvalidState:
+      description: Sai trạng thái — sửa/confirm event không phải `DRAFT`, ghép movement không phải `UNMATCHED` (`INVALID_STATE`)
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/Error" }
+          example: { code: INVALID_STATE, message: Giao dịch không còn ở trạng thái nháp. }
+
+  schemas:
+    Error:
+      type: object
+      description: '`code` là contract và ổn định; `message` tiếng Việt để hiện cho user, có thể đổi.'
+      properties:
+        code:
+          type: string
+          enum: [VALIDATION_ERROR, UNAUTHORIZED, NOT_FOUND, USERNAME_TAKEN,
+                 ZALO_USER_LINKED, INVALID_STATE, FILE_TOO_LARGE,
+                 UNSUPPORTED_FILE_TYPE, INTERNAL_ERROR]
+        message: { type: string }
+      required: [code, message]
+
+    EventType:
+      type: string
+      enum: [SALE, PURCHASE, DEPOSIT, OWNER_MONEY, UNKNOWN]
+    EventStatus:
+      type: string
+      enum: [DRAFT, CONFIRMED, REJECTED]
+    PaymentMethod:
+      type: string
+      enum: [CASH, BANK, UNKNOWN]
+    PaymentStatus:
+      type: string
+      enum: [UNPAID, PAID, UNKNOWN]
+    MovementStatus:
+      type: string
+      enum: [UNMATCHED, MATCHED, CLASSIFIED]
+    ClassificationType:
+      type: string
+      enum: [DEPOSIT, OWNER_MONEY, OTHER, UNKNOWN]
+    Direction:
+      type: string
+      enum: [IN, OUT]
+    Source:
+      type: string
+      enum: [APP, ZALO]
+      description: Nguồn capture — app dùng để hiện chip 💬 Zalo.
+    CaptureType:
+      type: string
+      enum: [TEXT, AUDIO, IMAGE_RECEIPT, IMAGE_TRANSFER]
+      description: |
+        Copy từ capture. Ảnh từ Zalo đi đường `IMAGE_UNKNOWN` nội bộ nhưng **lưu type sau khi
+        đã phân loại**, nên DTO không bao giờ trả `IMAGE_UNKNOWN`.
+
+    Session:
+      type: object
+      properties:
+        token: { type: string, examples: ["tb_3f9aK2mQ7xL0pR8vT1wY4zB6cD9eF2gH5jN8sU1vX4"] }
+        accountId: { type: string }
+        businessId: { type: string }
+        username: { type: string }
+        zaloId: { type: [string, "null"] }
+      required: [token, accountId, businessId, username, zaloId]
+
+    RegisterRequest:
+      type: object
+      properties:
+        username: { type: string }
+        password: { type: string }
+        zaloId:
+          type: [string, "null"]
+          description: Lấy từ `/api/zalo-users/unlinked`. Bỏ trống nếu chưa dùng Zalo.
+      required: [username, password]
+
+    LoginRequest:
+      type: object
+      properties:
+        username: { type: string }
+        password: { type: string }
+      required: [username, password]
+
+    ZaloUser:
+      type: object
+      properties:
+        zaloId: { type: string }
+        displayName: { type: [string, "null"] }
+        lastSeenAt: { type: string, format: date-time }
+      required: [zaloId, displayName, lastSeenAt]
+
+    CaptureTextRequest:
+      type: object
+      properties:
+        type: { type: string, const: TEXT }
+        text: { type: string }
+      required: [type, text]
+
+    CaptureResult:
+      type: object
+      properties:
+        captureId: { type: string }
+        status: { type: string, enum: [PROCESSING, DONE, FAILED] }
+        resultType: { type: [string, "null"], enum: [EVENT, MONEY_MOVEMENT, null] }
+        resultId: { type: [string, "null"] }
+        error:
+          type: [string, "null"]
+          enum: [AI_EXTRACTION_FAILED, NO_TRANSACTION, UNRECOGNIZED_IMAGE, null]
+      required: [captureId, status, resultType, resultId, error]
+
+    BusinessEvent:
+      type: object
+      description: Một giao dịch mua/bán. AI tạo ra ở trạng thái `DRAFT`, user sửa rồi xác nhận.
+      properties:
+        eventId: { type: string }
+        type: { $ref: "#/components/schemas/EventType" }
+        status: { $ref: "#/components/schemas/EventStatus" }
+        amount: { type: integer, format: int64, description: VND }
+        description: { type: [string, "null"] }
+        counterparty: { type: [string, "null"], description: Khách hoặc nhà cung cấp }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethod" }
+        paymentStatus: { $ref: "#/components/schemas/PaymentStatus" }
+        occurredAt: { type: string, format: date-time }
+        source: { $ref: "#/components/schemas/Source" }
+        captureType: { $ref: "#/components/schemas/CaptureType" }
+        evidenceText:
+          type: [string, "null"]
+          description: Câu gốc (TEXT) hoặc transcript (AUDIO); ảnh thì `null`.
+        evidenceUrl:
+          type: [string, "null"]
+          description: |
+            Firebase Storage download URL có token cho AUDIO / IMAGE_*; TEXT thì `null`.
+            **Ai có link đều mở được** — chấp nhận trong PoC.
+        confidence: { type: [number, "null"], description: Độ tự tin của AI, 0–1 }
+      required: [eventId, type, status, amount, description, counterparty, paymentMethod,
+                 paymentStatus, occurredAt, source, captureType, evidenceText, evidenceUrl, confidence]
+      example:
+        eventId: ev_001
+        type: SALE
+        status: DRAFT
+        amount: 450000
+        description: Bán 3 hộp collagen
+        counterparty: chị Lan
+        paymentMethod: BANK
+        paymentStatus: UNPAID
+        occurredAt: "2026-09-11T09:20:00+07:00"
+        source: APP
+        captureType: TEXT
+        evidenceText: Bán 3 hộp collagen 450 nghìn chuyển khoản
+        evidenceUrl: null
+        confidence: 0.93
+
+    EventUpdateRequest:
+      type: object
+      description: Partial — chỉ 7 field này. Field lạ → `400`.
+      additionalProperties: false
+      properties:
+        type: { $ref: "#/components/schemas/EventType" }
+        amount: { type: integer, format: int64, minimum: 0 }
+        description: { type: [string, "null"] }
+        counterparty: { type: [string, "null"] }
+        paymentMethod: { $ref: "#/components/schemas/PaymentMethod" }
+        paymentStatus: { $ref: "#/components/schemas/PaymentStatus" }
+        occurredAt: { type: string, format: date-time }
+
+    MatchCandidate:
+      type: object
+      properties:
+        eventId: { type: string }
+        description: { type: [string, "null"] }
+        amount: { type: integer, format: int64 }
+        score: { type: number, description: "0–1, càng cao càng khớp" }
+      required: [eventId, description, amount, score]
+
+    MoneyMovement:
+      type: object
+      description: Một khoản tiền vào/ra đọc từ ảnh chuyển khoản.
+      properties:
+        movementId: { type: string }
+        direction: { $ref: "#/components/schemas/Direction" }
+        amount: { type: integer, format: int64 }
+        memo: { type: [string, "null"], description: Nội dung chuyển khoản }
+        counterparty: { type: [string, "null"], description: Người gửi tiền }
+        occurredAt: { type: string, format: date-time }
+        source: { $ref: "#/components/schemas/Source" }
+        captureType: { $ref: "#/components/schemas/CaptureType" }
+        evidenceText: { type: [string, "null"] }
+        evidenceUrl: { type: [string, "null"] }
+        status: { $ref: "#/components/schemas/MovementStatus" }
+        matchedEventId: { type: [string, "null"] }
+        classificationType:
+          oneOf:
+            - { $ref: "#/components/schemas/ClassificationType" }
+            - { type: "null" }
+        candidates:
+          type: array
+          description: Luôn có key; `[]` khi không có gợi ý hoặc khi đã xử lý.
+          items: { $ref: "#/components/schemas/MatchCandidate" }
+      required: [movementId, direction, amount, memo, counterparty, occurredAt, source,
+                 captureType, evidenceText, evidenceUrl, status, matchedEventId,
+                 classificationType, candidates]
+
+    Dashboard:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        revenue: { type: integer, format: int64 }
+        expense: { type: integer, format: int64 }
+        collected: { type: integer, format: int64, description: Đã thu được tiền }
+        receivable: { type: integer, format: int64, description: revenue − collected }
+        bankIn: { type: integer, format: int64, description: Mọi movement IN, bất kể status }
+        draftCount: { type: integer }
+        unmatchedMoneyCount: { type: integer }
+      required: [date, revenue, expense, collected, receivable, bankIn, draftCount, unmatchedMoneyCount]
+
+    DailySummary:
+      type: object
+      properties:
+        revenue: { type: integer, format: int64 }
+        expense: { type: integer, format: int64 }
+        collected: { type: integer, format: int64 }
+        receivable: { type: integer, format: int64 }
+      required: [revenue, expense, collected, receivable]
+
+    Warning:
+      type: object
+      properties:
+        warningId: { type: string, description: "`{type}:{resourceId}`" }
+        type: { type: string, enum: [UNMATCHED_MONEY, DRAFT_EVENT] }
+        status: { type: string, enum: [OPEN, RESOLVED] }
+        resourceType: { type: string, enum: [EVENT, MONEY_MOVEMENT] }
+        resourceId: { type: string }
+        amount: { type: integer, format: int64 }
+        message: { type: string }
+        resolvedAt: { type: [string, "null"], format: date-time }
+      required: [warningId, type, status, resourceType, resourceId, amount, message, resolvedAt]
+
+    DailyRecord:
+      type: object
+      properties:
+        date: { type: string, format: date }
+        summary: { $ref: "#/components/schemas/DailySummary" }
+        warningCount: { type: integer, description: Số warning đang `OPEN` }
+        warnings:
+          type: array
+          items: { $ref: "#/components/schemas/Warning" }
+        closedAt: { type: string, format: date-time, description: Lần đóng ngày đầu tiên }
+        updatedAt: { type: string, format: date-time }
+      required: [date, summary, warningCount, warnings, closedAt, updatedAt]
+
+security:
+  - sessionToken: []
