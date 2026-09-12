@@ -142,6 +142,15 @@ dailyHistory/dailyRecord một lần); temp file dùng `Directory.systemTemp` (k
 `path_provider`); `SemanticsBinding` import từ `package:flutter/semantics.dart`;
 `RadioListTile` bọc trong `RadioGroup` (Flutter 3.47 deprecate `groupValue`).
 
+Thực tế khi code (12/09, dựng lại từ đầu trong monorepo `taxbridge/taxbridge-app`):
+`core/widgets.dart` gom `sourceChip` / `statusChip` / `SummaryGrid` / `ListCard` / `BusyOverlay` /
+`showError`; `dashboardDelta(prev, d)` là hàm top-level trong `home_screen.dart` (có
+`test/dashboard_delta_test.dart`). Home chỉ auto-refresh và cập nhật `prevDashboardProvider` khi
+đang là route trên cùng (`ModalRoute.isCurrent`) — không thì timer 8 s làm mốc so sánh trượt khi
+người dùng còn ở màn Capture/Detail và banner mất vế `Tiền vào +380.000đ`. `DEMO=true` ở mode
+text: nút **Dùng file demo** điền sẵn câu UC2 (Simulator không gõ được tiếng Việt). Mock:
+candidate = SALE CONFIRMED UNPAID cùng số tiền; dashboard/summary tính từ state như backend.
+
 Multipart:
 
 ```dart
@@ -414,5 +423,5 @@ API trực tiếp từ widget rồi `ref.invalidate(...)`; chỉ capture có con
 - [x] 3 Auto-refresh Home 8 s — §6 Home.
 - [x] 4 Chip nguồn 💬/🎤/📷 — §4 model `source, captureType`, §6 list/detail; cần BE Phase 5
       trả field (mock đã có qua fixture).
-- [ ] 5 Bằng chứng — §1 `audioplayers`, §2 `evidence_block.dart`, §4 `evidenceText/evidenceUrl`,
+- [x] 5 Bằng chứng — §1 `audioplayers`, §2 `evidence_block.dart`, §4 `evidenceText/evidenceUrl`,
       §6 Event/Movement Detail; cần BE Phase 3 trả field (mock qua fixture + file demo).

@@ -1,0 +1,16 @@
+{
+  "eventId": "ev_001",
+  "type": "SALE",
+  "status": "DRAFT",
+  "amount": 450000,
+  "description": "Bán 3 hộp collagen",
+  "counterparty": "chị Lan",
+  "paymentMethod": "BANK",
+  "paymentStatus": "UNPAID",
+  "occurredAt": "2026-09-11T09:20:00+07:00",
+  "source": "APP",
+  "captureType": "TEXT",
+  "evidenceText": "Bán 3 hộp collagen 450 nghìn chuyển khoản",
+  "evidenceUrl": null,
+  "confidence": 0.93
+}
