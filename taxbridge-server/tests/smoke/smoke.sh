@@ -237,6 +237,10 @@ fi
 
 # ------------------------------------------------------------------- contract
 uc "Contract"
+eq "/api/docs public → 200"        "$(code GET /api/docs)" "200"
+eq "/api/openapi.yaml public → 200" "$(code GET /api/openapi.yaml)" "200"
+eq "spec có đủ path"  "$(curl -sS "$B/api/openapi.yaml" | grep -c '^  /api/')" "21"
+
 SAVED="$T"; T="tb_sai"
 eq "token sai → 401" "$(code GET /api/events)" "401"
 T="$SAVED"

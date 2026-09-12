@@ -15,7 +15,8 @@ from .firestore import db
 
 # Public: không cần X-Session-Token (contract §2).
 PUBLIC = {"/api/health", "/api/register", "/api/login",
-          "/api/zalo-users/unlinked", "/api/zalo/webhook"}
+          "/api/zalo-users/unlinked", "/api/zalo/webhook",
+          "/api/docs", "/api/openapi.yaml"}
 
 HTTP_CODES = {400: "VALIDATION_ERROR", 401: "UNAUTHORIZED", 404: "NOT_FOUND",
               405: "VALIDATION_ERROR", 413: "FILE_TOO_LARGE", 415: "UNSUPPORTED_FILE_TYPE"}
