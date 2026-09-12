@@ -252,6 +252,12 @@ else
   printf '  ⚠️  bỏ qua Zalo ảnh/voice (đặt ZALO_MEDIA=1 khi media URL còn sống)\n'
 fi
 
+# Dọn sau khi chạy: link nốt user chỉ-gửi-sticker ở UC8. Không làm thì mỗi lần chạy smoke
+# trên prod lại để lại một entry lạ trong dropdown Register của màn demo.
+jpost /api/register "{\"username\":\"${U}_sticker\",\"password\":\"123456\",\"zaloId\":\"$ZID2\"}" > /dev/null
+eq "user sticker đã rời dropdown" \
+   "$(curl -sS "$B/api/zalo-users/unlinked" | jq -r --arg id "$ZID2" 'any(.[]; .zaloId == $id)')" "false"
+
 # ------------------------------------------------------------------- contract
 uc "Contract"
 eq "/api/docs public → 200"        "$(code GET /api/docs)" "200"
