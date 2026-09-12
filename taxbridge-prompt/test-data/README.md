@@ -203,7 +203,9 @@ có assert nội bộ), nên không thể lệch khỏi dữ liệu.
 ✅ A2 đã trộn nhiễu ở SNR 12dB (đo gated EBU R128, kiểm chứng lệch ≤0.1dB)
 ✅ Baseline trên backend cũ 11/09: 11/21 pass — `runs/2026-09-11-old-backend/report.md`
    (chỉ có report, không có `actual.json`); lỗi lặp đã thành rule ở plan backend §4.1
-⬜ Chạy lại 21 case trên backend mới → `score.py`, so với baseline
+✅ Chạy lại 21 case trên backend deploy (12/09): **18/21** —
+   `runs/2026-09-12-deployed-prod/report.md`; còn 1 nguyên nhân gốc (T5 "đặt" →
+   `DEPOSIT` thay vì `SALE`, kéo theo M3 thiếu candidate và D1 lệch 600.000)
 
 ### Biến thể của A2
 
