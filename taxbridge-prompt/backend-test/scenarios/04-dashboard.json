@@ -1,0 +1,98 @@
+{
+  "scenarioId": "SC-DASH",
+  "title": "Dashboard: 7 con số trên Home",
+  "intent": "Bảy số ở Home là thứ chủ hộ nhìn để biết hôm nay bán được bao nhiêu và còn phải thu bao nhiêu. Sai một dòng là khai thuế sai. Scenario này dựng một tập event kiểm soát hoàn toàn (ép bằng PUT) rồi đối chiếu từng công thức ở plan BE §7, đặc biệt các nhánh dễ nhầm: DRAFT/REJECTED không được tính, DEPOSIT/OWNER_MONEY/UNKNOWN không phải doanh thu, paymentStatus=UNKNOWN vào revenue nhưng KHÔNG vào collected.",
+  "ruleRefs": ["DASH-REVENUE", "DASH-EXPENSE", "DASH-COLLECTED", "DASH-RECEIVABLE", "DASH-BANKIN", "DASH-COUNTS", "DASH-DATE-FILTER", "DASH-SHAPE"],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-formula",
+      "name": "11 event phủ mọi nhánh lọc của 7 công thức",
+      "mode": "assert",
+      "seed": [
+        {"id": "s1", "seedEvent": {"type": "SALE", "amount": 450000, "description": "S1 sale confirmed unpaid", "counterparty": "Khach A", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "s2", "seedEvent": {"type": "SALE", "amount": 720000, "description": "S2 sale confirmed paid", "counterparty": "Khach B", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:01:00+07:00", "confirm": true}},
+        {"id": "s3", "seedEvent": {"type": "SALE", "amount": 250000, "description": "S3 sale confirmed paymentStatus UNKNOWN", "counterparty": "Khach C", "paymentMethod": "UNKNOWN", "paymentStatus": "UNKNOWN", "occurredAt": "${today}T08:02:00+07:00", "confirm": true}},
+        {"id": "s4", "seedEvent": {"type": "SALE", "amount": 999000, "description": "S4 sale con DRAFT", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:03:00+07:00", "confirm": false}},
+        {"id": "s5", "seedEvent": {"type": "SALE", "amount": 888000, "description": "S5 sale bi REJECTED", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:04:00+07:00", "confirm": "reject"}},
+        {"id": "p1", "seedEvent": {"type": "PURCHASE", "amount": 220000, "description": "P1 purchase confirmed", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:05:00+07:00", "confirm": true}},
+        {"id": "p2", "seedEvent": {"type": "PURCHASE", "amount": 180000, "description": "P2 purchase con DRAFT", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:06:00+07:00", "confirm": false}},
+        {"id": "p3", "seedEvent": {"type": "PURCHASE", "amount": 111000, "description": "P3 purchase bi REJECTED", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:07:00+07:00", "confirm": "reject"}},
+        {"id": "x1", "seedEvent": {"type": "DEPOSIT", "amount": 380000, "description": "X1 dat coc", "paymentMethod": "BANK", "paymentStatus": "PAID", "occurredAt": "${today}T08:08:00+07:00", "confirm": true}},
+        {"id": "x2", "seedEvent": {"type": "OWNER_MONEY", "amount": 500000, "description": "X2 chu ho bo tien vao quy", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:09:00+07:00", "confirm": true}},
+        {"id": "x3", "seedEvent": {"type": "UNKNOWN", "amount": 123000, "description": "X3 khong ro", "paymentMethod": "UNKNOWN", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:10:00+07:00", "confirm": true}}
+      ],
+      "act": [
+        {"id": "dash", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "drafts", "call": "GET /api/events?status=DRAFT"},
+        {"id": "confirmS4", "call": "POST /api/events/${s4}/confirm"},
+        {"id": "dash2", "call": "GET /api/dashboard?date=${today}"}
+      ],
+      "expect": [
+        {"rule": "DASH-REVENUE", "target": "dash", "path": "revenue", "op": "eq", "value": 1420000, "note": "450k+720k+250k; DRAFT/REJECTED/DEPOSIT/OWNER_MONEY/UNKNOWN đều bị loại"},
+        {"rule": "DASH-EXPENSE", "target": "dash", "path": "expense", "op": "eq", "value": 220000, "note": "purchase DRAFT 180k và REJECTED 111k không tính"},
+        {"rule": "DASH-COLLECTED", "target": "dash", "path": "collected", "op": "eq", "value": 720000, "note": "S3 paymentStatus=UNKNOWN vào revenue nhưng KHÔNG vào collected"},
+        {"rule": "DASH-RECEIVABLE", "target": "dash", "path": "receivable", "op": "eq", "value": 700000, "note": "= revenue − collected"},
+        {"rule": "DASH-BANKIN", "target": "dash", "path": "bankIn", "op": "eq", "value": 0},
+        {"rule": "DASH-COUNTS", "target": "dash", "path": "draftCount", "op": "eq", "value": 2},
+        {"rule": "DASH-COUNTS", "target": "dash", "path": "unmatchedMoneyCount", "op": "eq", "value": 0},
+        {"rule": "DASH-COUNTS", "target": "drafts", "path": "", "op": "len", "value": 2, "note": "draftCount phải khớp số phần tử thật của danh sách DRAFT"},
+        {"rule": "DASH-SHAPE", "target": "dash", "path": "date", "op": "eq", "value": "${today}"},
+        {"rule": "DASH-REVENUE", "target": "dash2", "path": "revenue", "op": "eq", "value": 2419000, "note": "confirm S4 ⇒ tính lại khi đọc, không ledger"},
+        {"rule": "DASH-COUNTS", "target": "dash2", "path": "draftCount", "op": "eq", "value": 1},
+        {"rule": "DASH-COLLECTED", "target": "dash2", "path": "collected", "op": "eq", "value": 1719000, "note": "S4 là PAID nên confirm xong vào cả collected"},
+        {"rule": "DASH-RECEIVABLE", "target": "dash2", "path": "receivable", "op": "eq", "value": 700000, "note": "2.419.000 − 1.719.000"}
+      ]
+    },
+    {
+      "variationId": "V2-date-filter",
+      "name": "Lọc theo ngày và biên đầu/cuối ngày",
+      "mode": "assert",
+      "seed": [
+        {"id": "d1", "seedEvent": {"type": "SALE", "amount": 100000, "description": "hom qua", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today-1}T23:59:59+07:00", "confirm": true}},
+        {"id": "d2", "seedEvent": {"type": "SALE", "amount": 200000, "description": "hom nay dau ngay", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T00:00:00+07:00", "confirm": true}},
+        {"id": "d3", "seedEvent": {"type": "SALE", "amount": 300000, "description": "ngay mai", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today+1}T08:00:00+07:00", "confirm": true}}
+      ],
+      "act": [
+        {"id": "yday", "call": "GET /api/dashboard?date=${today-1}"},
+        {"id": "tday", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "tmr", "call": "GET /api/dashboard?date=${today+1}"},
+        {"id": "nodate", "call": "GET /api/dashboard"},
+        {"id": "far", "call": "GET /api/dashboard?date=${today-30}"},
+        {"id": "baddate", "call": "GET /api/dashboard?date=12-09-2026", "allowError": true}
+      ],
+      "expect": [
+        {"rule": "DASH-DATE-FILTER", "target": "yday", "path": "revenue", "op": "eq", "value": 100000, "note": "biên cuối ngày 23:59:59 vẫn thuộc hôm qua"},
+        {"rule": "DASH-DATE-FILTER", "target": "tday", "path": "revenue", "op": "eq", "value": 200000, "note": "biên đầu ngày 00:00:00 thuộc hôm nay"},
+        {"rule": "DASH-DATE-FILTER", "target": "tmr", "path": "revenue", "op": "eq", "value": 300000},
+        {"rule": "DASH-DATE-FILTER", "target": "nodate", "path": "revenue", "op": "eq", "value": 200000, "note": "thiếu date = hôm nay Asia/Ho_Chi_Minh"},
+        {"rule": "DASH-DATE-FILTER", "target": "nodate", "path": "date", "op": "eq", "value": "${today}"},
+        {"rule": "DASH-DATE-FILTER", "target": "far", "path": "revenue", "op": "eq", "value": 0, "note": "ngày không có dữ liệu trả 0, không lỗi"},
+        {"rule": "ERR-CODE-CONFORM", "target": "baddate.status", "op": "eq", "value": 400},
+        {"rule": "ERR-CODE-CONFORM", "target": "baddate", "path": "code", "op": "eq", "value": "VALIDATION_ERROR"}
+      ]
+    },
+    {
+      "variationId": "V3-empty-business",
+      "name": "Business trắng: 7 số bằng 0, không null, không 404",
+      "mode": "assert",
+      "act": [
+        {"id": "dash", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "events", "call": "GET /api/events"},
+        {"id": "movs", "call": "GET /api/money-movements"}
+      ],
+      "expect": [
+        {"rule": "DASH-SHAPE", "target": "dash.status", "op": "eq", "value": 200},
+        {"rule": "DASH-REVENUE", "target": "dash", "path": "revenue", "op": "eq", "value": 0},
+        {"rule": "DASH-EXPENSE", "target": "dash", "path": "expense", "op": "eq", "value": 0},
+        {"rule": "DASH-COLLECTED", "target": "dash", "path": "collected", "op": "eq", "value": 0},
+        {"rule": "DASH-RECEIVABLE", "target": "dash", "path": "receivable", "op": "eq", "value": 0},
+        {"rule": "DASH-BANKIN", "target": "dash", "path": "bankIn", "op": "eq", "value": 0},
+        {"rule": "DASH-COUNTS", "target": "dash", "path": "draftCount", "op": "eq", "value": 0},
+        {"rule": "DASH-COUNTS", "target": "dash", "path": "unmatchedMoneyCount", "op": "eq", "value": 0},
+        {"rule": "DASH-SHAPE", "target": "events", "path": "", "op": "len", "value": 0},
+        {"rule": "DASH-SHAPE", "target": "movs", "path": "", "op": "len", "value": 0}
+      ]
+    }
+  ]
+}

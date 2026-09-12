@@ -1,0 +1,79 @@
+health 200 238ms (cold start, loại khỏi percentile)
+
+=== SC-HERO — Ghép / phân loại tiền vào — hero moment
+  SC-HERO/V1-match-effects                   up         200  2837ms
+  SC-HERO/V1-match-effects                   mv0        200   312ms
+  SC-HERO/V1-match-effects                   ev         200   294ms
+  SC-HERO/V1-match-effects                   dashBefore 200   301ms
+  SC-HERO/V1-match-effects                   eventsBefore 200   281ms
+  SC-HERO/V1-match-effects                   match      200   382ms
+  SC-HERO/V1-match-effects                   ev2        200   260ms
+  SC-HERO/V1-match-effects                   dashAfter  200   288ms
+  SC-HERO/V1-match-effects                   eventsAfter 200   262ms
+  → V1-match-effects: 23/23 assert đạt
+  SC-HERO/V2-classify-deposit                ev         200   343ms
+  SC-HERO/V2-classify-deposit                up         200  1879ms
+  SC-HERO/V2-classify-deposit                dashBefore 200   284ms
+  SC-HERO/V2-classify-deposit                eventsBefore 200   288ms
+  SC-HERO/V2-classify-deposit                cls        200   305ms
+  SC-HERO/V2-classify-deposit                dashAfter  200   291ms
+  SC-HERO/V2-classify-deposit                eventsAfter 200   282ms
+  SC-HERO/V2-classify-deposit                mov        200   282ms
+  → V2-classify-deposit: 17/17 assert đạt
+  SC-HERO/V3-classify-owner-money            ev         200   260ms
+  SC-HERO/V3-classify-owner-money            up         200  3273ms
+  SC-HERO/V3-classify-owner-money            dashBefore 200   264ms
+  SC-HERO/V3-classify-owner-money            cls        200   293ms
+  SC-HERO/V3-classify-owner-money            dashAfter  200   262ms
+  SC-HERO/V3-classify-owner-money            events     200   270ms
+  → V3-classify-owner-money: 12/12 assert đạt
+  SC-HERO/V4-bankin-all-status               up1        200  3102ms
+  SC-HERO/V4-bankin-all-status               g1         200   253ms
+  SC-HERO/V4-bankin-all-status               up2        200  1753ms
+  SC-HERO/V4-bankin-all-status               up3        200  1947ms
+  SC-HERO/V4-bankin-all-status               ev         200   322ms
+  SC-HERO/V4-bankin-all-status               dash0      200   252ms
+  SC-HERO/V4-bankin-all-status               m1         200   309ms
+  SC-HERO/V4-bankin-all-status               dash1      200   285ms
+  SC-HERO/V4-bankin-all-status               c2         200   290ms
+  SC-HERO/V4-bankin-all-status               dash2      200   277ms
+  SC-HERO/V4-bankin-all-status               c3         200   330ms
+  SC-HERO/V4-bankin-all-status               dash3      200   290ms
+  → V4-bankin-all-status: 16/16 assert đạt
+  SC-HERO/V5-state-guards                    up1        200  2204ms
+  SC-HERO/V5-state-guards                    g1         200   311ms
+  SC-HERO/V5-state-guards                    up2        200  1726ms
+  SC-HERO/V5-state-guards                    ev         200   270ms
+  SC-HERO/V5-state-guards                    match1     200   312ms
+  SC-HERO/V5-state-guards                    cls2       200   284ms
+  SC-HERO/V5-state-guards                    dashBefore 200   261ms
+  SC-HERO/V5-state-guards                    matchAgain 409   227ms
+  SC-HERO/V5-state-guards                    clsOnMatched 409   240ms
+  SC-HERO/V5-state-guards                    matchOnClassified 409   246ms
+  SC-HERO/V5-state-guards                    clsAgain   409   253ms
+  SC-HERO/V5-state-guards                    mov1After  200   264ms
+  SC-HERO/V5-state-guards                    mov2After  200   240ms
+  SC-HERO/V5-state-guards                    dashAfter  200   289ms
+  → V5-state-guards: 17/17 assert đạt
+  SC-HERO/V6-invalid-input                   up         200  2271ms
+  SC-HERO/V6-invalid-input                   clsBadEnum 400   253ms
+  SC-HERO/V6-invalid-input                   clsLower   400   234ms
+  SC-HERO/V6-invalid-input                   clsEmpty   400   220ms
+  SC-HERO/V6-invalid-input                   matchEmpty 400   218ms
+  SC-HERO/V6-invalid-input                   matchGhost 404   256ms
+  SC-HERO/V6-invalid-input                   movGhost   404   221ms
+  SC-HERO/V6-invalid-input                   mov        200   275ms
+  → V6-invalid-input: 10/10 assert đạt
+  SC-HERO/P2-match-target                    up1        200  2862ms
+  SC-HERO/P2-match-target                    up2        200  1950ms
+  SC-HERO/P2-match-target                    up3        200  1829ms
+  SC-HERO/P2-match-target                    evDraft    200   253ms
+  SC-HERO/P2-match-target                    evPurchase 200   293ms
+  SC-HERO/P2-match-target                    evPaid     200   289ms
+  SC-HERO/P2-match-target                    mDraft     200   326ms
+  SC-HERO/P2-match-target                    mPurchase  200   366ms
+  SC-HERO/P2-match-target                    mPaid      200   314ms
+  SC-HERO/P2-match-target                    evDraftAfter 200   252ms
+  SC-HERO/P2-match-target                    dashAfter  200   292ms
+  SC-HERO/P2-match-target                    close      200   323ms
+  → P2-match-target: 25/25 assert đạt

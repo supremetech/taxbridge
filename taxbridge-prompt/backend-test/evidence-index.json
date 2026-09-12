@@ -1,0 +1,16 @@
+{
+  "_note": "Số tiền/memo dưới đây là giá trị IN TRÊN ẢNH (fixture). Runner chỉ dùng để đối chiếu extractionFidelity; kỳ vọng của scenario luôn neo theo giá trị AI đọc được lúc chạy (${AMT}).",
+  "_root": "../test-data/evidence",
+  "M1": {"file": "synthetic_transfer_M1.png", "type": "IMAGE_TRANSFER", "amount": 900000, "memo": "LAN 2HOP TRAU GAC BEP"},
+  "M2": {"file": "synthetic_transfer_M2.jpg", "type": "IMAGE_TRANSFER", "amount": 400000, "memo": "CK HUONG MK"},
+  "M3": {"file": "synthetic_transfer_M3.png", "type": "IMAGE_TRANSFER", "amount": 600000, "memo": "CHUYEN TIEN"},
+  "M4": {"file": "synthetic_transfer_M4.png", "type": "IMAGE_TRANSFER", "amount": 380000, "memo": "COC MINH DAT HANG TET"},
+  "M5": {"file": "synthetic_transfer_M5.jpg", "type": "IMAGE_TRANSFER", "amount": 250000, "memo": "ck"},
+  "M6": {"file": "synthetic_transfer_M6.png", "type": "IMAGE_TRANSFER", "amount": 5000000, "memo": "CHUYEN QUY BAN HANG"},
+  "M7": {"file": "synthetic_transfer_M7.png", "type": "IMAGE_TRANSFER", "amount": 1242000, "memo": "DUNG THANH TOAN DON QUA TANG"},
+  "R1": {"file": "synthetic_receipt_R1.png", "type": "IMAGE_RECEIPT", "amount": 1500000, "memo": null},
+  "R2": {"file": "synthetic_receipt_R2.jpg", "type": "IMAGE_RECEIPT", "amount": 185000, "memo": null},
+  "R3": {"file": "synthetic_label_R3.jpg", "type": "IMAGE_RECEIPT", "amount": null, "memo": null},
+  "A1": {"file": "synthetic_voice_A1.m4a", "type": "AUDIO", "amount": 720000, "memo": null},
+  "A4": {"file": "synthetic_voice_A4.m4a", "type": "AUDIO", "amount": null, "memo": null}
+}

@@ -1,0 +1,200 @@
+health 200 293ms (cold start, loại khỏi percentile)
+
+=== SC-CAND — Candidate cho tiền vào: lọc pool, chấm điểm, xếp hạng, không tự ghép
+  SC-CAND/V1-weights                         up         200  2647ms
+  SC-CAND/V1-weights                         mv0        200   267ms
+  SC-CAND/V1-weights                         e1         200   273ms
+  SC-CAND/V1-weights                         e2         200   267ms
+  SC-CAND/V1-weights                         e3         200   258ms
+  SC-CAND/V1-weights                         mov        200   246ms
+  → V1-weights: 31/31 assert đạt
+  SC-CAND/V2-threshold                       up         200  2091ms
+  SC-CAND/V2-threshold                       mv0        200   250ms
+  SC-CAND/V2-threshold                       e04        200   258ms
+  SC-CAND/V2-threshold                       e03        200   265ms
+  SC-CAND/V2-threshold                       e01        200   284ms
+  SC-CAND/V2-threshold                       mov        200   248ms
+  → V2-threshold: 26/26 assert đạt
+  SC-CAND/V3-pool-filter                     up         200  2933ms
+  SC-CAND/V3-pool-filter                     mv0        200   468ms
+  SC-CAND/V3-pool-filter                     bPaid      200   281ms
+  SC-CAND/V3-pool-filter                     bDraft     200   315ms
+  SC-CAND/V3-pool-filter                     bRej       200   260ms
+  SC-CAND/V3-pool-filter                     bPur       200   245ms
+  SC-CAND/V3-pool-filter                     bDep       200   253ms
+  SC-CAND/V3-pool-filter                     bOwn       200   267ms
+  SC-CAND/V3-pool-filter                     bUnk       200   276ms
+  SC-CAND/V3-pool-filter                     good       200   250ms
+  SC-CAND/V3-pool-filter                     mov        200   245ms
+  → V3-pool-filter: 66/66 assert đạt
+  SC-CAND/V4-hero-no-candidate               e450       200   255ms
+  SC-CAND/V4-hero-no-candidate               up         200  2104ms
+  SC-CAND/V4-hero-no-candidate               mov        200   265ms
+  SC-CAND/V4-hero-no-candidate               dash       200   279ms
+  → V4-hero-no-candidate: 11/13 assert đạt — SAI 2
+  SC-CAND/V5-ambiguous-two-candidates        up         200  2810ms
+  SC-CAND/V5-ambiguous-two-candidates        mv0        200   252ms
+  SC-CAND/V5-ambiguous-two-candidates        eThu       200   245ms
+  SC-CAND/V5-ambiguous-two-candidates        eHa        200   245ms
+  SC-CAND/V5-ambiguous-two-candidates        mov        200   231ms
+  SC-CAND/V5-ambiguous-two-candidates        movAgain   200   251ms
+  SC-CAND/V5-ambiguous-two-candidates        list       200   257ms
+  → V5-ambiguous-two-candidates: 19/21 assert đạt — SAI 2
+  SC-CAND/P1-name-normalize                  up         200  2371ms
+  SC-CAND/P1-name-normalize                  mv0        200   227ms
+  SC-CAND/P1-name-normalize                  nDau       200   247ms
+  SC-CAND/P1-name-normalize                  nPrefix    200   256ms
+  SC-CAND/P1-name-normalize                  nSub       200   244ms
+  SC-CAND/P1-name-normalize                  mov        200   235ms
+  → P1-name-normalize: 23/23 assert đạt
+
+=== SC-HERO — Ghép / phân loại tiền vào — hero moment
+  SC-HERO/V1-match-effects                   up         200  2218ms
+  SC-HERO/V1-match-effects                   mv0        200   242ms
+  SC-HERO/V1-match-effects                   ev         200   239ms
+  SC-HERO/V1-match-effects                   dashBefore 200   227ms
+  SC-HERO/V1-match-effects                   eventsBefore 200   217ms
+  SC-HERO/V1-match-effects                   match      200   276ms
+  SC-HERO/V1-match-effects                   ev2        200   237ms
+  SC-HERO/V1-match-effects                   dashAfter  200   256ms
+  SC-HERO/V1-match-effects                   eventsAfter 200   231ms
+  → V1-match-effects: 22/23 assert đạt — SAI 1
+  SC-HERO/V2-classify-deposit                ev         200   251ms
+  SC-HERO/V2-classify-deposit                up         200  4158ms
+  SC-HERO/V2-classify-deposit                dashBefore 200   272ms
+  SC-HERO/V2-classify-deposit                eventsBefore 200   237ms
+  SC-HERO/V2-classify-deposit                cls        200   255ms
+  SC-HERO/V2-classify-deposit                dashAfter  200   238ms
+  SC-HERO/V2-classify-deposit                eventsAfter 200   233ms
+  SC-HERO/V2-classify-deposit                mov        200   231ms
+  → V2-classify-deposit: 15/17 assert đạt — SAI 2
+  SC-HERO/V3-classify-owner-money            ev         200   243ms
+  SC-HERO/V3-classify-owner-money            up         200  2944ms
+  SC-HERO/V3-classify-owner-money            dashBefore 200   250ms
+  SC-HERO/V3-classify-owner-money            cls        200   241ms
+  SC-HERO/V3-classify-owner-money            dashAfter  200   240ms
+  SC-HERO/V3-classify-owner-money            events     200   226ms
+  → V3-classify-owner-money: 10/12 assert đạt — SAI 2
+  SC-HERO/V4-bankin-all-status               up1        200  2571ms
+  SC-HERO/V4-bankin-all-status               g1         200   227ms
+  SC-HERO/V4-bankin-all-status               up2        200  2173ms
+  SC-HERO/V4-bankin-all-status               up3        200  2602ms
+  SC-HERO/V4-bankin-all-status               ev         200   248ms
+  SC-HERO/V4-bankin-all-status               dash0      200   242ms
+  SC-HERO/V4-bankin-all-status               m1         200   304ms
+  SC-HERO/V4-bankin-all-status               dash1      200   247ms
+  SC-HERO/V4-bankin-all-status               c2         200   246ms
+  SC-HERO/V4-bankin-all-status               dash2      200   236ms
+  SC-HERO/V4-bankin-all-status               c3         200   250ms
+  SC-HERO/V4-bankin-all-status               dash3      200   252ms
+  → V4-bankin-all-status: 11/16 assert đạt — SAI 5
+  SC-HERO/V5-state-guards                    up1        200  2268ms
+  SC-HERO/V5-state-guards                    g1         200   228ms
+  SC-HERO/V5-state-guards                    up2        200  2288ms
+  SC-HERO/V5-state-guards                    ev         200   240ms
+  SC-HERO/V5-state-guards                    match1     200   295ms
+  SC-HERO/V5-state-guards                    cls2       200   256ms
+  SC-HERO/V5-state-guards                    dashBefore 200   255ms
+  SC-HERO/V5-state-guards                    matchAgain 409   232ms
+  SC-HERO/V5-state-guards                    clsOnMatched 409   236ms
+  SC-HERO/V5-state-guards                    matchOnClassified 409   236ms
+  SC-HERO/V5-state-guards                    clsAgain   409   228ms
+  SC-HERO/V5-state-guards                    mov1After  200   214ms
+  SC-HERO/V5-state-guards                    mov2After  200   256ms
+  SC-HERO/V5-state-guards                    dashAfter  200   237ms
+  → V5-state-guards: 17/17 assert đạt
+  SC-HERO/V6-invalid-input                   up         200  2199ms
+  SC-HERO/V6-invalid-input                   clsBadEnum 400   211ms
+  SC-HERO/V6-invalid-input                   clsLower   400   214ms
+  SC-HERO/V6-invalid-input                   clsEmpty   400   208ms
+  SC-HERO/V6-invalid-input                   matchEmpty 400   248ms
+  SC-HERO/V6-invalid-input                   matchGhost 404   269ms
+  SC-HERO/V6-invalid-input                   movGhost   404   245ms
+  SC-HERO/V6-invalid-input                   mov        200   277ms
+  → V6-invalid-input: 10/10 assert đạt
+  SC-HERO/P2-match-target                    up1        200  2389ms
+  SC-HERO/P2-match-target                    up2        200  2346ms
+  SC-HERO/P2-match-target                    up3        200  2591ms
+  SC-HERO/P2-match-target                    evDraft    200   249ms
+  SC-HERO/P2-match-target                    evPurchase 200   263ms
+  SC-HERO/P2-match-target                    evPaid     200   264ms
+  SC-HERO/P2-match-target                    mDraft     200   290ms
+  SC-HERO/P2-match-target                    mPurchase  200   279ms
+  SC-HERO/P2-match-target                    mPaid      200   287ms
+  SC-HERO/P2-match-target                    evDraftAfter 200   299ms
+  SC-HERO/P2-match-target                    dashAfter  200   231ms
+  SC-HERO/P2-match-target                    close      200   297ms
+  → P2-match-target: 25/25 assert đạt
+
+=== SC-CLOSE — Đóng ngày: sinh warning, xử lý warning, đóng lại, lịch sử
+  SC-CLOSE/V1-generate-and-resolve           evSale     200   242ms
+  SC-CLOSE/V1-generate-and-resolve           evD1       200   240ms
+  SC-CLOSE/V1-generate-and-resolve           evD2       200   261ms
+  SC-CLOSE/V1-generate-and-resolve           up         200  2102ms
+  SC-CLOSE/V1-generate-and-resolve           mv0        200   240ms
+  SC-CLOSE/V1-generate-and-resolve           evForMatch 200   273ms
+  SC-CLOSE/V1-generate-and-resolve           dash       200   258ms
+  SC-CLOSE/V1-generate-and-resolve           close1     200   293ms
+  SC-CLOSE/V1-generate-and-resolve           confirmD1  200   286ms
+  SC-CLOSE/V1-generate-and-resolve           rec1       200   234ms
+  SC-CLOSE/V1-generate-and-resolve           rejectD2   200   307ms
+  SC-CLOSE/V1-generate-and-resolve           rec2       200   236ms
+  SC-CLOSE/V1-generate-and-resolve           match      200   328ms
+  SC-CLOSE/V1-generate-and-resolve           rec3       200   240ms
+  → V1-generate-and-resolve: 46/52 assert đạt — SAI 6
+  SC-CLOSE/V2-classify-keeps-summary         evSale     200   262ms
+  SC-CLOSE/V2-classify-keeps-summary         up         200  2855ms
+  SC-CLOSE/V2-classify-keeps-summary         close1     200   287ms
+  SC-CLOSE/V2-classify-keeps-summary         cls        200   243ms
+  SC-CLOSE/V2-classify-keeps-summary         rec        200   246ms
+  → V2-classify-keeps-summary: 11/13 assert đạt — SAI 2
+  SC-CLOSE/V3-reclose-upsert                 evD1       200   257ms
+  SC-CLOSE/V3-reclose-upsert                 close1     200   284ms
+  SC-CLOSE/V3-reclose-upsert                 confirmD1  200   283ms
+  SC-CLOSE/V3-reclose-upsert                 evD2       200   274ms
+  SC-CLOSE/V3-reclose-upsert                 up         200  3022ms
+  SC-CLOSE/V3-reclose-upsert                 close2     200   275ms
+  SC-CLOSE/V3-reclose-upsert                 list       200   234ms
+  → V3-reclose-upsert: 16/19 assert đạt — SAI 3
+  SC-CLOSE/V4-history-and-errors             e0         200   253ms
+  SC-CLOSE/V4-history-and-errors             e1         200   259ms
+  SC-CLOSE/V4-history-and-errors             e2         200   253ms
+  SC-CLOSE/V4-history-and-errors             c0         200   298ms
+  SC-CLOSE/V4-history-and-errors             c1         200   308ms
+  SC-CLOSE/V4-history-and-errors             c2         200   309ms
+  SC-CLOSE/V4-history-and-errors             list       200   234ms
+  SC-CLOSE/V4-history-and-errors             notClosed  404   216ms
+  SC-CLOSE/V4-history-and-errors             badDate    400   218ms
+  → V4-history-and-errors: 28/28 assert đạt
+
+=== SC-DASH — Dashboard: 7 con số trên Home
+  SC-DASH/V1-formula                         s1         200   258ms
+  SC-DASH/V1-formula                         s2         200   272ms
+  SC-DASH/V1-formula                         s3         200   268ms
+  SC-DASH/V1-formula                         s4         200   260ms
+  SC-DASH/V1-formula                         s5         200   257ms
+  SC-DASH/V1-formula                         p1         200   259ms
+  SC-DASH/V1-formula                         p2         200   263ms
+  SC-DASH/V1-formula                         p3         200   261ms
+  SC-DASH/V1-formula                         x1         200   242ms
+  SC-DASH/V1-formula                         x2         200   255ms
+  SC-DASH/V1-formula                         x3         200   248ms
+  SC-DASH/V1-formula                         dash       200   253ms
+  SC-DASH/V1-formula                         drafts     200   226ms
+  SC-DASH/V1-formula                         confirmS4  200   270ms
+  SC-DASH/V1-formula                         dash2      200   245ms
+  → V1-formula: 82/82 assert đạt
+  SC-DASH/V2-date-filter                     d1         200   248ms
+  SC-DASH/V2-date-filter                     d2         200   263ms
+  SC-DASH/V2-date-filter                     d3         200   257ms
+  SC-DASH/V2-date-filter                     yday       200   249ms
+  SC-DASH/V2-date-filter                     tday       200   230ms
+  SC-DASH/V2-date-filter                     tmr        200   240ms
+  SC-DASH/V2-date-filter                     nodate     200   244ms
+  SC-DASH/V2-date-filter                     far        200   246ms
+  SC-DASH/V2-date-filter                     baddate    400   217ms
+  → V2-date-filter: 26/26 assert đạt
+  SC-DASH/V3-empty-business                  dash       200   243ms
+  SC-DASH/V3-empty-business                  events     200   236ms
+  SC-DASH/V3-empty-business                  movs       200   220ms
+  → V3-empty-business: 10/10 assert đạt
