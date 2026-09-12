@@ -1,0 +1,51 @@
+{
+  "caseId": "M10",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "OWNER_OUTGOING_EMPTY_MEMO",
+  "occurredAt": "2026-09-05T09:10:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M10_out_empty_memo.jpg",
+    "screenshotType": "owner_outgoing",
+    "ownerNameHint": "LE TRONG SONG HAN",
+    "nameVisibleOnScreen": "TRAN VAN CUONG",
+    "memoOnScreen": null
+  },
+  "expectedOutput": {
+    "direction": "OUT",
+    "amount": 250000,
+    "memo": null,
+    "counterparty": "TRAN VAN CUONG",
+    "occurredAt": "2026-09-05T09:10:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "màn hình (dòng người nhận / người gửi)",
+    "mustNotReturn": "LE TRONG SONG HAN",
+    "why": "Không có nội dung chuyển khoản: chiều tiền và tên bên kia phải đọc từ dấu '−' + dòng 'Người nhận'."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "classificationType": "OTHER"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "none",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "counterparty"
+  ],
+  "softFields_gradedByHuman": [
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "counterparty": "human — chấp nhận hoa/thường, rút gọn tên",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "memo rỗng → `memo: null`, KHÔNG được bịa nội dung."
+}

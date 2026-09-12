@@ -402,6 +402,25 @@ api POST /api/captures -F type=IMAGE_BANK_HISTORY -F "file=@$ASSETS/receipt.jpg"
 eq "ảnh không phải danh sách → FAILED" "$(jq -r .status "$TMP/cap14c.json")" "FAILED"
 eq "error UNRECOGNIZED_IMAGE" "$(jq -r .error "$TMP/cap14c.json")" "UNRECOGNIZED_IMAGE"
 
+# ------------------------------------------------ tiền ra (ảnh CK của chính chủ hộ)
+uc "Tiền ra · ảnh MoMo chủ hộ tự chụp (eval M8)"
+EVID="$P/test-data/evidence"
+api POST /api/captures -F type=IMAGE_TRANSFER \
+    -F "file=@$EVID/synthetic_transfer_M8_owner_out.jpg" > "$TMP/capout.json"
+MOUT="$(jq -r .resultId "$TMP/capout.json")"
+api GET "/api/money-movements/$MOUT" > "$TMP/mout.json"
+eq "direction OUT (eval)"   "$(jq -r .direction "$TMP/mout.json")" "OUT"
+eq "amount (eval)"          "$(jq -r .amount "$TMP/mout.json")" "100000"
+eq "counterparty = người nhận, không phải chủ hộ (eval)" \
+   "$(jq -r '.counterparty | ascii_upcase | contains("HANH")' "$TMP/mout.json")" "true"
+eq "occurredAt = ngày trên ảnh" "$(jq -r '.occurredAt[:10]' "$TMP/mout.json")" "2026-08-14"
+eq "tiền ra không có candidate" "$(jq -r '.candidates | length' "$TMP/mout.json")" "0"
+eq "bankIn không tính tiền ra" "$(dashd bankIn 2026-08-14)" "0"
+eq "match tiền ra → 409" "$(code POST "/api/money-movements/$MOUT/match" \
+    -H 'Content-Type: application/json' -d "{\"eventId\":\"$EV1\"}")" "409"
+jpost "/api/money-movements/$MOUT/classify" '{"type":"OTHER"}' > "$TMP/mout.json"
+eq "classify tiền ra → CLASSIFIED" "$(jq -r .status "$TMP/mout.json")" "CLASSIFIED"
+
 # ------------------------------------------------------------------- contract
 uc "Contract"
 eq "/api/docs public → 200"        "$(code GET /api/docs)" "200"

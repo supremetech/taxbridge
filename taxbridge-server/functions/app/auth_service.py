@@ -32,7 +32,7 @@ def register(username: str, password: str, zalo_id: str | None) -> dict:
     if _find_account(username):
         raise errors.ApiError(409, "USERNAME_TAKEN", "Tên đăng nhập đã tồn tại.")
 
-    zalo_ref = None
+    zalo_ref, owner_name = None, None
     if zalo_id:
         zalo_ref = db.collection("zalo_users").document(zalo_id)
         zalo = zalo_ref.get()
@@ -41,11 +41,13 @@ def register(username: str, password: str, zalo_id: str | None) -> dict:
         if zalo.to_dict().get("linkedAccountId"):
             raise errors.ApiError(409, "ZALO_USER_LINKED",
                                   "Zalo user đã liên kết với account khác.")
+        # Tên hiển thị Zalo = tên chủ hộ in trên ảnh CK → prompt dùng để đối chiếu (§4.1).
+        owner_name = zalo.to_dict().get("displayName")
 
     account_id, business_id, ts = new_id("acc"), new_id("biz"), now_iso()
     db.collection("businesses").document(business_id).set({
         "businessId": business_id, "name": f"Hộ kinh doanh của {username}",
-        "ownerAccountId": account_id, "createdAt": ts,
+        "ownerAccountId": account_id, "ownerName": owner_name, "createdAt": ts,
     })
     account = {"accountId": account_id, "username": username,
                "passwordHash": generate_password_hash(password),

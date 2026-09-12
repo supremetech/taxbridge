@@ -2,8 +2,10 @@
 
 # --- OpenAI ---------------------------------------------------------------
 # Pin theo CLAUDE.md §6. Fallback dùng khi model chính ném exception (thử lại 1 lần).
-VISION_MODEL = "gpt-5.6-terra"
+VISION_MODEL = "gpt-5.6-terra"          # model lớn nhất họ 5.6 (còn gpt-5.6-sol, -luna)
 VISION_FALLBACK_MODEL = "gpt-5.6-luna"
+# ĐỪNG đổi sang "none" nếu chưa đo trên prod: 12/09 local 17/17 case y hệt "low" và nhanh hơn,
+# nhưng deploy lên Functions thì receipt.jpg ra SALE 5/5. Model 5.6 không nhận "minimal".
 REASONING_EFFORT = "low"
 TRANSCRIBE_MODEL = "gpt-transcribe"
 TRANSCRIBE_FALLBACK_MODEL = "gpt-4o-transcribe"

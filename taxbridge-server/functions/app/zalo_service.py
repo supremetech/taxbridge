@@ -146,9 +146,11 @@ def reply_text(result: dict | None, business_id: str | None, message: dict) -> s
 
     if result["resultType"] == "MONEY_MOVEMENT":
         movement = reconciliation_service.get_dto(business_id, result["resultId"])
-        label = "Tiền vào" if movement["direction"] == "IN" else "Tiền ra"
+        incoming = movement["direction"] == "IN"
+        label, preposition = ("Tiền vào", "từ") if incoming else ("Tiền ra", "cho")
         who = movement.get("counterparty") or movement.get("memo")
-        head = f"🏦 {label} {money(movement['amount'])}" + (f" từ {who}" if who else "")
+        head = (f"🏦 {label} {money(movement['amount'])}"
+                + (f" {preposition} {who}" if who else ""))
         n = len(movement["candidates"])
         if n:
             return f"{head} — có {n} đơn có thể khớp. Mở app để ghép."
@@ -180,16 +182,18 @@ def _capture_message(business_id: str, message: dict) -> dict | None:
                      message["messageId"], message["messageType"])
         return None
 
+    # displayName Zalo = tên chủ hộ in trên ảnh CK của chính họ → prompt đối chiếu (§4.1).
+    owner = message.get("displayName")
     if message["messageType"] == "TEXT":
         return process_capture(business_id, "ZALO", "TEXT", text=message["text"],
-                               zalo_message_id=message["messageId"])
+                               zalo_message_id=message["messageId"], owner_name=owner)
     if message["messageType"] == "IMAGE":
         return process_capture(business_id, "ZALO", "IMAGE_UNKNOWN",
                                file_bytes=download(message["imageUrl"]),
-                               zalo_message_id=message["messageId"])
+                               zalo_message_id=message["messageId"], owner_name=owner)
     return process_capture(business_id, "ZALO", "AUDIO",
                            file_bytes=aac_to_m4a(download(message["audioUrl"])),
-                           zalo_message_id=message["messageId"])
+                           zalo_message_id=message["messageId"], owner_name=owner)
 
 
 def handle(payload: dict | None) -> None:

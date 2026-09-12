@@ -1,4 +1,4 @@
-# TaxBridge — Bộ eval AI extraction (1 ngày, 21 case)
+# TaxBridge — Bộ eval AI extraction (1 ngày, 25 case)
 
 Bộ dữ liệu thử nghiệm để **đo và tune độ chính xác** của AI extraction trong
 TaxBridge PoC. Không phải seed data để demo — mỗi case có ground truth đi kèm và
@@ -29,7 +29,7 @@ runs/2026-09-12-prompt-v2-fix-sotien/
 runs/2026-09-13-prompt-v3-fix-counterparty/
 ```
 
-### 2. Chạy 21 case qua backend, gom vào `actual.json`
+### 2. Chạy 25 case qua backend, gom vào `actual.json`
 
 Một object, key là caseId, value là DTO backend trả về:
 
@@ -101,7 +101,7 @@ for f in sys.argv[1:]:
 ```text
 test-data/
 ├── manifest.json        tóm tắt bộ dữ liệu + tổng hợp số liệu ngày
-├── cases/               21 case: input + expected output + giải thích bẫy
+├── cases/               25 case: input + expected output + giải thích bẫy
 ├── evidence/            ảnh chuyển khoản, hóa đơn, nền tiếng ồn
 ├── score.py             chấm điểm tự động
 ├── audio_scripts.md     kịch bản đã dùng để thu 4 file audio
@@ -116,17 +116,22 @@ test-data/
 
 ---
 
-## Phân bổ 21 case
+## Phân bổ 25 case
 
 | Loại | Số case | Case |
 |---|---|---|
 | TEXT | 6 | T1–T6 |
 | AUDIO | 4 | A1–A4 |
 | IMAGE_RECEIPT | 3 | R1–R3 |
-| IMAGE_TRANSFER | 7 | M1–M7 |
+| IMAGE_TRANSFER | 11 | M1–M7 · M8–M11 (ảnh MoMo của CHÍNH chủ hộ, có tiền ra) |
 | CLOSE_DAY | 1 | D1 |
 
 Mật độ dồn vào IMAGE_TRANSFER vì ghép/phân loại tiền vào là hero use case.
+
+**M8–M11 thêm 12/09** sau khi bot Zalo đọc sai ảnh MoMo thật: chủ hộ tự chụp giao dịch trong
+app của mình (có dấu `+`/`−`), khác hẳn M1–M7 (khách chụp màn hình gửi cho shop, không dấu).
+Bốn biến thể nội dung chuyển khoản user liệt kê: ghi **ngược** chiều (M8 — đúng ca lỗi thật),
+ghi đủ hai bên (M9), **rỗng** (M10), **nhiễu** không liên quan (M11).
 
 ### Các bẫy được gài có chủ đích
 
@@ -203,7 +208,11 @@ có assert nội bộ), nên không thể lệch khỏi dữ liệu.
 ✅ A2 đã trộn nhiễu ở SNR 12dB (đo gated EBU R128, kiểm chứng lệch ≤0.1dB)
 ✅ Baseline trên backend cũ 11/09: 11/21 pass — `runs/2026-09-11-old-backend/report.md`
    (chỉ có report, không có `actual.json`); lỗi lặp đã thành rule ở plan backend §4.1
-⬜ Chạy lại 21 case trên backend mới → `score.py`, so với baseline
+⬜ Chạy lại 25 case trên backend mới → `score.py`, so với baseline
+✅ 12/09: chạy tay T1–T6, A1–A3 (extract từ referenceTranscript), R1–R3, M8–M11 với prompt
+   Phase 2 → **17/17 đúng** ở cả `reasoning.effort` `none` lẫn `low` (chưa qua `score.py`).
+   ⚠️ Kết quả local **không** suy ra được prod: cùng code, `effort="none"` trên Functions đọc
+   `demo-assets/receipt.jpg` thành `SALE` 5/5 lần. Đo lại trên prod trước khi chốt prompt/model.
 
 ### Biến thể của A2
 
