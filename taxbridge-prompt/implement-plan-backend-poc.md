@@ -605,11 +605,15 @@ bằng Zalo trên điện thoại.
 - [x] Mục 15: schema, nhánh capture, dedupe; smoke UC14 (gửi 2 lần).
 - [x] `openapi.yaml`: `IMAGE_BANK_HISTORY`, `MONEY_MOVEMENT_BATCH`.
 
-Kết quả 12/09 (local: Firestore emulator + `flask run`, OpenAI thật): `smoke.sh`
-**145 pass · 0 fail** (9 UC v1 + UC10–14). Chưa chạy trên prod, chưa deploy.
+Kết quả 12/09: `smoke.sh` **145 pass · 0 fail** local (Firestore emulator + `flask run`) và
+**146 pass · 0 fail** trên prod sau khi deploy (thêm 1 assert `evidenceUrl` mở được — emulator
+không có Storage).
 
 ### Deploy
 
-- [ ] Sau Phase 7: `firebase deploy --only functions:api` (hỏi trước) — lần này có secret
-      `ZALO_BOT_TOKEN`; deploy fail → kiểm tra lại IAM binding. Nhắn Zalo thật từ điện thoại → bot trả lời.
-- [ ] Sau Phase 8/9: deploy lại một lần trước khi quay video.
+- [x] Deploy cả Phase 7–9 một lần (12/09 12:55): `firebase deploy --only functions:api` OK,
+      CLI tự cấp `roles/secretmanager.secretAccessor` trên `ZALO_BOT_TOKEN` cho
+      `495996584842-compute@…` trong lúc deploy. Prod smoke 146 pass · 0 fail.
+- [ ] **Nhắn Zalo thật từ điện thoại → bot trả lời** (chỉ việc này còn lại; `firebase
+      functions:log` không in được phần text của log nên phải kiểm bằng máy thật).
+- [ ] Deploy lại trước khi quay video nếu còn sửa code.
