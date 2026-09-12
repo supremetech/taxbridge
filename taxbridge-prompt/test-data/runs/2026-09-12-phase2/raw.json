@@ -1,0 +1,669 @@
+{
+  "T3": {
+    "capture": {
+      "captureId": "cap_507f5058baa2",
+      "error": null,
+      "occurredAt": "2026-09-12T13:29:15+07:00",
+      "resultId": "ev_5071dd8f9220",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 220000,
+      "captureType": "TEXT",
+      "confidence": 0.99,
+      "counterparty": null,
+      "description": "Mua thùng carton và băng dính đóng hàng, trả tiền mặt.",
+      "eventId": "ev_5071dd8f9220",
+      "evidenceText": "Mua thùng carton với băng dính đóng hàng hết 220 nghìn, trả tiền mặt",
+      "evidenceUrl": null,
+      "occurredAt": "2026-09-12T13:29:15+07:00",
+      "paymentMethod": "CASH",
+      "paymentStatus": "PAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "PURCHASE"
+    }
+  },
+  "T4": {
+    "capture": {
+      "captureId": "cap_b654a80105ba",
+      "error": null,
+      "occurredAt": "2026-09-12T12:00:00+07:00",
+      "resultId": "ev_13db5535c512",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 500000,
+      "captureType": "TEXT",
+      "confidence": 0.99,
+      "counterparty": null,
+      "description": "Chủ hộ bỏ thêm tiền túi vào quỹ để có tiền lẻ trả khách.",
+      "eventId": "ev_13db5535c512",
+      "evidenceText": "Sáng nay tôi bỏ thêm 500 nghìn tiền túi vào quỹ để có tiền lẻ trả khách",
+      "evidenceUrl": null,
+      "occurredAt": "2026-09-12T12:00:00+07:00",
+      "paymentMethod": "CASH",
+      "paymentStatus": "PAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "OWNER_MONEY"
+    }
+  },
+  "T1": {
+    "capture": {
+      "captureId": "cap_40cc0bca7614",
+      "error": null,
+      "occurredAt": "2026-09-12T13:29:20+07:00",
+      "resultId": "ev_ab7379a0faec",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 900000,
+      "captureType": "TEXT",
+      "confidence": 0.98,
+      "counterparty": "chị Lan",
+      "description": "Bán 2 hộp thịt trâu gác bếp cho chị Lan, chuyển khoản sau.",
+      "eventId": "ev_ab7379a0faec",
+      "evidenceText": "Bán chị Lan 2 hộp thịt trâu gác bếp 900 nghìn, chị ấy chuyển khoản sau",
+      "evidenceUrl": null,
+      "occurredAt": "2026-09-12T13:29:20+07:00",
+      "paymentMethod": "BANK",
+      "paymentStatus": "UNPAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "SALE"
+    }
+  },
+  "T2": {
+    "capture": {
+      "captureId": "cap_a01821ee7817",
+      "error": null,
+      "occurredAt": "2026-09-12T13:29:22+07:00",
+      "resultId": "ev_35d65a529106",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 470000,
+      "captureType": "TEXT",
+      "confidence": 0.98,
+      "counterparty": null,
+      "description": "Khách lẻ mua 1 cân măng rối và 1 cân chè dây.",
+      "eventId": "ev_35d65a529106",
+      "evidenceText": "Khách lẻ mua 1 cân măng rối với 1 cân chè dây, 470 nghìn",
+      "evidenceUrl": null,
+      "occurredAt": "2026-09-12T13:29:22+07:00",
+      "paymentMethod": "UNKNOWN",
+      "paymentStatus": "UNKNOWN",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "SALE"
+    }
+  },
+  "A1": {
+    "capture": {
+      "captureId": "cap_bc16700f37a6",
+      "error": null,
+      "occurredAt": "2026-09-12T13:29:27+07:00",
+      "resultId": "ev_7b2ee727fb3e",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 720000,
+      "captureType": "AUDIO",
+      "confidence": 0.99,
+      "counterparty": "anh Minh",
+      "description": "Bán 3 hộp tỏi đen cô đơn cho anh Minh, đã trả tiền mặt.",
+      "eventId": "ev_7b2ee727fb3e",
+      "evidenceText": "Bán cho anh Minh ba hộp tỏi đen cô đơn, bảy trăm hai mươi nghìn, anh ấy trả tiền mặt.",
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_bc16700f37a6.m4a?alt=media&token=6a6803cfaa1c4ef0ae61b4d84bb2e4db",
+      "occurredAt": "2026-09-12T13:29:27+07:00",
+      "paymentMethod": "CASH",
+      "paymentStatus": "PAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "SALE"
+    }
+  },
+  "M1": {
+    "capture": {
+      "captureId": "cap_82d19ee54127",
+      "error": null,
+      "occurredAt": "2026-09-11T10:05:00+07:00",
+      "resultId": "mov_8890474b5735",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 900000,
+      "candidates": [
+        {
+          "amount": 900000,
+          "description": "Bán 2 hộp thịt trâu gác bếp cho chị Lan, chuyển khoản sau.",
+          "eventId": "T1",
+          "score": 0.9
+        }
+      ],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": "LAN",
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_82d19ee54127.png?alt=media&token=b63baedb2c634e1791ccca150d8bb4b2",
+      "matchedEventId": null,
+      "memo": "LAN 2HOP TRAU GAC BEP",
+      "movementId": "mov_8890474b5735",
+      "occurredAt": "2026-09-11T10:05:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "A2": {
+    "capture": {
+      "captureId": "cap_057342d36929",
+      "error": null,
+      "occurredAt": "2026-09-12T12:00:00+07:00",
+      "resultId": "ev_5d52110dc7bf",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 400000,
+      "captureType": "AUDIO",
+      "confidence": 0.98,
+      "counterparty": "cô Hương",
+      "description": "Bán 1 cân mắc khén cho cô Hương, khách hẹn chuyển khoản sau.",
+      "eventId": "ev_5d52110dc7bf",
+      "evidenceText": "Bán cho cô Hương một cân mắc khén bốn trăm nghìn, cô nói chút nữa chuyển khoản.",
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_057342d36929.m4a?alt=media&token=f21b69bf3f3d4c76b70118123d694fda",
+      "occurredAt": "2026-09-12T12:00:00+07:00",
+      "paymentMethod": "BANK",
+      "paymentStatus": "UNPAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "SALE"
+    }
+  },
+  "A3": {
+    "capture": {
+      "captureId": "cap_b1a63b8e6c62",
+      "error": null,
+      "occurredAt": "2026-09-12T13:29:41+07:00",
+      "resultId": "ev_4ebf99a02681",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 600000,
+      "captureType": "AUDIO",
+      "confidence": 0.98,
+      "counterparty": "Chị Thu",
+      "description": "Chị Thu lấy ba hộp trà ô long, sẽ chuyển khoản sau.",
+      "eventId": "ev_4ebf99a02681",
+      "evidenceText": "Chị Thu lấy hai hộp trà ô long, à không, ba hộp, tổng là sáu trăm nghìn, chị ấy chuyển khoản sau.",
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_b1a63b8e6c62.m4a?alt=media&token=e21a85a366ee4cb8b936a7b8615a3f5d",
+      "occurredAt": "2026-09-12T13:29:41+07:00",
+      "paymentMethod": "BANK",
+      "paymentStatus": "UNPAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "SALE"
+    }
+  },
+  "M2": {
+    "capture": {
+      "captureId": "cap_649d391e6c80",
+      "error": null,
+      "occurredAt": "2026-09-11T11:40:00+07:00",
+      "resultId": "mov_92c1677dbfee",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 400000,
+      "candidates": [
+        {
+          "amount": 400000,
+          "description": "Bán 1 cân mắc khén cho cô Hương, khách hẹn chuyển khoản sau.",
+          "eventId": "A2",
+          "score": 0.9
+        }
+      ],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": "HUONG",
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_649d391e6c80.jpg?alt=media&token=4ec2580246d4476f9db843852a49c1dc",
+      "matchedEventId": null,
+      "memo": "CK HUONG MK",
+      "movementId": "mov_92c1677dbfee",
+      "occurredAt": "2026-09-11T11:40:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "A4": {
+    "capture": {
+      "captureId": "cap_78acde7c755e",
+      "error": "NO_TRANSACTION",
+      "occurredAt": null,
+      "resultId": null,
+      "resultIds": [],
+      "resultType": null,
+      "skippedCount": 0,
+      "status": "FAILED"
+    }
+  },
+  "T5": {
+    "capture": {
+      "captureId": "cap_f12267e50959",
+      "error": null,
+      "occurredAt": "2026-09-12T12:00:00+07:00",
+      "resultId": "ev_ec344f488918",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 600000,
+      "captureType": "TEXT",
+      "confidence": 0.93,
+      "counterparty": "Chị Hà",
+      "description": "Chị Hà đặt 2 cân macca, chuyển khoản sau.",
+      "eventId": "ev_ec344f488918",
+      "evidenceText": "Chị Hà đặt 2 cân macca 600 nghìn, chuyển khoản sau",
+      "evidenceUrl": null,
+      "occurredAt": "2026-09-12T12:00:00+07:00",
+      "paymentMethod": "BANK",
+      "paymentStatus": "UNPAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "DEPOSIT"
+    }
+  },
+  "T6": {
+    "capture": {
+      "captureId": "cap_4b91cd9a4218",
+      "error": null,
+      "occurredAt": "2026-09-12T13:29:54+07:00",
+      "resultId": "ev_3fc7bf6fff9d",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 1250000,
+      "captureType": "TEXT",
+      "confidence": 0.98,
+      "counterparty": "Anh Dũng",
+      "description": "Bán 1 set quà tặng Tết cho anh Dũng, chuyển khoản.",
+      "eventId": "ev_3fc7bf6fff9d",
+      "evidenceText": "Anh Dũng lấy 1 set quà tặng Tết 1 triệu 250, chuyển khoản",
+      "evidenceUrl": null,
+      "occurredAt": "2026-09-12T13:29:54+07:00",
+      "paymentMethod": "BANK",
+      "paymentStatus": "UNPAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "SALE"
+    }
+  },
+  "M3": {
+    "capture": {
+      "captureId": "cap_51c8ae0e2ddf",
+      "error": null,
+      "occurredAt": "2026-09-11T13:20:00+07:00",
+      "resultId": "mov_dda91922056a",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 600000,
+      "candidates": [
+        {
+          "amount": 600000,
+          "description": "Chị Thu lấy ba hộp trà ô long, sẽ chuyển khoản sau.",
+          "eventId": "A3",
+          "score": 0.6
+        }
+      ],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": null,
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_51c8ae0e2ddf.png?alt=media&token=8c70b7a5090b4f8daa84a124eb43dba7",
+      "matchedEventId": null,
+      "memo": "CHUYEN TIEN",
+      "movementId": "mov_dda91922056a",
+      "occurredAt": "2026-09-11T13:20:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "R1": {
+    "capture": {
+      "captureId": "cap_4f8222ffa918",
+      "error": null,
+      "occurredAt": "2026-09-11T12:00:00+07:00",
+      "resultId": "ev_3dd053f7de47",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 1500000,
+      "captureType": "IMAGE_RECEIPT",
+      "confidence": 0.99,
+      "counterparty": "CƠ SỞ CHẾ BIẾN HẠT ĐIỀU BÌNH PHƯỚC",
+      "description": "Mua hạt điều rang muối loại A và hạt điều vỡ đôi.",
+      "eventId": "ev_3dd053f7de47",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_4f8222ffa918.png?alt=media&token=1c164bdf2dbf4cf384bf3bae8c70388a",
+      "occurredAt": "2026-09-11T12:00:00+07:00",
+      "paymentMethod": "BANK",
+      "paymentStatus": "PAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "PURCHASE"
+    }
+  },
+  "R2": {
+    "capture": {
+      "captureId": "cap_ce5308d98654",
+      "error": null,
+      "occurredAt": "2026-09-11T14:25:00+07:00",
+      "resultId": "ev_3a1dcbc40a02",
+      "resultIds": [],
+      "resultType": "EVENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 185000,
+      "captureType": "IMAGE_RECEIPT",
+      "confidence": 0.99,
+      "counterparty": "CỬA HÀNG BAO BÌ MINH LONG",
+      "description": "Mua túi zip, tem nhãn, băng dính và túi giấy theo hóa đơn bán lẻ.",
+      "eventId": "ev_3a1dcbc40a02",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_ce5308d98654.jpg?alt=media&token=14227822bb304ada985fa91d8af5eee3",
+      "occurredAt": "2026-09-11T14:25:00+07:00",
+      "paymentMethod": "CASH",
+      "paymentStatus": "PAID",
+      "source": "APP",
+      "status": "DRAFT",
+      "type": "PURCHASE"
+    }
+  },
+  "M4": {
+    "capture": {
+      "captureId": "cap_811b7db80ce5",
+      "error": null,
+      "occurredAt": "2026-09-11T14:45:00+07:00",
+      "resultId": "mov_7146fa5f0049",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 380000,
+      "candidates": [],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": null,
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_811b7db80ce5.png?alt=media&token=309fafb50e5445da964858486490c84a",
+      "matchedEventId": null,
+      "memo": "COC MINH DAT HANG TET",
+      "movementId": "mov_7146fa5f0049",
+      "occurredAt": "2026-09-11T14:45:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "R3": {
+    "capture": {
+      "captureId": "cap_3d71b0fd46c9",
+      "error": "UNRECOGNIZED_IMAGE",
+      "occurredAt": null,
+      "resultId": null,
+      "resultIds": [],
+      "resultType": null,
+      "skippedCount": 0,
+      "status": "FAILED"
+    }
+  },
+  "M5": {
+    "capture": {
+      "captureId": "cap_01d72a0f419c",
+      "error": null,
+      "occurredAt": "2026-09-11T15:30:00+07:00",
+      "resultId": "mov_6347a09445c5",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 250000,
+      "candidates": [],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": null,
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_01d72a0f419c.jpg?alt=media&token=8db8b7d4e37649dea0764d958ddd09e1",
+      "matchedEventId": null,
+      "memo": "ck",
+      "movementId": "mov_6347a09445c5",
+      "occurredAt": "2026-09-11T15:30:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "M6": {
+    "capture": {
+      "captureId": "cap_e72a84489d5a",
+      "error": null,
+      "occurredAt": "2026-09-11T16:20:00+07:00",
+      "resultId": "mov_53b3885afa83",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 5000000,
+      "candidates": [],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": null,
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_e72a84489d5a.png?alt=media&token=26d785e56eef4f24a1f073df8545a8e6",
+      "matchedEventId": null,
+      "memo": "CHUYEN QUY BAN HANG",
+      "movementId": "mov_53b3885afa83",
+      "occurredAt": "2026-09-11T16:20:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "M7": {
+    "capture": {
+      "captureId": "cap_3993103be480",
+      "error": null,
+      "occurredAt": "2026-09-11T17:10:00+07:00",
+      "resultId": "mov_e6691577761b",
+      "resultIds": [],
+      "resultType": "MONEY_MOVEMENT",
+      "skippedCount": 0,
+      "status": "DONE"
+    },
+    "dto": {
+      "amount": 1242000,
+      "candidates": [
+        {
+          "amount": 1250000,
+          "description": "Bán 1 set quà tặng Tết cho anh Dũng, chuyển khoản.",
+          "eventId": "T6",
+          "score": 0.3
+        }
+      ],
+      "captureType": "IMAGE_TRANSFER",
+      "classificationType": null,
+      "counterparty": "HOANG VAN DUNG",
+      "direction": "IN",
+      "evidenceText": null,
+      "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_8057fb451045%2Fcap_3993103be480.png?alt=media&token=03ce172ee4474be39ec7edee7d8765be",
+      "matchedEventId": null,
+      "memo": "DUNG THANH TOAN DON QUA TANG",
+      "movementId": "mov_e6691577761b",
+      "occurredAt": "2026-09-11T17:10:00+07:00",
+      "source": "APP",
+      "status": "UNMATCHED"
+    }
+  },
+  "D1": {
+    "records": {
+      "2026-09-11": {
+        "closedAt": "2026-09-12T13:30:21+07:00",
+        "date": "2026-09-11",
+        "summary": {
+          "collected": 0,
+          "expense": 1500000,
+          "receivable": 0,
+          "revenue": 0
+        },
+        "updatedAt": "2026-09-12T13:30:21+07:00",
+        "warningCount": 2,
+        "warnings": [
+          {
+            "amount": 1242000,
+            "message": "Khoản tiền 1.242.000đ chưa được phân loại.",
+            "resolvedAt": null,
+            "resourceId": "mov_e6691577761b",
+            "resourceType": "MONEY_MOVEMENT",
+            "status": "OPEN",
+            "type": "UNMATCHED_MONEY",
+            "warningId": "UNMATCHED_MONEY:mov_e6691577761b"
+          },
+          {
+            "amount": 185000,
+            "message": "Giao dịch 185.000đ chưa được xác nhận.",
+            "resolvedAt": null,
+            "resourceId": "ev_3a1dcbc40a02",
+            "resourceType": "EVENT",
+            "status": "OPEN",
+            "type": "DRAFT_EVENT",
+            "warningId": "DRAFT_EVENT:ev_3a1dcbc40a02"
+          }
+        ]
+      },
+      "2026-09-12": {
+        "closedAt": "2026-09-12T13:30:21+07:00",
+        "date": "2026-09-12",
+        "summary": {
+          "collected": 2620000,
+          "expense": 220000,
+          "receivable": 1720000,
+          "revenue": 4340000
+        },
+        "updatedAt": "2026-09-12T13:30:21+07:00",
+        "warningCount": 0,
+        "warnings": []
+      }
+    },
+    "report": {
+      "byDay": [
+        {
+          "bankIn": 0,
+          "collected": 2620000,
+          "date": "2026-09-12",
+          "draftCount": 0,
+          "expense": 220000,
+          "revenue": 4340000,
+          "saleCount": 6,
+          "unmatchedMoneyCount": 0
+        },
+        {
+          "bankIn": 8772000,
+          "collected": 0,
+          "date": "2026-09-11",
+          "draftCount": 1,
+          "expense": 1500000,
+          "revenue": 0,
+          "saleCount": 0,
+          "unmatchedMoneyCount": 1
+        }
+      ],
+      "byType": [
+        {
+          "amount": 4340000,
+          "count": 6,
+          "type": "SALE"
+        },
+        {
+          "amount": 1720000,
+          "count": 2,
+          "type": "PURCHASE"
+        },
+        {
+          "amount": 600000,
+          "count": 1,
+          "type": "DEPOSIT"
+        },
+        {
+          "amount": 500000,
+          "count": 1,
+          "type": "OWNER_MONEY"
+        }
+      ],
+      "days": 2,
+      "from": "2026-09-11",
+      "summary": {
+        "bankIn": 8772000,
+        "collected": 2620000,
+        "draftCount": 1,
+        "expense": 1720000,
+        "purchaseCount": 2,
+        "receivable": 1720000,
+        "revenue": 4340000,
+        "saleCount": 6,
+        "unmatchedMoneyCount": 1
+      },
+      "to": "2026-09-12"
+    }
+  }
+}

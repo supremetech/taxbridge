@@ -1,0 +1,719 @@
+{
+  "scenarioId": "SC-CLOSE",
+  "title": "Đóng ngày: sinh warning, xử lý warning, đóng lại, lịch sử",
+  "intent": "UC7 là use case duy nhất cho thấy hệ thống tự dọn việc tồn. Warning phải sinh đúng cho mỗi event DRAFT và mỗi movement chưa phân loại; sau khi chủ hộ xử lý thì warning chuyển RESOLVED và summary được tính lại — nếu không, màn Lịch sử ngày đứng im và con số trong sổ ngày lệch với Home.",
+  "ruleRefs": [
+    "CLOSE-WARNING-ID",
+    "CLOSE-WARNING-SCOPE",
+    "CLOSE-COUNT-OPEN-ONLY",
+    "CLOSE-SUMMARY",
+    "CLOSE-RESOLVE",
+    "CLOSE-KEEP-CLOSEDAT",
+    "CLOSE-UPSERT",
+    "CLOSE-HISTORY",
+    "ERR-CODE-CONFORM"
+  ],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-generate-and-resolve",
+      "name": "2 draft + 1 tiền chưa ghép ⇒ 3 warning; confirm/reject/match làm sạch dần",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "up",
+          "capture": {
+            "type": "IMAGE_TRANSFER",
+            "evidence": "M1"
+          },
+          "save": {
+            "movId": "$.resultId",
+            "MDATE": "$.occurredAt|date"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh CK"
+            }
+          ]
+        },
+        {
+          "id": "mv0",
+          "call": "GET /api/money-movements/${movId}",
+          "save": {
+            "AMT": "$.amount",
+            "MDATE": "$.occurredAt|date"
+          }
+        },
+        {
+          "id": "evSale",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 450000,
+            "description": "don da xac nhan",
+            "counterparty": "chị Lan",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "occurredAt": "${MDATE}T08:00:00+07:00",
+            "confirm": true
+          }
+        },
+        {
+          "id": "evD1",
+          "seedEvent": {
+            "type": "PURCHASE",
+            "amount": 180000,
+            "description": "phieu mua con nhap",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${MDATE}T08:01:00+07:00",
+            "confirm": false
+          }
+        },
+        {
+          "id": "evD2",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 90000,
+            "description": "ban le con nhap",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${MDATE}T08:02:00+07:00",
+            "confirm": false
+          }
+        },
+        {
+          "id": "evForMatch",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": "${AMT}",
+            "description": "don de ghep voi tien vao",
+            "counterparty": "chị Lan",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "occurredAt": "${MDATE}T08:03:00+07:00",
+            "confirm": true
+          }
+        },
+        {
+          "id": "dash",
+          "call": "GET /api/dashboard?date=${MDATE}"
+        },
+        {
+          "id": "close1",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${MDATE}"
+          }
+        },
+        {
+          "id": "confirmD1",
+          "call": "POST /api/events/${evD1}/confirm"
+        },
+        {
+          "id": "rec1",
+          "call": "GET /api/daily-records/${MDATE}"
+        },
+        {
+          "id": "rejectD2",
+          "call": "POST /api/events/${evD2}/reject"
+        },
+        {
+          "id": "rec2",
+          "call": "GET /api/daily-records/${MDATE}"
+        },
+        {
+          "id": "match",
+          "call": "POST /api/money-movements/${movId}/match",
+          "json": {
+            "eventId": "${evForMatch}"
+          }
+        },
+        {
+          "id": "rec3",
+          "call": "GET /api/daily-records/${MDATE}"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "close1",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 3
+        },
+        {
+          "rule": "CLOSE-WARNING-ID",
+          "target": "close1",
+          "path": "warnings[*].warningId",
+          "op": "contains",
+          "value": "DRAFT_EVENT:${evD1}"
+        },
+        {
+          "rule": "CLOSE-WARNING-ID",
+          "target": "close1",
+          "path": "warnings[*].warningId",
+          "op": "contains",
+          "value": "DRAFT_EVENT:${evD2}"
+        },
+        {
+          "rule": "CLOSE-WARNING-ID",
+          "target": "close1",
+          "path": "warnings[*].warningId",
+          "op": "contains",
+          "value": "UNMATCHED_MONEY:${movId}"
+        },
+        {
+          "rule": "CLOSE-WARNING-SCOPE",
+          "target": "close1",
+          "path": "warnings[*].warningId",
+          "op": "notContains",
+          "value": "DRAFT_EVENT:${evSale}",
+          "note": "event đã CONFIRMED không sinh warning"
+        },
+        {
+          "rule": "CLOSE-WARNING-SCOPE",
+          "target": "close1",
+          "path": "warnings[?resourceId=${evD1}].resourceType",
+          "op": "eq",
+          "value": "EVENT"
+        },
+        {
+          "rule": "CLOSE-WARNING-SCOPE",
+          "target": "close1",
+          "path": "warnings[?resourceId=${movId}].resourceType",
+          "op": "eq",
+          "value": "MONEY_MOVEMENT"
+        },
+        {
+          "rule": "CLOSE-WARNING-SCOPE",
+          "target": "close1",
+          "path": "warnings[?resourceId=${evD1}].amount",
+          "op": "eq",
+          "value": 180000
+        },
+        {
+          "rule": "CLOSE-WARNING-SCOPE",
+          "target": "close1",
+          "path": "warnings[?resourceId=${evD1}].status",
+          "op": "eq",
+          "value": "OPEN"
+        },
+        {
+          "rule": "CLOSE-WARNING-SCOPE",
+          "target": "close1",
+          "path": "warnings[?resourceId=${evD1}].resolvedAt",
+          "op": "isNull"
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "close1",
+          "path": "summary.revenue",
+          "op": "sameAs",
+          "refTarget": "dash",
+          "refPath": "revenue",
+          "note": "sổ ngày phải khớp Home"
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "close1",
+          "path": "summary.expense",
+          "op": "eq",
+          "value": 0,
+          "note": "phiếu mua 180k còn DRAFT nên chưa vào chi phí"
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "close1",
+          "path": "summary.collected",
+          "op": "eq",
+          "value": 0
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "close1",
+          "path": "closedAt",
+          "op": "notNull"
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec1",
+          "path": "warnings[?resourceId=${evD1}].status",
+          "op": "eq",
+          "value": "RESOLVED"
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec1",
+          "path": "warnings[?resourceId=${evD1}].resolvedAt",
+          "op": "notNull"
+        },
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "rec1",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 2
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec1",
+          "path": "summary.expense",
+          "op": "eq",
+          "value": 180000,
+          "note": "resolve_warnings phải recompute summary"
+        },
+        {
+          "rule": "CLOSE-KEEP-CLOSEDAT",
+          "target": "rec1",
+          "path": "closedAt",
+          "op": "sameAs",
+          "refTarget": "close1",
+          "refPath": "closedAt"
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec2",
+          "path": "warnings[?resourceId=${evD2}].status",
+          "op": "eq",
+          "value": "RESOLVED"
+        },
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "rec2",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 1
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec2",
+          "path": "summary.revenue",
+          "op": "sameAs",
+          "refTarget": "rec1",
+          "refPath": "summary.revenue",
+          "note": "reject không làm đổi doanh thu"
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec3",
+          "path": "warnings[?resourceId=${movId}].status",
+          "op": "eq",
+          "value": "RESOLVED"
+        },
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "rec3",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 0
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec3",
+          "path": "summary.collected",
+          "op": "eq",
+          "value": "${AMT}",
+          "note": "ghép tiền xong thì sổ ngày phải ghi nhận đã thu"
+        },
+        {
+          "rule": "CLOSE-KEEP-CLOSEDAT",
+          "target": "rec3",
+          "path": "closedAt",
+          "op": "sameAs",
+          "refTarget": "close1",
+          "refPath": "closedAt"
+        }
+      ]
+    },
+    {
+      "variationId": "V2-classify-keeps-summary",
+      "name": "Phân loại đặt cọc sau khi đã đóng ngày: warning sạch nhưng 4 số không đổi",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "up",
+          "capture": {
+            "type": "IMAGE_TRANSFER",
+            "evidence": "M4"
+          },
+          "save": {
+            "movId": "$.resultId",
+            "MDATE": "$.occurredAt|date"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh CK đặt cọc"
+            }
+          ]
+        },
+        {
+          "id": "evSale",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 1000000,
+            "description": "don ban da xac nhan",
+            "counterparty": "Khach A",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${MDATE}T08:00:00+07:00",
+            "confirm": true
+          }
+        },
+        {
+          "id": "close1",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${MDATE}"
+          }
+        },
+        {
+          "id": "cls",
+          "call": "POST /api/money-movements/${movId}/classify",
+          "json": {
+            "type": "DEPOSIT"
+          }
+        },
+        {
+          "id": "rec",
+          "call": "GET /api/daily-records/${MDATE}"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "close1",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 1
+        },
+        {
+          "rule": "CLOSE-RESOLVE",
+          "target": "rec",
+          "path": "warnings[?resourceId=${movId}].status",
+          "op": "eq",
+          "value": "RESOLVED"
+        },
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "rec",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 0
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "target": "rec",
+          "path": "summary.revenue",
+          "op": "eq",
+          "value": 1000000,
+          "note": "HERO ở tầng sổ ngày: đặt cọc không làm tăng doanh thu"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "target": "rec",
+          "path": "summary.collected",
+          "op": "sameAs",
+          "refTarget": "close1",
+          "refPath": "summary.collected"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "target": "rec",
+          "path": "summary.receivable",
+          "op": "sameAs",
+          "refTarget": "close1",
+          "refPath": "summary.receivable"
+        }
+      ]
+    },
+    {
+      "variationId": "V3-reclose-upsert",
+      "name": "Đóng lại cùng ngày: giữ warning đã xử lý, thêm warning mới, không nhân đôi",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "up",
+          "capture": {
+            "type": "IMAGE_TRANSFER",
+            "evidence": "M5"
+          },
+          "save": {
+            "movId": "$.resultId",
+            "MDATE": "$.occurredAt|date"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh CK"
+            }
+          ]
+        },
+        {
+          "id": "evD1",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 120000,
+            "description": "draft dot 1",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${MDATE}T08:00:00+07:00",
+            "confirm": false
+          }
+        },
+        {
+          "id": "close1",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${MDATE}"
+          }
+        },
+        {
+          "id": "confirmD1",
+          "call": "POST /api/events/${evD1}/confirm"
+        },
+        {
+          "id": "evD2",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 130000,
+            "description": "draft dot 2",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${MDATE}T09:00:00+07:00",
+            "confirm": false
+          }
+        },
+        {
+          "id": "close2",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${MDATE}"
+          }
+        },
+        {
+          "id": "list",
+          "call": "GET /api/daily-records"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "CLOSE-UPSERT",
+          "target": "close2",
+          "path": "warnings",
+          "op": "len",
+          "value": 3,
+          "note": "1 cũ đã RESOLVED + 2 mới"
+        },
+        {
+          "rule": "CLOSE-UPSERT",
+          "target": "close2",
+          "path": "warnings[?resourceId=${evD1}].status",
+          "op": "eq",
+          "value": "RESOLVED",
+          "note": "đóng lại không được lật warning đã xử lý về OPEN"
+        },
+        {
+          "rule": "CLOSE-UPSERT",
+          "target": "close2",
+          "path": "warnings[*].warningId",
+          "op": "contains",
+          "value": "DRAFT_EVENT:${evD2}"
+        },
+        {
+          "rule": "CLOSE-UPSERT",
+          "target": "close2",
+          "path": "warnings[*].warningId",
+          "op": "contains",
+          "value": "UNMATCHED_MONEY:${movId}"
+        },
+        {
+          "rule": "CLOSE-COUNT-OPEN-ONLY",
+          "target": "close2",
+          "path": "warningCount",
+          "op": "eq",
+          "value": 2
+        },
+        {
+          "rule": "CLOSE-UPSERT",
+          "target": "list",
+          "path": "",
+          "op": "len",
+          "value": 1,
+          "note": "upsert: vẫn đúng một record cho ngày này"
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "close2",
+          "path": "summary.revenue",
+          "op": "eq",
+          "value": 120000,
+          "note": "chỉ draft đã confirm mới vào doanh thu"
+        }
+      ]
+    },
+    {
+      "variationId": "V4-history-and-errors",
+      "name": "Lịch sử nhiều ngày, ngày chưa đóng, ngày sai định dạng",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "e0",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 100000,
+            "description": "hom nay",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${today}T08:00:00+07:00",
+            "confirm": true
+          }
+        },
+        {
+          "id": "e1",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 200000,
+            "description": "hom qua",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${today-1}T08:00:00+07:00",
+            "confirm": true
+          }
+        },
+        {
+          "id": "e2",
+          "seedEvent": {
+            "type": "SALE",
+            "amount": 300000,
+            "description": "hom kia",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "occurredAt": "${today-2}T08:00:00+07:00",
+            "confirm": true
+          }
+        },
+        {
+          "id": "c0",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${today-2}"
+          }
+        },
+        {
+          "id": "c1",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${today-1}"
+          }
+        },
+        {
+          "id": "c2",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "${today}"
+          }
+        },
+        {
+          "id": "list",
+          "call": "GET /api/daily-records"
+        },
+        {
+          "id": "notClosed",
+          "call": "GET /api/daily-records/${today-5}",
+          "allowError": true
+        },
+        {
+          "id": "badDate",
+          "call": "POST /api/close-day",
+          "json": {
+            "date": "12-09-2026"
+          },
+          "allowError": true
+        }
+      ],
+      "expect": [
+        {
+          "rule": "CLOSE-HISTORY",
+          "target": "list",
+          "path": "",
+          "op": "len",
+          "value": 3
+        },
+        {
+          "rule": "CLOSE-HISTORY",
+          "target": "list",
+          "path": "[0].date",
+          "op": "eq",
+          "value": "${today}",
+          "note": "sort date giảm dần, mới nhất trước"
+        },
+        {
+          "rule": "CLOSE-HISTORY",
+          "target": "list",
+          "path": "[2].date",
+          "op": "eq",
+          "value": "${today-2}"
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "c0",
+          "path": "summary.revenue",
+          "op": "eq",
+          "value": 300000,
+          "note": "mỗi ngày chỉ gồm giao dịch của ngày đó"
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "c1",
+          "path": "summary.revenue",
+          "op": "eq",
+          "value": 200000
+        },
+        {
+          "rule": "CLOSE-SUMMARY",
+          "target": "c2",
+          "path": "summary.revenue",
+          "op": "eq",
+          "value": 100000
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "notClosed.status",
+          "op": "eq",
+          "value": 404
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "notClosed",
+          "path": "code",
+          "op": "eq",
+          "value": "NOT_FOUND"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "badDate.status",
+          "op": "eq",
+          "value": 400
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "badDate",
+          "path": "code",
+          "op": "eq",
+          "value": "VALIDATION_ERROR"
+        }
+      ]
+    }
+  ]
+}

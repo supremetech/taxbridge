@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/evidence_block.dart';
+import '../../core/format.dart';
 import '../../core/providers.dart';
 import '../../core/widgets.dart';
 import '../../models/business_event.dart';
@@ -51,6 +52,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
   late final _party = TextEditingController(
     text: widget.event.counterparty ?? '',
   );
+  late DateTime? _occurredAt = widget.event.occurredAt?.toLocal();
   bool _busy = false;
 
   BusinessEvent get e => widget.event;
@@ -79,7 +81,43 @@ class _EventFormState extends ConsumerState<_EventForm> {
     if (party != (e.counterparty ?? '')) p['counterparty'] = party;
     if (_method != e.paymentMethod) p['paymentMethod'] = _method;
     if (_payStatus != e.paymentStatus) p['paymentStatus'] = _payStatus;
+    final at = _occurredAt;
+    if (at != null && e.occurredAt != null && at != e.occurredAt!.toLocal()) {
+      p['occurredAt'] = _iso7(at);
+    }
     return p;
+  }
+
+  /// ISO-8601 với offset máy (VN = +07:00), không dùng `Z`.
+  static String _iso7(DateTime d) {
+    final off = d.timeZoneOffset;
+    final sign = off.isNegative ? '-' : '+';
+    final hh = off.inHours.abs().toString().padLeft(2, '0');
+    final mm = (off.inMinutes.abs() % 60).toString().padLeft(2, '0');
+    final base = d.toIso8601String().split('.').first;
+    return '$base$sign$hh:$mm';
+  }
+
+  /// Ô Ngày (Phase 2 ②): đổi ngày, giữ giờ cũ.
+  Future<void> _pickDate() async {
+    final cur = _occurredAt ?? DateTime.now();
+    final d = await showDatePicker(
+      context: context,
+      initialDate: cur,
+      firstDate: DateTime.now().subtract(const Duration(days: 365)),
+      lastDate: DateTime.now().add(const Duration(days: 1)),
+    );
+    if (d == null) return;
+    setState(
+      () => _occurredAt = DateTime(
+        d.year,
+        d.month,
+        d.day,
+        cur.hour,
+        cur.minute,
+        cur.second,
+      ),
+    );
   }
 
   Future<void> _confirm() async {
@@ -87,6 +125,11 @@ class _EventFormState extends ConsumerState<_EventForm> {
     try {
       final api = ref.read(apiProvider);
       final patch = _patch();
+      await prepareReturnToDate(
+        ref,
+        _occurredAt,
+        drafts: 1,
+      ); // Home về ngày bản ghi
       if (patch.isNotEmpty) await api.updateEvent(e.eventId, patch);
       await api.confirmEvent(e.eventId);
       invalidateAll(ref);
@@ -103,6 +146,7 @@ class _EventFormState extends ConsumerState<_EventForm> {
   Future<void> _reject() async {
     setState(() => _busy = true);
     try {
+      await prepareReturnToDate(ref, e.occurredAt, drafts: 1);
       await ref.read(apiProvider).rejectEvent(e.eventId);
       invalidateAll(ref);
       if (mounted) context.go('/home');
@@ -174,6 +218,20 @@ class _EventFormState extends ConsumerState<_EventForm> {
             decoration: const InputDecoration(
               labelText: 'Khách',
               border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: editable ? _pickDate : null,
+            child: InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Ngày',
+                border: OutlineInputBorder(),
+                suffixIcon: Icon(Icons.calendar_today_outlined),
+              ),
+              child: Text(
+                _occurredAt == null ? '' : displayDate(dateKey(_occurredAt!)),
+              ),
             ),
           ),
           const SizedBox(height: 12),

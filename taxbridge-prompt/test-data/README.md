@@ -1,5 +1,8 @@
 # TaxBridge — Bộ eval AI extraction (1 ngày, 25 case)
 
+> Bộ này đo **AI trích xuất**. Đo **logic xử lý back-end** (candidate, ghép/phân loại
+> tiền, dashboard, đóng ngày): `../backend-test/`.
+
 Bộ dữ liệu thử nghiệm để **đo và tune độ chính xác** của AI extraction trong
 TaxBridge PoC. Không phải seed data để demo — mỗi case có ground truth đi kèm và
 chấm được tự động.

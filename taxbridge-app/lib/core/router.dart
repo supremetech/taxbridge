@@ -14,6 +14,9 @@ import '../features/events/event_list_screen.dart';
 import '../features/home/home_screen.dart';
 import '../features/movements/movement_detail_screen.dart';
 import '../features/movements/movement_list_screen.dart';
+import '../features/movements/reconcile_screen.dart';
+import '../features/pending/pending_screen.dart';
+import '../features/reports/report_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   // Đổi session → GoRouter chạy lại redirect.
@@ -54,6 +57,18 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/movements/:id',
         builder: (_, s) => MovementDetailScreen(id: s.pathParameters['id']!),
       ),
+      GoRoute(
+        path: '/reconcile',
+        builder: (_, s) => ReconcileScreen(
+          ids: (s.uri.queryParameters['ids'] ?? '')
+              .split(',')
+              .where((x) => x.isNotEmpty)
+              .toList(),
+          skipped: int.tryParse(s.uri.queryParameters['skipped'] ?? '') ?? 0,
+        ),
+      ),
+      GoRoute(path: '/reports', builder: (_, _) => const ReportScreen()),
+      GoRoute(path: '/pending', builder: (_, _) => const PendingScreen()),
       GoRoute(path: '/close-day', builder: (_, _) => const CloseDayScreen()),
       GoRoute(
         path: '/daily-history',

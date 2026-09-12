@@ -5,6 +5,8 @@ import '../models/capture_result.dart';
 import '../models/daily_record.dart';
 import '../models/dashboard.dart';
 import '../models/money_movement.dart';
+import '../models/pending.dart';
+import '../models/report.dart';
 import '../models/session.dart';
 import '../models/zalo_user.dart';
 import 'api_client.dart';
@@ -173,5 +175,23 @@ class DioTaxBridgeApi implements TaxBridgeApi {
   Future<DailyRecord> dailyRecord(String date) => _call(
     () => _dio.get('/api/daily-records/$date'),
     (d) => DailyRecord.fromJson(_map(d)),
+  );
+
+  // ---- Phase 2 ----
+
+  @override
+  Future<Report> report(String from, String to) => _call(
+    () => _dio.get('/api/reports', queryParameters: {'from': from, 'to': to}),
+    (d) => Report.fromJson(_map(d)),
+  );
+
+  @override
+  Future<Pending> pending() =>
+      _call(() => _dio.get('/api/pending'), (d) => Pending.fromJson(_map(d)));
+
+  @override
+  Future<ReplayResult> replayZalo(String zaloId) => _call(
+    () => _dio.post('/api/zalo-users/$zaloId/replay'),
+    (d) => ReplayResult.fromJson(_map(d)),
   );
 }

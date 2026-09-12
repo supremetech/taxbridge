@@ -1,0 +1,99 @@
+{
+  "scenarioId": "SC-REPORT",
+  "title": "Báo cáo theo khoảng ngày và danh sách tồn đọng (Phase 2 ③④)",
+  "intent": "UC12 và UC13. Báo cáo là chỗ chủ hộ đối chiếu với sổ tay, nên tổng phải bằng tổng các dòng ngày — lệch một đồng là mất niềm tin. Tồn đọng là chỗ duy nhất thấy được việc cũ chưa xử lý; nếu nó không gom đủ mọi ngày thì nháp cũ nằm lại vĩnh viễn và không ai biết.",
+  "ruleRefs": ["REPORT-SUMMARY", "REPORT-BYDAY", "REPORT-BYTYPE", "REPORT-VALIDATION", "PENDING-CONTENT", "PENDING-SYNC", "DASH-PAST-COUNTS", "ERR-CODE-CONFORM"],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-report-totals",
+      "name": "Tổng của báo cáo phải bằng tổng các dòng ngày",
+      "mode": "assert",
+      "seed": [
+        {"id": "s0", "seedEvent": {"type": "SALE", "amount": 500000, "description": "ban hom nay", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "s1", "seedEvent": {"type": "SALE", "amount": 300000, "description": "ban hom qua", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today-1}T08:00:00+07:00", "confirm": true}},
+        {"id": "s3", "seedEvent": {"type": "SALE", "amount": 200000, "description": "ban 3 hom truoc", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today-3}T08:00:00+07:00", "confirm": true}},
+        {"id": "p1", "seedEvent": {"type": "PURCHASE", "amount": 120000, "description": "mua hom qua", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today-1}T09:00:00+07:00", "confirm": true}},
+        {"id": "d0", "seedEvent": {"type": "SALE", "amount": 999000, "description": "nhap hom nay chua xac nhan", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T10:00:00+07:00", "confirm": false}}
+      ],
+      "act": [
+        {"id": "rep", "call": "GET /api/reports?from=${today-3}&to=${today}"},
+        {"id": "dashToday", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "dashYday", "call": "GET /api/dashboard?date=${today-1}"}
+      ],
+      "expect": [
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "days", "op": "eq", "value": 4},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "from", "op": "eq", "value": "${today-3}"},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "to", "op": "eq", "value": "${today}"},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.revenue", "op": "eq", "value": 1000000, "note": "500k + 300k + 200k; nháp 999k không tính"},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.expense", "op": "eq", "value": 120000},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.collected", "op": "eq", "value": 700000},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.receivable", "op": "eq", "value": 300000},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.saleCount", "op": "eq", "value": 3},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.purchaseCount", "op": "eq", "value": 1},
+        {"rule": "REPORT-SUMMARY", "target": "rep", "path": "summary.draftCount", "op": "eq", "value": 1},
+        {"rule": "REPORT-BYDAY", "target": "rep", "path": "byDay", "op": "len", "value": 3, "note": "chỉ ngày có dữ liệu; ${today-2} trống nên không có dòng"},
+        {"rule": "REPORT-BYDAY", "target": "rep", "path": "byDay[0].date", "op": "eq", "value": "${today}", "note": "mới nhất trước"},
+        {"rule": "REPORT-BYDAY", "target": "rep", "path": "byDay[2].date", "op": "eq", "value": "${today-3}"},
+        {"rule": "REPORT-BYDAY", "target": "rep", "path": "byDay[0].revenue", "op": "sameAs", "refTarget": "dashToday", "refPath": "revenue", "note": "dòng ngày phải khớp Home của chính ngày đó"},
+        {"rule": "REPORT-BYDAY", "target": "rep", "path": "byDay[1].revenue", "op": "sameAs", "refTarget": "dashYday", "refPath": "revenue"},
+        {"rule": "REPORT-BYDAY", "target": "rep", "path": "byDay[1].expense", "op": "sameAs", "refTarget": "dashYday", "refPath": "expense"},
+        {"rule": "REPORT-BYTYPE", "target": "rep", "path": "byType[?type=SALE].amount", "op": "eq", "value": 1000000},
+        {"rule": "REPORT-BYTYPE", "target": "rep", "path": "byType[?type=SALE].count", "op": "eq", "value": 3},
+        {"rule": "REPORT-BYTYPE", "target": "rep", "path": "byType[?type=PURCHASE].amount", "op": "eq", "value": 120000},
+        {"rule": "REPORT-BYTYPE", "target": "rep", "path": "byType[*].type", "op": "notContains", "value": "DEPOSIT", "note": "type không có dữ liệu thì không xuất hiện"}
+      ]
+    },
+    {
+      "variationId": "V2-report-validation",
+      "name": "Khoảng ngày sai phải bị chặn",
+      "mode": "assert",
+      "act": [
+        {"id": "rev", "call": "GET /api/reports?from=${today}&to=${today-3}", "allowError": true},
+        {"id": "toolong", "call": "GET /api/reports?from=2026-01-01&to=2026-09-12", "allowError": true},
+        {"id": "badfmt", "call": "GET /api/reports?from=12-09-2026&to=${today}", "allowError": true},
+        {"id": "ok1", "call": "GET /api/reports?from=${today}&to=${today}"}
+      ],
+      "expect": [
+        {"rule": "REPORT-VALIDATION", "target": "rev.status", "op": "eq", "value": 400, "note": "to < from"},
+        {"rule": "ERR-CODE-CONFORM", "target": "rev", "path": "code", "op": "eq", "value": "VALIDATION_ERROR"},
+        {"rule": "REPORT-VALIDATION", "target": "toolong.status", "op": "eq", "value": 400, "note": "quá 92 ngày"},
+        {"rule": "REPORT-VALIDATION", "target": "badfmt.status", "op": "eq", "value": 400},
+        {"rule": "REPORT-SUMMARY", "target": "ok1", "path": "days", "op": "eq", "value": 1, "note": "from = to là khoảng 1 ngày hợp lệ"},
+        {"rule": "REPORT-BYDAY", "target": "ok1", "path": "byDay", "op": "len", "value": 0, "note": "business trắng thì không có dòng nào"}
+      ]
+    },
+    {
+      "variationId": "V3-pending-all-days",
+      "name": "Tồn đọng gom mọi ngày, cũ nhất trước, xử lý xong thì biến mất",
+      "mode": "assert",
+      "seed": [
+        {"id": "dOld", "seedEvent": {"type": "PURCHASE", "amount": 111000, "description": "nhap cu 3 hom truoc", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today-3}T08:00:00+07:00", "confirm": false}},
+        {"id": "dMid", "seedEvent": {"type": "SALE", "amount": 222000, "description": "nhap hom qua", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today-1}T08:00:00+07:00", "confirm": false}},
+        {"id": "dNew", "seedEvent": {"type": "SALE", "amount": 333000, "description": "nhap hom nay", "paymentMethod": "CASH", "paymentStatus": "PAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": false}}
+      ],
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"movId": "$.resultId", "MDATE": "$.occurredAt|date"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "pend", "call": "GET /api/pending"},
+        {"id": "dashToday", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "confirmOld", "call": "POST /api/events/${dOld}/confirm"},
+        {"id": "pend2", "call": "GET /api/pending"},
+        {"id": "dashToday2", "call": "GET /api/dashboard?date=${today}"}
+      ],
+      "expect": [
+        {"rule": "PENDING-CONTENT", "target": "pend", "path": "draftEvents", "op": "len", "value": 3, "note": "gom nháp của MỌI ngày, không chỉ hôm nay"},
+        {"rule": "PENDING-CONTENT", "target": "pend", "path": "draftEvents[0].eventId", "op": "eq", "value": "${dOld}", "note": "cũ nhất trước (occurredAt tăng dần)"},
+        {"rule": "PENDING-CONTENT", "target": "pend", "path": "draftEvents[2].eventId", "op": "eq", "value": "${dNew}"},
+        {"rule": "PENDING-CONTENT", "target": "pend", "path": "unmatchedMovements", "op": "len", "value": 1},
+        {"rule": "PENDING-CONTENT", "target": "pend", "path": "unmatchedMovements[0].candidates", "op": "notNull", "note": "movement trong tồn đọng phải kèm candidates để xử lý ngay tại chỗ"},
+        {"rule": "DASH-PAST-COUNTS", "target": "dashToday", "path": "pastDraftCount", "op": "eq", "value": 2, "note": "2 nháp của ngày trước; nháp hôm nay không tính là tồn đọng"},
+        {"rule": "DASH-PAST-COUNTS", "target": "dashToday", "path": "draftCount", "op": "eq", "value": 1},
+        {"rule": "DASH-PAST-COUNTS", "target": "dashToday", "path": "pastUnmatchedCount", "op": "eq", "value": 1, "note": "ảnh CK ngày 11/09 là tồn đọng khi nhìn từ hôm nay"},
+        {"rule": "PENDING-SYNC", "target": "pend2", "path": "draftEvents", "op": "len", "value": 2},
+        {"rule": "PENDING-SYNC", "target": "pend2", "path": "draftEvents[*].eventId", "op": "notContains", "value": "${dOld}"},
+        {"rule": "PENDING-SYNC", "target": "dashToday2", "path": "pastDraftCount", "op": "eq", "value": 1}
+      ]
+    }
+  ]
+}

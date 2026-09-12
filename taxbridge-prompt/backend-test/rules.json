@@ -1,0 +1,317 @@
+{
+  "CAND-SCORE-FORMULA": {
+    "group": "matching",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "score = 0.6·(amount bằng nhau) + 0.3·(similar tên/memo) + 0.1·(cùng ngày)"
+  },
+  "CAND-THRESHOLD": {
+    "group": "matching",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6 (CANDIDATE_MIN_SCORE)",
+    "statement": "Chỉ giữ candidate score >= 0.3; riêng 'cùng ngày' 0.1 không đủ."
+  },
+  "CAND-FILTER-ELIGIBLE": {
+    "group": "matching",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "Pool candidate chỉ gồm event SALE + CONFIRMED + UNPAID của chính business."
+  },
+  "CAND-LIMIT-3": {
+    "group": "matching",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "Tối đa 3 candidate."
+  },
+  "CAND-SORT-DESC": {
+    "group": "matching",
+    "severity": "major",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "Candidate sắp theo score giảm dần."
+  },
+  "CAND-SHAPE": {
+    "group": "matching",
+    "severity": "minor",
+    "hero": false,
+    "source": "contract/fixtures/money_movement.json",
+    "statement": "Mỗi candidate có đủ 4 key: eventId, description, amount, score."
+  },
+  "CAND-NO-AUTO": {
+    "group": "matching",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6 + feature-map/match-classify-money.md",
+    "statement": "Không bao giờ tự ghép: sau capture movement luôn UNMATCHED, matchedEventId null."
+  },
+  "CAND-ONLY-WHEN-UNMATCHED": {
+    "group": "matching",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "Candidates chỉ tính khi UNMATCHED; sau match/classify trả [] (key vẫn có mặt)."
+  },
+  "MATCH-EFFECT-MOVEMENT": {
+    "group": "money",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "match → movement MATCHED + matchedEventId, candidates [], classificationType null."
+  },
+  "MATCH-EFFECT-EVENT": {
+    "group": "money",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "match → event paymentStatus = PAID, status vẫn CONFIRMED."
+  },
+  "CLS-EFFECT": {
+    "group": "money",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "classify → movement CLASSIFIED + classificationType, không tạo event."
+  },
+  "CLS-REVENUE-INVARIANT": {
+    "group": "money",
+    "severity": "critical",
+    "hero": true,
+    "source": "CLAUDE.md §6 + feature-map/match-classify-money.md",
+    "statement": "Sau classify, dashboard chỉ đổi đúng unmatchedMoneyCount; revenue/expense/collected/receivable/bankIn/draftCount y nguyên."
+  },
+  "STATE-INVALID-409": {
+    "group": "money",
+    "severity": "critical",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §6",
+    "statement": "match/classify sai trạng thái → 409 INVALID_STATE và không đổi dữ liệu."
+  },
+  "DASH-REVENUE": {
+    "group": "dashboard",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §7",
+    "statement": "revenue = Σ amount event SALE CONFIRMED (DRAFT/REJECTED/DEPOSIT/OWNER_MONEY/UNKNOWN bị loại)."
+  },
+  "DASH-EXPENSE": {
+    "group": "dashboard",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §7",
+    "statement": "expense = Σ amount event PURCHASE CONFIRMED."
+  },
+  "DASH-COLLECTED": {
+    "group": "dashboard",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §7",
+    "statement": "collected = Σ amount event SALE CONFIRMED paymentStatus=PAID (UNKNOWN không tính)."
+  },
+  "DASH-RECEIVABLE": {
+    "group": "dashboard",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §7",
+    "statement": "receivable = revenue − collected."
+  },
+  "DASH-BANKIN": {
+    "group": "dashboard",
+    "severity": "critical",
+    "hero": true,
+    "source": "CLAUDE.md §6",
+    "statement": "bankIn = Σ amount mọi movement direction=IN, bất kể status."
+  },
+  "DASH-COUNTS": {
+    "group": "dashboard",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §7",
+    "statement": "draftCount = số event DRAFT; unmatchedMoneyCount = số movement UNMATCHED."
+  },
+  "DASH-DATE-FILTER": {
+    "group": "dashboard",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §7 + §2",
+    "statement": "Lọc theo occurredAt[:10]; thiếu date = hôm nay Asia/Ho_Chi_Minh."
+  },
+  "DASH-SHAPE": {
+    "group": "dashboard",
+    "severity": "minor",
+    "hero": false,
+    "source": "contract/fixtures/dashboard.json",
+    "statement": "Dashboard đúng 8 key, mọi số là int."
+  },
+  "CLOSE-WARNING-ID": {
+    "group": "closeday",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "warningId = 'DRAFT_EVENT:{eventId}' | 'UNMATCHED_MONEY:{movementId}'."
+  },
+  "CLOSE-WARNING-SCOPE": {
+    "group": "closeday",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "Chỉ event DRAFT và movement UNMATCHED sinh warning."
+  },
+  "CLOSE-COUNT-OPEN-ONLY": {
+    "group": "closeday",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "warningCount = số warning OPEN."
+  },
+  "CLOSE-SUMMARY": {
+    "group": "closeday",
+    "severity": "critical",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8 + contract/fixtures/daily_record.json",
+    "statement": "summary lồng đúng 4 key và trùng khít dashboard cùng ngày."
+  },
+  "CLOSE-RESOLVE": {
+    "group": "closeday",
+    "severity": "critical",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "Sau confirm/reject/match/classify: warning OPEN trùng resourceId → RESOLVED + resolvedAt, recompute summary."
+  },
+  "CLOSE-KEEP-CLOSEDAT": {
+    "group": "closeday",
+    "severity": "minor",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "resolve_warnings cập nhật updatedAt, giữ nguyên closedAt."
+  },
+  "CLOSE-UPSERT": {
+    "group": "closeday",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "Đóng lại cùng ngày: upsert 1 record, warning RESOLVED giữ nguyên, warning mới thêm vào, không trùng warningId."
+  },
+  "CLOSE-HISTORY": {
+    "group": "closeday",
+    "severity": "minor",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §8",
+    "statement": "GET /daily-records sort date giảm dần; ngày chưa đóng → 404 NOT_FOUND."
+  },
+  "ERR-CODE-CONFORM": {
+    "group": "errors",
+    "severity": "major",
+    "hero": false,
+    "source": "contract/README.md §3",
+    "statement": "Lỗi trả đúng cặp (HTTP, code) và có message."
+  },
+  "EVENT-PUT-ECHO": {
+    "group": "events",
+    "severity": "major",
+    "hero": false,
+    "source": "contract/endpoints.md",
+    "statement": "PUT /events/{id} khi DRAFT áp dụng đúng 7 field được phép."
+  },
+  "DATE-FROM-DOCUMENT": {
+    "group": "date",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §12 · CLAUDE.md §6 (Phase 2 ②)",
+    "statement": "Ảnh: occurredAt = ngày in trên chứng từ; text/voice chỉ khi nói rõ, còn lại now(); ngoài [now−365d, now+1d] → now()."
+  },
+  "CAPTURE-RESULT-SHAPE": {
+    "group": "date",
+    "severity": "major",
+    "hero": false,
+    "source": "contract/README.md §5 (Phase 2)",
+    "statement": "CaptureResult có đủ captureId, status, resultType, resultId, resultIds, skippedCount, occurredAt, error."
+  },
+  "DASH-PAST-COUNTS": {
+    "group": "dashboard",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §14",
+    "statement": "pastDraftCount / pastUnmatchedCount đếm DRAFT / UNMATCHED có ngày < date đang xem."
+  },
+  "SYNC-RECORD": {
+    "group": "closeday",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §12",
+    "statement": "sync_record chạy sau mọi tạo/confirm/reject/match/classify trên ngày của bản ghi: record đã đóng thì thêm warning mới, warning hết lý do → RESOLVED, recompute summary; ngày chưa đóng thì không tạo record."
+  },
+  "REPORT-SUMMARY": {
+    "group": "report",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §13",
+    "statement": "reports.summary phải bằng tổng byDay; days = số ngày trong khoảng."
+  },
+  "REPORT-BYDAY": {
+    "group": "report",
+    "severity": "major",
+    "hero": false,
+    "source": "contract/endpoints.md (Phase 2 ④)",
+    "statement": "byDay chỉ gồm ngày có ≥1 event hoặc movement, sort date giảm dần."
+  },
+  "REPORT-BYTYPE": {
+    "group": "report",
+    "severity": "minor",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §13",
+    "statement": "byType gộp event CONFIRMED theo type, bỏ type không có dữ liệu."
+  },
+  "REPORT-VALIDATION": {
+    "group": "report",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §13",
+    "statement": "to < from hoặc khoảng > 92 ngày → 400 VALIDATION_ERROR."
+  },
+  "PENDING-CONTENT": {
+    "group": "pending",
+    "severity": "major",
+    "hero": false,
+    "source": "contract/endpoints.md (Phase 2 ③a)",
+    "statement": "pending gồm draftEvents + unmatchedMovements MỌI ngày, occurredAt tăng dần, movement kèm candidates."
+  },
+  "PENDING-SYNC": {
+    "group": "pending",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §14",
+    "statement": "Xử lý một mục tồn đọng thì nó biến khỏi pending và khỏi past*Count."
+  },
+  "BATCH-RESULT": {
+    "group": "batch",
+    "severity": "critical",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §15",
+    "statement": "IMAGE_BANK_HISTORY → resultType MONEY_MOVEMENT_BATCH, resultIds = movement mới, skippedCount = dòng trùng."
+  },
+  "BATCH-DEDUPE": {
+    "group": "batch",
+    "severity": "critical",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §15",
+    "statement": "Gửi lại cùng ảnh → không tạo movement nào, resultIds rỗng, skippedCount = tổng số dòng."
+  },
+  "BATCH-REJECT-NON-LIST": {
+    "group": "batch",
+    "severity": "major",
+    "hero": false,
+    "source": "implement-plan-backend-poc.md §15",
+    "statement": "Ảnh không phải danh sách giao dịch (hóa đơn, ảnh CK đơn lẻ) → FAILED UNRECOGNIZED_IMAGE, không tạo movement rác."
+  },
+  "DASH-BANKIN-IN-ONLY": {
+    "group": "dashboard",
+    "severity": "critical",
+    "hero": true,
+    "source": "implement-plan-backend-poc.md §7 · CLAUDE.md §6",
+    "statement": "bankIn chỉ cộng movement direction=IN; dòng chuyển đi (OUT) không được cộng vào tiền vào."
+  }
+}
