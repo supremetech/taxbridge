@@ -1,0 +1,222 @@
+{
+  "scenarioId": "SC-HERO",
+  "title": "Ghép / phân loại tiền vào — hero moment",
+  "intent": "Câu chốt của cả sản phẩm: tiền vào ngân hàng tăng nhưng doanh thu KHÔNG đổi. Nếu classify chạm vào revenue thì banner 'Tiền vào +380.000đ · Doanh thu không đổi ✓' trên Home đang nói dối. Còn match phải kéo theo đúng ba hệ quả: movement MATCHED, event thành PAID, collected tăng đúng bằng số tiền.",
+  "ruleRefs": ["MATCH-EFFECT-MOVEMENT", "MATCH-EFFECT-EVENT", "CLS-EFFECT", "CLS-REVENUE-INVARIANT", "STATE-INVALID-409", "DASH-BANKIN", "CAND-ONLY-WHEN-UNMATCHED", "ERR-CODE-CONFORM"],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-match-effects",
+      "name": "UC4: ghép tiền vào với đơn đã xác nhận",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "mv0", "call": "GET /api/money-movements/${movId}", "save": {"AMT": "$.amount"}},
+        {"id": "ev", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don ban cho chi Lan", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "dashBefore", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "eventsBefore", "call": "GET /api/events"},
+        {"id": "match", "call": "POST /api/money-movements/${movId}/match", "json": {"eventId": "${ev}"}},
+        {"id": "ev2", "call": "GET /api/events/${ev}"},
+        {"id": "dashAfter", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "eventsAfter", "call": "GET /api/events"}
+      ],
+      "expect": [
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "match.status", "op": "eq", "value": 200},
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "match", "path": "status", "op": "eq", "value": "MATCHED"},
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "match", "path": "matchedEventId", "op": "eq", "value": "${ev}"},
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "match", "path": "classificationType", "op": "isNull", "note": "match không được lây sang classify"},
+        {"rule": "CAND-ONLY-WHEN-UNMATCHED", "target": "match", "path": "candidates", "op": "len", "value": 0},
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "match", "path": "amount", "op": "eq", "value": "${AMT}", "note": "match không được sửa số tiền"},
+        {"rule": "MATCH-EFFECT-EVENT", "target": "ev2", "path": "paymentStatus", "op": "eq", "value": "PAID"},
+        {"rule": "MATCH-EFFECT-EVENT", "target": "ev2", "path": "status", "op": "eq", "value": "CONFIRMED", "note": "vẫn CONFIRMED, không nhảy trạng thái khác"},
+        {"rule": "MATCH-EFFECT-EVENT", "target": "ev2", "path": "amount", "op": "eq", "value": "${AMT}"},
+        {"rule": "DASH-COLLECTED", "op": "delta", "from": "dashBefore", "to": "dashAfter", "path": "collected", "value": "${AMT}"},
+        {"rule": "DASH-RECEIVABLE", "op": "delta", "from": "dashBefore", "to": "dashAfter", "path": "receivable", "value": "${-AMT}"},
+        {"rule": "DASH-REVENUE", "op": "delta", "from": "dashBefore", "to": "dashAfter", "path": "revenue", "value": 0, "note": "ghép tiền không tạo thêm doanh thu"},
+        {"rule": "DASH-BANKIN", "op": "delta", "from": "dashBefore", "to": "dashAfter", "path": "bankIn", "value": 0, "note": "bankIn đã cộng từ lúc capture, không cộng lần hai"},
+        {"rule": "DASH-COUNTS", "op": "delta", "from": "dashBefore", "to": "dashAfter", "path": "unmatchedMoneyCount", "value": -1},
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "eventsAfter", "path": "", "op": "len", "value": 1, "note": "match không tạo event mới"},
+        {"rule": "MATCH-EFFECT-MOVEMENT", "target": "eventsBefore", "path": "", "op": "len", "value": 1}
+      ]
+    },
+    {
+      "variationId": "V2-classify-deposit",
+      "name": "UC5 hero: đặt cọc 380k — dashboard chỉ được đổi đúng một key",
+      "mode": "assert",
+      "act": [
+        {"id": "ev", "seedEvent": {"type": "SALE", "amount": 1000000, "description": "don ban de revenue khac 0", "counterparty": "Khach A", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK đặt cọc"}]},
+        {"id": "dashBefore", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "eventsBefore", "call": "GET /api/events"},
+        {"id": "cls", "call": "POST /api/money-movements/${movId}/classify", "json": {"type": "DEPOSIT"}},
+        {"id": "dashAfter", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "eventsAfter", "call": "GET /api/events"},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"}
+      ],
+      "expect": [
+        {"rule": "CLS-EFFECT", "target": "cls.status", "op": "eq", "value": 200},
+        {"rule": "CLS-EFFECT", "target": "cls", "path": "status", "op": "eq", "value": "CLASSIFIED"},
+        {"rule": "CLS-EFFECT", "target": "cls", "path": "classificationType", "op": "eq", "value": "DEPOSIT"},
+        {"rule": "CLS-EFFECT", "target": "cls", "path": "matchedEventId", "op": "isNull"},
+        {"rule": "CAND-ONLY-WHEN-UNMATCHED", "target": "mov", "path": "candidates", "op": "len", "value": 0},
+        {"rule": "CLS-REVENUE-INVARIANT", "op": "diffOnlyKeys", "from": "dashBefore", "to": "dashAfter", "value": {"unmatchedMoneyCount": -1}, "note": "HERO: đúng một key được phép đổi; revenue/expense/collected/receivable/bankIn/draftCount y nguyên"},
+        {"rule": "CLS-REVENUE-INVARIANT", "target": "dashAfter", "path": "revenue", "op": "eq", "value": 1000000},
+        {"rule": "DASH-BANKIN", "target": "dashAfter", "path": "bankIn", "op": "eq", "value": 380000},
+        {"rule": "CLS-EFFECT", "target": "eventsAfter", "path": "", "op": "len", "value": 1, "note": "classify KHÔNG được tạo event"},
+        {"rule": "CLS-EFFECT", "target": "eventsBefore", "path": "", "op": "len", "value": 1}
+      ]
+    },
+    {
+      "variationId": "V3-classify-owner-money",
+      "name": "5 triệu chủ hộ tự chuyển — số lớn, rất dễ bị tính nhầm thành doanh thu",
+      "mode": "assert",
+      "act": [
+        {"id": "ev", "seedEvent": {"type": "SALE", "amount": 1000000, "description": "don ban de revenue khac 0", "counterparty": "Khach A", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M6"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK 5 triệu"}]},
+        {"id": "dashBefore", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "cls", "call": "POST /api/money-movements/${movId}/classify", "json": {"type": "OWNER_MONEY"}},
+        {"id": "dashAfter", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "events", "call": "GET /api/events"}
+      ],
+      "expect": [
+        {"rule": "CLS-EFFECT", "target": "cls", "path": "classificationType", "op": "eq", "value": "OWNER_MONEY"},
+        {"rule": "CLS-REVENUE-INVARIANT", "op": "diffOnlyKeys", "from": "dashBefore", "to": "dashAfter", "value": {"unmatchedMoneyCount": -1}},
+        {"rule": "CLS-REVENUE-INVARIANT", "target": "dashAfter", "path": "revenue", "op": "eq", "value": 1000000, "note": "5 triệu KHÔNG được vào doanh thu"},
+        {"rule": "DASH-BANKIN", "target": "dashAfter", "path": "bankIn", "op": "eq", "value": 5000000},
+        {"rule": "CLS-EFFECT", "target": "events", "path": "", "op": "len", "value": 1}
+      ]
+    },
+    {
+      "variationId": "V4-bankin-all-status",
+      "name": "bankIn cộng mọi movement IN bất kể status",
+      "mode": "assert",
+      "act": [
+        {"id": "up1", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"mov1": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M1"}]},
+        {"id": "g1", "call": "GET /api/money-movements/${mov1}", "save": {"AMT": "$.amount"}},
+        {"id": "up2", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"mov2": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M4"}]},
+        {"id": "up3", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M5"}, "save": {"mov3": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M5"}]},
+        {"id": "ev", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don de ghep", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "dash0", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "m1", "call": "POST /api/money-movements/${mov1}/match", "json": {"eventId": "${ev}"}},
+        {"id": "dash1", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "c2", "call": "POST /api/money-movements/${mov2}/classify", "json": {"type": "DEPOSIT"}},
+        {"id": "dash2", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "c3", "call": "POST /api/money-movements/${mov3}/classify", "json": {"type": "OTHER"}},
+        {"id": "dash3", "call": "GET /api/dashboard?date=${today}"}
+      ],
+      "expect": [
+        {"rule": "DASH-BANKIN", "target": "dash0", "path": "bankIn", "op": "eq", "value": 1530000, "note": "900k + 380k + 250k"},
+        {"rule": "DASH-BANKIN", "op": "delta", "from": "dash0", "to": "dash1", "path": "bankIn", "value": 0, "note": "MATCHED vẫn tính vào bankIn"},
+        {"rule": "DASH-BANKIN", "op": "delta", "from": "dash1", "to": "dash2", "path": "bankIn", "value": 0, "note": "CLASSIFIED vẫn tính vào bankIn"},
+        {"rule": "DASH-BANKIN", "target": "dash3", "path": "bankIn", "op": "eq", "value": 1530000},
+        {"rule": "DASH-COUNTS", "target": "dash0", "path": "unmatchedMoneyCount", "op": "eq", "value": 3},
+        {"rule": "DASH-COUNTS", "target": "dash1", "path": "unmatchedMoneyCount", "op": "eq", "value": 2},
+        {"rule": "DASH-COUNTS", "target": "dash2", "path": "unmatchedMoneyCount", "op": "eq", "value": 1},
+        {"rule": "DASH-COUNTS", "target": "dash3", "path": "unmatchedMoneyCount", "op": "eq", "value": 0},
+        {"rule": "CLS-REVENUE-INVARIANT", "target": "dash3", "path": "revenue", "op": "eq", "value": "${AMT}", "note": "chỉ đơn bán mới là doanh thu"}
+      ]
+    },
+    {
+      "variationId": "V5-state-guards",
+      "name": "Gọi lại match/classify sai trạng thái phải bị chặn và không đổi dữ liệu",
+      "mode": "assert",
+      "act": [
+        {"id": "up1", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"mov1": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M1"}]},
+        {"id": "g1", "call": "GET /api/money-movements/${mov1}", "save": {"AMT": "$.amount"}},
+        {"id": "up2", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"mov2": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M4"}]},
+        {"id": "ev", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don de ghep", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "match1", "call": "POST /api/money-movements/${mov1}/match", "json": {"eventId": "${ev}"}},
+        {"id": "cls2", "call": "POST /api/money-movements/${mov2}/classify", "json": {"type": "DEPOSIT"}},
+        {"id": "dashBefore", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "matchAgain", "call": "POST /api/money-movements/${mov1}/match", "json": {"eventId": "${ev}"}, "allowError": true},
+        {"id": "clsOnMatched", "call": "POST /api/money-movements/${mov1}/classify", "json": {"type": "OTHER"}, "allowError": true},
+        {"id": "matchOnClassified", "call": "POST /api/money-movements/${mov2}/match", "json": {"eventId": "${ev}"}, "allowError": true},
+        {"id": "clsAgain", "call": "POST /api/money-movements/${mov2}/classify", "json": {"type": "OWNER_MONEY"}, "allowError": true},
+        {"id": "mov1After", "call": "GET /api/money-movements/${mov1}"},
+        {"id": "mov2After", "call": "GET /api/money-movements/${mov2}"},
+        {"id": "dashAfter", "call": "GET /api/dashboard?date=${today}"}
+      ],
+      "expect": [
+        {"rule": "STATE-INVALID-409", "target": "matchAgain.status", "op": "eq", "value": 409},
+        {"rule": "ERR-CODE-CONFORM", "target": "matchAgain", "path": "code", "op": "eq", "value": "INVALID_STATE"},
+        {"rule": "ERR-CODE-CONFORM", "target": "matchAgain", "path": "message", "op": "notNull"},
+        {"rule": "STATE-INVALID-409", "target": "clsOnMatched.status", "op": "eq", "value": 409},
+        {"rule": "STATE-INVALID-409", "target": "matchOnClassified.status", "op": "eq", "value": 409},
+        {"rule": "STATE-INVALID-409", "target": "clsAgain.status", "op": "eq", "value": 409},
+        {"rule": "STATE-INVALID-409", "target": "mov1After", "path": "status", "op": "eq", "value": "MATCHED"},
+        {"rule": "STATE-INVALID-409", "target": "mov1After", "path": "classificationType", "op": "isNull"},
+        {"rule": "STATE-INVALID-409", "target": "mov2After", "path": "classificationType", "op": "eq", "value": "DEPOSIT", "note": "classify lần 2 bị chặn nên vẫn là DEPOSIT"},
+        {"rule": "STATE-INVALID-409", "op": "diffOnlyKeys", "from": "dashBefore", "to": "dashAfter", "value": {}, "note": "bốn lệnh bị chặn không được đổi bất kỳ con số nào"}
+      ]
+    },
+    {
+      "variationId": "V6-invalid-input",
+      "name": "Body sai của match/classify",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "clsBadEnum", "call": "POST /api/money-movements/${movId}/classify", "json": {"type": "SALE"}, "allowError": true},
+        {"id": "clsLower", "call": "POST /api/money-movements/${movId}/classify", "json": {"type": "deposit"}, "allowError": true},
+        {"id": "clsEmpty", "call": "POST /api/money-movements/${movId}/classify", "json": {}, "allowError": true},
+        {"id": "matchEmpty", "call": "POST /api/money-movements/${movId}/match", "json": {}, "allowError": true},
+        {"id": "matchGhost", "call": "POST /api/money-movements/${movId}/match", "json": {"eventId": "ev_khong_ton_tai"}, "allowError": true},
+        {"id": "movGhost", "call": "GET /api/money-movements/mov_khong_ton_tai", "allowError": true},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"}
+      ],
+      "expect": [
+        {"rule": "ERR-CODE-CONFORM", "target": "clsBadEnum.status", "op": "eq", "value": 400},
+        {"rule": "ERR-CODE-CONFORM", "target": "clsBadEnum", "path": "code", "op": "eq", "value": "VALIDATION_ERROR"},
+        {"rule": "ERR-CODE-CONFORM", "target": "clsLower.status", "op": "eq", "value": 400, "note": "enum phân biệt hoa/thường"},
+        {"rule": "ERR-CODE-CONFORM", "target": "clsEmpty.status", "op": "eq", "value": 400},
+        {"rule": "ERR-CODE-CONFORM", "target": "matchEmpty.status", "op": "eq", "value": 400},
+        {"rule": "ERR-CODE-CONFORM", "target": "matchGhost.status", "op": "eq", "value": 404},
+        {"rule": "ERR-CODE-CONFORM", "target": "matchGhost", "path": "code", "op": "eq", "value": "NOT_FOUND"},
+        {"rule": "ERR-CODE-CONFORM", "target": "movGhost.status", "op": "eq", "value": 404},
+        {"rule": "STATE-INVALID-409", "target": "mov", "path": "status", "op": "eq", "value": "UNMATCHED", "note": "mọi lệnh sai đều không được đổi trạng thái"},
+        {"rule": "STATE-INVALID-409", "target": "mov", "path": "classificationType", "op": "isNull"}
+      ]
+    },
+    {
+      "variationId": "P2-match-target",
+      "name": "PROBE — match vào event không đủ điều kiện thì sao",
+      "mode": "probe",
+      "probe": {
+        "question": "Spec không định nghĩa: match vào event DRAFT / PURCHASE / đã PAID được chấp nhận hay 409? Mỗi target dùng MỘT movement riêng, nếu không thì lệnh thứ hai sẽ nhận 409 vì movement đã MATCHED chứ không phải vì backend chặn target.",
+        "observe": ["mDraft.status", "mPurchase.status", "mPaid.status", "evDraftAfter.status", "evDraftAfter.paymentStatus", "dashAfter.revenue", "dashAfter.collected"],
+        "impact": "Match vào event DRAFT ⇒ đơn thành DRAFT + PAID: không vào doanh thu nhưng đã coi như thu tiền, và warning DRAFT_EVENT vẫn treo. Match vào event đã PAID ⇒ hai khoản tiền cùng trỏ một đơn, collected chỉ tăng một lần."
+      },
+      "act": [
+        {"id": "up1", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"mov1": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M1"}]},
+        {"id": "up2", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"mov2": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M4"}]},
+        {"id": "up3", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M5"}, "save": {"mov3": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được M5"}]},
+        {"id": "evDraft", "seedEvent": {"type": "SALE", "amount": 900000, "description": "don con DRAFT", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": false}},
+        {"id": "evPurchase", "seedEvent": {"type": "PURCHASE", "amount": 380000, "description": "don mua hang", "counterparty": "NCC", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "evPaid", "seedEvent": {"type": "SALE", "amount": 250000, "description": "don da thu tien", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "PAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "mDraft", "call": "POST /api/money-movements/${mov1}/match", "json": {"eventId": "${evDraft}"}, "allowError": true},
+        {"id": "mPurchase", "call": "POST /api/money-movements/${mov2}/match", "json": {"eventId": "${evPurchase}"}, "allowError": true},
+        {"id": "mPaid", "call": "POST /api/money-movements/${mov3}/match", "json": {"eventId": "${evPaid}"}, "allowError": true},
+        {"id": "evDraftAfter", "call": "GET /api/events/${evDraft}"},
+        {"id": "dashAfter", "call": "GET /api/dashboard?date=${today}"},
+        {"id": "close", "call": "POST /api/close-day", "json": {"date": "${today}"}}
+      ],
+      "expect": [
+        {"rule": "ERR-CODE-CONFORM", "target": "mDraft.status", "op": "neq", "value": 500, "note": "dù chốt thế nào cũng không được 5xx"},
+        {"rule": "ERR-CODE-CONFORM", "target": "mPurchase.status", "op": "neq", "value": 500},
+        {"rule": "ERR-CODE-CONFORM", "target": "mPaid.status", "op": "neq", "value": 500},
+        {"rule": "DASH-RECEIVABLE", "target": "dashAfter", "path": "receivable", "op": "eq", "value": 0, "note": "bất biến số học phải đúng bất kể match target nào được chấp nhận: revenue 250k − collected 250k"}
+      ]
+    }
+  ]
+}

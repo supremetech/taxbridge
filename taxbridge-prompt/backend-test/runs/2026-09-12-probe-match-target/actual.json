@@ -1,0 +1,2465 @@
+{
+  "SC-HERO": {
+    "V1-match-effects": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "match.status",
+          "op": "eq",
+          "value": 200,
+          "ok": true,
+          "actual": "200"
+        },
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "match",
+          "path": "status",
+          "op": "eq",
+          "value": "MATCHED",
+          "ok": true,
+          "actual": "'MATCHED'"
+        },
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "match",
+          "path": "matchedEventId",
+          "op": "eq",
+          "value": "ev_5241a5add308",
+          "ok": true,
+          "actual": "'ev_5241a5add308'"
+        },
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "match",
+          "path": "classificationType",
+          "op": "isNull",
+          "note": "match không được lây sang classify",
+          "ok": true,
+          "actual": "None"
+        },
+        {
+          "rule": "CAND-ONLY-WHEN-UNMATCHED",
+          "target": "match",
+          "path": "candidates",
+          "op": "len",
+          "value": 0,
+          "ok": true,
+          "actual": "len=0 []"
+        },
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "match",
+          "path": "amount",
+          "op": "eq",
+          "value": 900000,
+          "note": "match không được sửa số tiền",
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "MATCH-EFFECT-EVENT",
+          "target": "ev2",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "MATCH-EFFECT-EVENT",
+          "target": "ev2",
+          "path": "status",
+          "op": "eq",
+          "value": "CONFIRMED",
+          "note": "vẫn CONFIRMED, không nhảy trạng thái khác",
+          "ok": true,
+          "actual": "'CONFIRMED'"
+        },
+        {
+          "rule": "MATCH-EFFECT-EVENT",
+          "target": "ev2",
+          "path": "amount",
+          "op": "eq",
+          "value": 900000,
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "DASH-COLLECTED",
+          "op": "delta",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "path": "collected",
+          "value": 900000,
+          "ok": true,
+          "actual": "0 → 900000 (delta 900000)"
+        },
+        {
+          "rule": "DASH-RECEIVABLE",
+          "op": "delta",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "path": "receivable",
+          "value": -900000,
+          "ok": true,
+          "actual": "900000 → 0 (delta -900000)"
+        },
+        {
+          "rule": "DASH-REVENUE",
+          "op": "delta",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "path": "revenue",
+          "value": 0,
+          "note": "ghép tiền không tạo thêm doanh thu",
+          "ok": true,
+          "actual": "900000 → 900000 (delta 0)"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "op": "delta",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "path": "bankIn",
+          "value": 0,
+          "note": "bankIn đã cộng từ lúc capture, không cộng lần hai",
+          "ok": true,
+          "actual": "900000 → 900000 (delta 0)"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "op": "delta",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "path": "unmatchedMoneyCount",
+          "value": -1,
+          "ok": true,
+          "actual": "1 → 0 (delta -1)"
+        },
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "eventsAfter",
+          "path": "",
+          "op": "len",
+          "value": 1,
+          "note": "match không tạo event mới",
+          "ok": true,
+          "actual": "len=1 [{'amount': 900000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': 'chị Lan', 'description': 'don ban cho chi Lan', 'eventId': 'ev_5241a5add308', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:00:00+07:00', 'paymentMethod': 'BANK', 'paymentStatus': 'PAID', 'source': 'APP', 'status': 'CONFIRMED', 'type': 'SALE'}]"
+        },
+        {
+          "rule": "MATCH-EFFECT-MOVEMENT",
+          "target": "eventsBefore",
+          "path": "",
+          "op": "len",
+          "value": 1,
+          "ok": true,
+          "actual": "len=1 [{'amount': 900000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': 'chị Lan', 'description': 'don ban cho chi Lan', 'eventId': 'ev_5241a5add308', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:00:00+07:00', 'paymentMethod': 'BANK', 'paymentStatus': 'UNPAID', 'source': 'APP', 'status': 'CONFIRMED', 'type': 'SALE'}]"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 900000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don ban cho chi Lan",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don ban cho chi Lan'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "chị Lan",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'chị Lan'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "up": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_0367ae11e02d",
+            "error": null,
+            "resultId": "mov_f6ee28930fed",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 2837
+        },
+        "mv0": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_2f5370b9cd19%2Fcap_0367ae11e02d.png?alt=media&token=0650147b93ad44cb9305cc55d2a48864",
+            "matchedEventId": null,
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_f6ee28930fed",
+            "occurredAt": "2026-09-12T12:54:08+07:00",
+            "source": "APP",
+            "status": "UNMATCHED"
+          },
+          "ms": 312
+        },
+        "ev__put": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don ban cho chi Lan",
+            "eventId": "ev_5241a5add308",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 294
+        },
+        "ev": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don ban cho chi Lan",
+            "eventId": "ev_5241a5add308",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 294
+        },
+        "dashBefore": {
+          "status": 200,
+          "body": {
+            "bankIn": 900000,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 900000,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 1
+          },
+          "ms": 301
+        },
+        "eventsBefore": {
+          "status": 200,
+          "body": [
+            {
+              "amount": 900000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": "chị Lan",
+              "description": "don ban cho chi Lan",
+              "eventId": "ev_5241a5add308",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:00:00+07:00",
+              "paymentMethod": "BANK",
+              "paymentStatus": "UNPAID",
+              "source": "APP",
+              "status": "CONFIRMED",
+              "type": "SALE"
+            }
+          ],
+          "ms": 281
+        },
+        "match": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_2f5370b9cd19%2Fcap_0367ae11e02d.png?alt=media&token=0650147b93ad44cb9305cc55d2a48864",
+            "matchedEventId": "ev_5241a5add308",
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_f6ee28930fed",
+            "occurredAt": "2026-09-12T12:54:08+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 382
+        },
+        "ev2": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don ban cho chi Lan",
+            "eventId": "ev_5241a5add308",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "CONFIRMED",
+            "type": "SALE"
+          },
+          "ms": 260
+        },
+        "dashAfter": {
+          "status": 200,
+          "body": {
+            "bankIn": 900000,
+            "collected": 900000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 288
+        },
+        "eventsAfter": {
+          "status": 200,
+          "body": [
+            {
+              "amount": 900000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": "chị Lan",
+              "description": "don ban cho chi Lan",
+              "eventId": "ev_5241a5add308",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:00:00+07:00",
+              "paymentMethod": "BANK",
+              "paymentStatus": "PAID",
+              "source": "APP",
+              "status": "CONFIRMED",
+              "type": "SALE"
+            }
+          ],
+          "ms": 262
+        }
+      },
+      "durationMs": 7360,
+      "mode": "assert"
+    },
+    "V2-classify-deposit": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "CLS-EFFECT",
+          "target": "cls.status",
+          "op": "eq",
+          "value": 200,
+          "ok": true,
+          "actual": "200"
+        },
+        {
+          "rule": "CLS-EFFECT",
+          "target": "cls",
+          "path": "status",
+          "op": "eq",
+          "value": "CLASSIFIED",
+          "ok": true,
+          "actual": "'CLASSIFIED'"
+        },
+        {
+          "rule": "CLS-EFFECT",
+          "target": "cls",
+          "path": "classificationType",
+          "op": "eq",
+          "value": "DEPOSIT",
+          "ok": true,
+          "actual": "'DEPOSIT'"
+        },
+        {
+          "rule": "CLS-EFFECT",
+          "target": "cls",
+          "path": "matchedEventId",
+          "op": "isNull",
+          "ok": true,
+          "actual": "None"
+        },
+        {
+          "rule": "CAND-ONLY-WHEN-UNMATCHED",
+          "target": "mov",
+          "path": "candidates",
+          "op": "len",
+          "value": 0,
+          "ok": true,
+          "actual": "len=0 []"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "op": "diffOnlyKeys",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "value": {
+            "unmatchedMoneyCount": -1
+          },
+          "note": "HERO: đúng một key được phép đổi; revenue/expense/collected/receivable/bankIn/draftCount y nguyên",
+          "ok": true,
+          "actual": "đổi: {'unmatchedMoneyCount': [1, 0]}"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "target": "dashAfter",
+          "path": "revenue",
+          "op": "eq",
+          "value": 1000000,
+          "ok": true,
+          "actual": "1000000"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "target": "dashAfter",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 380000,
+          "ok": true,
+          "actual": "380000"
+        },
+        {
+          "rule": "CLS-EFFECT",
+          "target": "eventsAfter",
+          "path": "",
+          "op": "len",
+          "value": 1,
+          "note": "classify KHÔNG được tạo event",
+          "ok": true,
+          "actual": "len=1 [{'amount': 1000000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': 'Khach A', 'description': 'don ban de revenue khac 0', 'eventId': 'ev_da69107b136b', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:00:00+07:00', 'paymentMethod': 'BANK', 'paymentStatus': 'UNPAID', 'source': 'APP', 'status': 'CONFIRMED', 'type': 'SALE'}]"
+        },
+        {
+          "rule": "CLS-EFFECT",
+          "target": "eventsBefore",
+          "path": "",
+          "op": "len",
+          "value": 1,
+          "ok": true,
+          "actual": "len=1 [{'amount': 1000000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': 'Khach A', 'description': 'don ban de revenue khac 0', 'eventId': 'ev_da69107b136b', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:00:00+07:00', 'paymentMethod': 'BANK', 'paymentStatus': 'UNPAID', 'source': 'APP', 'status': 'CONFIRMED', 'type': 'SALE'}]"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 1000000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "1000000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don ban de revenue khac 0",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don ban de revenue khac 0'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "Khach A",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'Khach A'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "ev__put": {
+          "status": 200,
+          "body": {
+            "amount": 1000000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach A",
+            "description": "don ban de revenue khac 0",
+            "eventId": "ev_da69107b136b",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 343
+        },
+        "ev": {
+          "status": 200,
+          "body": {
+            "amount": 1000000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach A",
+            "description": "don ban de revenue khac 0",
+            "eventId": "ev_da69107b136b",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 343
+        },
+        "up": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_0d27ad41af23",
+            "error": null,
+            "resultId": "mov_7a6925ac17d6",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 1879
+        },
+        "dashBefore": {
+          "status": 200,
+          "body": {
+            "bankIn": 380000,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 1000000,
+            "revenue": 1000000,
+            "unmatchedMoneyCount": 1
+          },
+          "ms": 284
+        },
+        "eventsBefore": {
+          "status": 200,
+          "body": [
+            {
+              "amount": 1000000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": "Khach A",
+              "description": "don ban de revenue khac 0",
+              "eventId": "ev_da69107b136b",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:00:00+07:00",
+              "paymentMethod": "BANK",
+              "paymentStatus": "UNPAID",
+              "source": "APP",
+              "status": "CONFIRMED",
+              "type": "SALE"
+            }
+          ],
+          "ms": 288
+        },
+        "cls": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "DEPOSIT",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_3f84d56c537d%2Fcap_0d27ad41af23.png?alt=media&token=23a672bf7c794e5b9531bcbb3f78258c",
+            "matchedEventId": null,
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_7a6925ac17d6",
+            "occurredAt": "2026-09-12T12:54:18+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 305
+        },
+        "dashAfter": {
+          "status": 200,
+          "body": {
+            "bankIn": 380000,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 1000000,
+            "revenue": 1000000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 291
+        },
+        "eventsAfter": {
+          "status": 200,
+          "body": [
+            {
+              "amount": 1000000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": "Khach A",
+              "description": "don ban de revenue khac 0",
+              "eventId": "ev_da69107b136b",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:00:00+07:00",
+              "paymentMethod": "BANK",
+              "paymentStatus": "UNPAID",
+              "source": "APP",
+              "status": "CONFIRMED",
+              "type": "SALE"
+            }
+          ],
+          "ms": 282
+        },
+        "mov": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "DEPOSIT",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_3f84d56c537d%2Fcap_0d27ad41af23.png?alt=media&token=23a672bf7c794e5b9531bcbb3f78258c",
+            "matchedEventId": null,
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_7a6925ac17d6",
+            "occurredAt": "2026-09-12T12:54:18+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 282
+        }
+      },
+      "durationMs": 6154,
+      "mode": "assert"
+    },
+    "V3-classify-owner-money": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "CLS-EFFECT",
+          "target": "cls",
+          "path": "classificationType",
+          "op": "eq",
+          "value": "OWNER_MONEY",
+          "ok": true,
+          "actual": "'OWNER_MONEY'"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "op": "diffOnlyKeys",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "value": {
+            "unmatchedMoneyCount": -1
+          },
+          "ok": true,
+          "actual": "đổi: {'unmatchedMoneyCount': [1, 0]}"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "target": "dashAfter",
+          "path": "revenue",
+          "op": "eq",
+          "value": 1000000,
+          "note": "5 triệu KHÔNG được vào doanh thu",
+          "ok": true,
+          "actual": "1000000"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "target": "dashAfter",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 5000000,
+          "ok": true,
+          "actual": "5000000"
+        },
+        {
+          "rule": "CLS-EFFECT",
+          "target": "events",
+          "path": "",
+          "op": "len",
+          "value": 1,
+          "ok": true,
+          "actual": "len=1 [{'amount': 1000000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': 'Khach A', 'description': 'don ban de revenue khac 0', 'eventId': 'ev_ad24c6d729ab', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:00:00+07:00', 'paymentMethod': 'BANK', 'paymentStatus': 'UNPAID', 'source': 'APP', 'status': 'CONFIRMED', 'type': 'SALE'}]"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 1000000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "1000000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don ban de revenue khac 0",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don ban de revenue khac 0'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "Khach A",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'Khach A'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "ev__put": {
+          "status": 200,
+          "body": {
+            "amount": 1000000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach A",
+            "description": "don ban de revenue khac 0",
+            "eventId": "ev_ad24c6d729ab",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 260
+        },
+        "ev": {
+          "status": 200,
+          "body": {
+            "amount": 1000000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach A",
+            "description": "don ban de revenue khac 0",
+            "eventId": "ev_ad24c6d729ab",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 260
+        },
+        "up": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_30b5e8a52f3d",
+            "error": null,
+            "resultId": "mov_921dd03526b4",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 3273
+        },
+        "dashBefore": {
+          "status": 200,
+          "body": {
+            "bankIn": 5000000,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 1000000,
+            "revenue": 1000000,
+            "unmatchedMoneyCount": 1
+          },
+          "ms": 264
+        },
+        "cls": {
+          "status": 200,
+          "body": {
+            "amount": 5000000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "OWNER_MONEY",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_6c8ae053e24c%2Fcap_30b5e8a52f3d.png?alt=media&token=74c43cd6af8940c49a7cc55b7f6c051c",
+            "matchedEventId": null,
+            "memo": "CHUYEN QUY BAN HANG",
+            "movementId": "mov_921dd03526b4",
+            "occurredAt": "2026-09-12T12:54:26+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 293
+        },
+        "dashAfter": {
+          "status": 200,
+          "body": {
+            "bankIn": 5000000,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 1000000,
+            "revenue": 1000000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 262
+        },
+        "events": {
+          "status": 200,
+          "body": [
+            {
+              "amount": 1000000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": "Khach A",
+              "description": "don ban de revenue khac 0",
+              "eventId": "ev_ad24c6d729ab",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:00:00+07:00",
+              "paymentMethod": "BANK",
+              "paymentStatus": "UNPAID",
+              "source": "APP",
+              "status": "CONFIRMED",
+              "type": "SALE"
+            }
+          ],
+          "ms": 270
+        }
+      },
+      "durationMs": 6776,
+      "mode": "assert"
+    },
+    "V4-bankin-all-status": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "DASH-BANKIN",
+          "target": "dash0",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 1530000,
+          "note": "900k + 380k + 250k",
+          "ok": true,
+          "actual": "1530000"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "op": "delta",
+          "from": "dash0",
+          "to": "dash1",
+          "path": "bankIn",
+          "value": 0,
+          "note": "MATCHED vẫn tính vào bankIn",
+          "ok": true,
+          "actual": "1530000 → 1530000 (delta 0)"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "op": "delta",
+          "from": "dash1",
+          "to": "dash2",
+          "path": "bankIn",
+          "value": 0,
+          "note": "CLASSIFIED vẫn tính vào bankIn",
+          "ok": true,
+          "actual": "1530000 → 1530000 (delta 0)"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "target": "dash3",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 1530000,
+          "ok": true,
+          "actual": "1530000"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash0",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 3,
+          "ok": true,
+          "actual": "3"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash1",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 2,
+          "ok": true,
+          "actual": "2"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash2",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 1,
+          "ok": true,
+          "actual": "1"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash3",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "CLS-REVENUE-INVARIANT",
+          "target": "dash3",
+          "path": "revenue",
+          "op": "eq",
+          "value": 900000,
+          "note": "chỉ đơn bán mới là doanh thu",
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 900000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don de ghep",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don de ghep'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "chị Lan",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'chị Lan'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "up1": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_2e0f5867f3c2",
+            "error": null,
+            "resultId": "mov_55103e880590",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 3102
+        },
+        "g1": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_31164ff6bad4%2Fcap_2e0f5867f3c2.png?alt=media&token=a14428ae41094b178be5a8e80400ba54",
+            "matchedEventId": null,
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_55103e880590",
+            "occurredAt": "2026-09-12T12:54:30+07:00",
+            "source": "APP",
+            "status": "UNMATCHED"
+          },
+          "ms": 253
+        },
+        "up2": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_91de4da5830f",
+            "error": null,
+            "resultId": "mov_5e53d763ccec",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 1753
+        },
+        "up3": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_2e4f54cea728",
+            "error": null,
+            "resultId": "mov_fa6c07a00477",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 1947
+        },
+        "ev__put": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don de ghep",
+            "eventId": "ev_cca426d6bc1b",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 322
+        },
+        "ev": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don de ghep",
+            "eventId": "ev_cca426d6bc1b",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 322
+        },
+        "dash0": {
+          "status": 200,
+          "body": {
+            "bankIn": 1530000,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 900000,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 3
+          },
+          "ms": 252
+        },
+        "m1": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_31164ff6bad4%2Fcap_2e0f5867f3c2.png?alt=media&token=a14428ae41094b178be5a8e80400ba54",
+            "matchedEventId": "ev_cca426d6bc1b",
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_55103e880590",
+            "occurredAt": "2026-09-12T12:54:30+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 309
+        },
+        "dash1": {
+          "status": 200,
+          "body": {
+            "bankIn": 1530000,
+            "collected": 900000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 2
+          },
+          "ms": 285
+        },
+        "c2": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "DEPOSIT",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_31164ff6bad4%2Fcap_91de4da5830f.png?alt=media&token=18aa061f1ba54f9e9efdc089ae74d78b",
+            "matchedEventId": null,
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_5e53d763ccec",
+            "occurredAt": "2026-09-12T12:54:32+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 290
+        },
+        "dash2": {
+          "status": 200,
+          "body": {
+            "bankIn": 1530000,
+            "collected": 900000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 1
+          },
+          "ms": 277
+        },
+        "c3": {
+          "status": 200,
+          "body": {
+            "amount": 250000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "OTHER",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_31164ff6bad4%2Fcap_2e4f54cea728.jpg?alt=media&token=9a636ef3b98942298e88f2f129640255",
+            "matchedEventId": null,
+            "memo": "ck",
+            "movementId": "mov_fa6c07a00477",
+            "occurredAt": "2026-09-12T12:54:34+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 330
+        },
+        "dash3": {
+          "status": 200,
+          "body": {
+            "bankIn": 1530000,
+            "collected": 900000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 290
+        }
+      },
+      "durationMs": 12027,
+      "mode": "assert"
+    },
+    "V5-state-guards": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "matchAgain.status",
+          "op": "eq",
+          "value": 409,
+          "ok": true,
+          "actual": "409"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "matchAgain",
+          "path": "code",
+          "op": "eq",
+          "value": "INVALID_STATE",
+          "ok": true,
+          "actual": "'INVALID_STATE'"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "matchAgain",
+          "path": "message",
+          "op": "notNull",
+          "ok": true,
+          "actual": "'Khoản tiền đã được xử lý.'"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "clsOnMatched.status",
+          "op": "eq",
+          "value": 409,
+          "ok": true,
+          "actual": "409"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "matchOnClassified.status",
+          "op": "eq",
+          "value": 409,
+          "ok": true,
+          "actual": "409"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "clsAgain.status",
+          "op": "eq",
+          "value": 409,
+          "ok": true,
+          "actual": "409"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "mov1After",
+          "path": "status",
+          "op": "eq",
+          "value": "MATCHED",
+          "ok": true,
+          "actual": "'MATCHED'"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "mov1After",
+          "path": "classificationType",
+          "op": "isNull",
+          "ok": true,
+          "actual": "None"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "mov2After",
+          "path": "classificationType",
+          "op": "eq",
+          "value": "DEPOSIT",
+          "note": "classify lần 2 bị chặn nên vẫn là DEPOSIT",
+          "ok": true,
+          "actual": "'DEPOSIT'"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "op": "diffOnlyKeys",
+          "from": "dashBefore",
+          "to": "dashAfter",
+          "value": {},
+          "note": "bốn lệnh bị chặn không được đổi bất kỳ con số nào",
+          "ok": true,
+          "actual": "đổi: không key nào"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 900000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don de ghep",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don de ghep'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "chị Lan",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'chị Lan'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "ev__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "up1": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_31e11f1847bb",
+            "error": null,
+            "resultId": "mov_55da3ee535c2",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 2204
+        },
+        "g1": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_78a965947c64%2Fcap_31e11f1847bb.png?alt=media&token=8c8dc684e5bb4b9cba878dd7ee609662",
+            "matchedEventId": null,
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_55da3ee535c2",
+            "occurredAt": "2026-09-12T12:54:42+07:00",
+            "source": "APP",
+            "status": "UNMATCHED"
+          },
+          "ms": 311
+        },
+        "up2": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_a0175800d167",
+            "error": null,
+            "resultId": "mov_14202b23fad1",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 1726
+        },
+        "ev__put": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don de ghep",
+            "eventId": "ev_382a2a63ad53",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 270
+        },
+        "ev": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don de ghep",
+            "eventId": "ev_382a2a63ad53",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 270
+        },
+        "match1": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_78a965947c64%2Fcap_31e11f1847bb.png?alt=media&token=8c8dc684e5bb4b9cba878dd7ee609662",
+            "matchedEventId": "ev_382a2a63ad53",
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_55da3ee535c2",
+            "occurredAt": "2026-09-12T12:54:42+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 312
+        },
+        "cls2": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "DEPOSIT",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_78a965947c64%2Fcap_a0175800d167.png?alt=media&token=650a3e019f2a45a2b19bf49a9b9b2d5d",
+            "matchedEventId": null,
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_14202b23fad1",
+            "occurredAt": "2026-09-12T12:54:44+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 284
+        },
+        "dashBefore": {
+          "status": 200,
+          "body": {
+            "bankIn": 1280000,
+            "collected": 900000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 261
+        },
+        "matchAgain": {
+          "status": 409,
+          "body": {
+            "code": "INVALID_STATE",
+            "message": "Khoản tiền đã được xử lý."
+          },
+          "ms": 227
+        },
+        "clsOnMatched": {
+          "status": 409,
+          "body": {
+            "code": "INVALID_STATE",
+            "message": "Khoản tiền đã được xử lý."
+          },
+          "ms": 240
+        },
+        "matchOnClassified": {
+          "status": 409,
+          "body": {
+            "code": "INVALID_STATE",
+            "message": "Khoản tiền đã được xử lý."
+          },
+          "ms": 246
+        },
+        "clsAgain": {
+          "status": 409,
+          "body": {
+            "code": "INVALID_STATE",
+            "message": "Khoản tiền đã được xử lý."
+          },
+          "ms": 253
+        },
+        "mov1After": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_78a965947c64%2Fcap_31e11f1847bb.png?alt=media&token=8c8dc684e5bb4b9cba878dd7ee609662",
+            "matchedEventId": "ev_382a2a63ad53",
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_55da3ee535c2",
+            "occurredAt": "2026-09-12T12:54:42+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 264
+        },
+        "mov2After": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": "DEPOSIT",
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_78a965947c64%2Fcap_a0175800d167.png?alt=media&token=650a3e019f2a45a2b19bf49a9b9b2d5d",
+            "matchedEventId": null,
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_14202b23fad1",
+            "occurredAt": "2026-09-12T12:54:44+07:00",
+            "source": "APP",
+            "status": "CLASSIFIED"
+          },
+          "ms": 240
+        },
+        "dashAfter": {
+          "status": 200,
+          "body": {
+            "bankIn": 1280000,
+            "collected": 900000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 900000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 289
+        }
+      },
+      "durationMs": 9113,
+      "mode": "assert"
+    },
+    "V6-invalid-input": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "clsBadEnum.status",
+          "op": "eq",
+          "value": 400,
+          "ok": true,
+          "actual": "400"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "clsBadEnum",
+          "path": "code",
+          "op": "eq",
+          "value": "VALIDATION_ERROR",
+          "ok": true,
+          "actual": "'VALIDATION_ERROR'"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "clsLower.status",
+          "op": "eq",
+          "value": 400,
+          "note": "enum phân biệt hoa/thường",
+          "ok": true,
+          "actual": "400"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "clsEmpty.status",
+          "op": "eq",
+          "value": 400,
+          "ok": true,
+          "actual": "400"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "matchEmpty.status",
+          "op": "eq",
+          "value": 400,
+          "ok": true,
+          "actual": "400"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "matchGhost.status",
+          "op": "eq",
+          "value": 404,
+          "ok": true,
+          "actual": "404"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "matchGhost",
+          "path": "code",
+          "op": "eq",
+          "value": "NOT_FOUND",
+          "ok": true,
+          "actual": "'NOT_FOUND'"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "movGhost.status",
+          "op": "eq",
+          "value": 404,
+          "ok": true,
+          "actual": "404"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "mov",
+          "path": "status",
+          "op": "eq",
+          "value": "UNMATCHED",
+          "note": "mọi lệnh sai đều không được đổi trạng thái",
+          "ok": true,
+          "actual": "'UNMATCHED'"
+        },
+        {
+          "rule": "STATE-INVALID-409",
+          "target": "mov",
+          "path": "classificationType",
+          "op": "isNull",
+          "ok": true,
+          "actual": "None"
+        }
+      ],
+      "steps": {
+        "up": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_f6d50b8409e8",
+            "error": null,
+            "resultId": "mov_24376a57a0c6",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 2271
+        },
+        "clsBadEnum": {
+          "status": 400,
+          "body": {
+            "code": "VALIDATION_ERROR",
+            "message": "type không hợp lệ."
+          },
+          "ms": 253
+        },
+        "clsLower": {
+          "status": 400,
+          "body": {
+            "code": "VALIDATION_ERROR",
+            "message": "type không hợp lệ."
+          },
+          "ms": 234
+        },
+        "clsEmpty": {
+          "status": 400,
+          "body": {
+            "code": "VALIDATION_ERROR",
+            "message": "Thiếu field type."
+          },
+          "ms": 220
+        },
+        "matchEmpty": {
+          "status": 400,
+          "body": {
+            "code": "VALIDATION_ERROR",
+            "message": "Thiếu field eventId."
+          },
+          "ms": 218
+        },
+        "matchGhost": {
+          "status": 404,
+          "body": {
+            "code": "NOT_FOUND",
+            "message": "Không tìm thấy giao dịch."
+          },
+          "ms": 256
+        },
+        "movGhost": {
+          "status": 404,
+          "body": {
+            "code": "NOT_FOUND",
+            "message": "Không tìm thấy khoản tiền."
+          },
+          "ms": 221
+        },
+        "mov": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_b55f021af7dd%2Fcap_f6d50b8409e8.png?alt=media&token=db1161d875b24ba4908d3e76f83299bd",
+            "matchedEventId": null,
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_24376a57a0c6",
+            "occurredAt": "2026-09-12T12:54:52+07:00",
+            "source": "APP",
+            "status": "UNMATCHED"
+          },
+          "ms": 275
+        }
+      },
+      "durationMs": 3955,
+      "mode": "assert"
+    },
+    "P2-match-target": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "mDraft.status",
+          "op": "neq",
+          "value": 500,
+          "note": "dù chốt thế nào cũng không được 5xx",
+          "ok": true,
+          "actual": "200"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "mPurchase.status",
+          "op": "neq",
+          "value": 500,
+          "ok": true,
+          "actual": "200"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "mPaid.status",
+          "op": "neq",
+          "value": 500,
+          "ok": true,
+          "actual": "200"
+        },
+        {
+          "rule": "DASH-RECEIVABLE",
+          "target": "dashAfter",
+          "path": "receivable",
+          "op": "eq",
+          "value": 0,
+          "note": "bất biến số học phải đúng bất kể match target nào được chấp nhận: revenue 250k − collected 250k",
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 900000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "900000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don con DRAFT",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don con DRAFT'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "chị Lan",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'chị Lan'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evDraft__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "type",
+          "op": "eq",
+          "value": "PURCHASE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PURCHASE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 380000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "380000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don mua hang",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don mua hang'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "NCC",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'NCC'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPurchase__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 250000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "250000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "description",
+          "op": "eq",
+          "value": "don da thu tien",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'don da thu tien'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "chị Lan",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'chị Lan'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "evPaid__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "up1": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_079a6ce62979",
+            "error": null,
+            "resultId": "mov_cf03995c76b3",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 2862
+        },
+        "up2": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_35b08225105d",
+            "error": null,
+            "resultId": "mov_d608a829c78d",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 1950
+        },
+        "up3": {
+          "status": 200,
+          "body": {
+            "captureId": "cap_6ef946248ba8",
+            "error": null,
+            "resultId": "mov_109703a2b72f",
+            "resultType": "MONEY_MOVEMENT",
+            "status": "DONE"
+          },
+          "ms": 1829
+        },
+        "evDraft__put": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don con DRAFT",
+            "eventId": "ev_ee88f00225a8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 253
+        },
+        "evDraft": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don con DRAFT",
+            "eventId": "ev_ee88f00225a8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 253
+        },
+        "evPurchase__put": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "NCC",
+            "description": "don mua hang",
+            "eventId": "ev_c7b3da8b2978",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 293
+        },
+        "evPurchase": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "NCC",
+            "description": "don mua hang",
+            "eventId": "ev_c7b3da8b2978",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 293
+        },
+        "evPaid__put": {
+          "status": 200,
+          "body": {
+            "amount": 250000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don da thu tien",
+            "eventId": "ev_0b2ecf29e239",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 289
+        },
+        "evPaid": {
+          "status": 200,
+          "body": {
+            "amount": 250000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don da thu tien",
+            "eventId": "ev_0b2ecf29e239",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 289
+        },
+        "mDraft": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": "LAN",
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_41ec40dacec9%2Fcap_079a6ce62979.png?alt=media&token=ad3ba45c657e4c96ba57699f8d11cd3d",
+            "matchedEventId": "ev_ee88f00225a8",
+            "memo": "LAN 2HOP TRAU GAC BEP",
+            "movementId": "mov_cf03995c76b3",
+            "occurredAt": "2026-09-12T12:54:57+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 326
+        },
+        "mPurchase": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_41ec40dacec9%2Fcap_35b08225105d.png?alt=media&token=887fd6125f7a4531bac3d0907f58d81c",
+            "matchedEventId": "ev_c7b3da8b2978",
+            "memo": "COC MINH DAT HANG TET",
+            "movementId": "mov_d608a829c78d",
+            "occurredAt": "2026-09-12T12:54:59+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 366
+        },
+        "mPaid": {
+          "status": 200,
+          "body": {
+            "amount": 250000,
+            "candidates": [],
+            "captureType": "IMAGE_TRANSFER",
+            "classificationType": null,
+            "counterparty": null,
+            "direction": "IN",
+            "evidenceText": null,
+            "evidenceUrl": "https://firebasestorage.googleapis.com/v0/b/hackathon-42790.firebasestorage.app/o/captures%2Fbiz_41ec40dacec9%2Fcap_6ef946248ba8.jpg?alt=media&token=f88daa632f594f35ab8eb21509c4c27c",
+            "matchedEventId": "ev_0b2ecf29e239",
+            "memo": "ck",
+            "movementId": "mov_109703a2b72f",
+            "occurredAt": "2026-09-12T12:55:00+07:00",
+            "source": "APP",
+            "status": "MATCHED"
+          },
+          "ms": 314
+        },
+        "evDraftAfter": {
+          "status": 200,
+          "body": {
+            "amount": 900000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "chị Lan",
+            "description": "don con DRAFT",
+            "eventId": "ev_ee88f00225a8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 252
+        },
+        "dashAfter": {
+          "status": 200,
+          "body": {
+            "bankIn": 1530000,
+            "collected": 250000,
+            "date": "2026-09-12",
+            "draftCount": 1,
+            "expense": 380000,
+            "receivable": 0,
+            "revenue": 250000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 292
+        },
+        "close": {
+          "status": 200,
+          "body": {
+            "closedAt": "2026-09-12T12:55:09+07:00",
+            "date": "2026-09-12",
+            "summary": {
+              "collected": 250000,
+              "expense": 380000,
+              "receivable": 0,
+              "revenue": 250000
+            },
+            "updatedAt": "2026-09-12T12:55:09+07:00",
+            "warningCount": 1,
+            "warnings": [
+              {
+                "amount": 900000,
+                "message": "Giao dịch 900.000đ chưa được xác nhận.",
+                "resolvedAt": null,
+                "resourceId": "ev_ee88f00225a8",
+                "resourceType": "EVENT",
+                "status": "OPEN",
+                "type": "DRAFT_EVENT",
+                "warningId": "DRAFT_EVENT:ev_ee88f00225a8"
+              }
+            ]
+          },
+          "ms": 323
+        }
+      },
+      "durationMs": 15009,
+      "mode": "probe"
+    }
+  }
+}

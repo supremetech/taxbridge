@@ -61,7 +61,7 @@
     "snrMethod": "EBU R128 gated (LUFS), đã kiểm chứng lệch ≤0.1dB so với mức đặt"
   },
   "remainingWork": [
-    "Chạy lại 21 case trên backend mới rồi chấm bằng score.py, so với baseline 11/21"
+    "Sửa nguyên nhân T5: 'đặt N cân ...' bị hiểu thành đặt cọc → type=DEPOSIT thay vì SALE (kéo theo M3 thiếu candidate, D1 lệch 600.000), rồi chạy lại bộ 21 case"
   ],
   "baselineRun": {
     "dir": "runs/2026-09-11-old-backend",

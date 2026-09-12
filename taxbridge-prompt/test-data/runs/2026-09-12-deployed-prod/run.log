@@ -1,0 +1,41 @@
+login ok: business=biz_83472efc0a3b
+T3  TEXT             6.8s  status=DONE resultType=EVENT err=None
+    → confirm ev_913766e46cbb: CONFIRMED
+T4  TEXT             3.2s  status=DONE resultType=EVENT err=None
+    → confirm ev_95ad2bae0548: CONFIRMED
+T1  TEXT             2.1s  status=DONE resultType=EVENT err=None
+    → confirm ev_603721d9b472: CONFIRMED
+T2  TEXT             2.1s  status=DONE resultType=EVENT err=None
+    → confirm ev_aacc3c27d760: CONFIRMED
+A1  AUDIO            3.4s  status=DONE resultType=EVENT err=None
+    → confirm ev_ad41f21c8443: CONFIRMED
+M1  IMAGE_TRANSFER   2.8s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → match mov_312424431f1e → T1(ev_603721d9b472): MATCHED
+A2  AUDIO            3.1s  status=DONE resultType=EVENT err=None
+    → confirm ev_903412d976bf: CONFIRMED
+A3  AUDIO            3.2s  status=DONE resultType=EVENT err=None
+    → confirm ev_f173867c5500: CONFIRMED
+M2  IMAGE_TRANSFER   4.7s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → match mov_faf1f4f2d90d → A2(ev_903412d976bf): MATCHED
+A4  AUDIO            4.6s  status=FAILED resultType=None err=NO_TRANSACTION
+T5  TEXT             2.2s  status=DONE resultType=EVENT err=None
+    → confirm ev_eb5f25c64e76: CONFIRMED
+T6  TEXT             1.9s  status=DONE resultType=EVENT err=None
+    → confirm ev_c8703095a04b: CONFIRMED
+M3  IMAGE_TRANSFER   2.3s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → match mov_3cd3cce92fc2 → A3(ev_f173867c5500): MATCHED
+R1  IMAGE_RECEIPT    6.3s  status=DONE resultType=EVENT err=None
+    → confirm ev_d18e42d76c9a: CONFIRMED
+R2  IMAGE_RECEIPT    2.5s  status=DONE resultType=EVENT err=None
+    → giữ DRAFT ev_b88d20089d74
+M4  IMAGE_TRANSFER   2.9s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → classify mov_84be5c819024 = DEPOSIT: CLASSIFIED / DEPOSIT
+R3  IMAGE_RECEIPT    3.1s  status=FAILED resultType=None err=UNRECOGNIZED_IMAGE
+M5  IMAGE_TRANSFER   1.7s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → classify mov_1d16b8accc64 = OTHER: CLASSIFIED / OTHER
+M6  IMAGE_TRANSFER   2.6s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → classify mov_c6c9a7a77505 = OWNER_MONEY: CLASSIFIED / OWNER_MONEY
+M7  IMAGE_TRANSFER   2.4s  status=DONE resultType=MONEY_MOVEMENT err=None
+    → để nguyên UNMATCHED mov_700de25f30d1
+dashboard trước close-day (2026-09-12): {"bankIn": 8772000, "collected": 2620000, "date": "2026-09-12", "draftCount": 1, "expense": 1720000, "receivable": 1720000, "revenue": 4340000, "unmatchedMoneyCount": 1}
+close-day: {"closedAt": "2026-09-12T11:24:08+07:00", "date": "2026-09-12", "summary": {"collected": 2620000, "expense": 1720000, "receivable": 1720000, "revenue": 4340000}, "updatedAt": "2026-09-12T11:24:08+07:00", "warningCount": 2, "warnings": [{"amount": 1242000, "message": "Khoản tiền 1.242.000đ chưa được phân loại.", "resolvedAt": null, "resourceId": "mov_700de25f30d1", "resourceType": "MONEY_MOVEMENT", "status": "OPEN", "type": "UNMATCHED_MONEY", "warningId": "UNMATCHED_MONEY:mov_700de25f30d1"}, {"amount": 185000, "message": "Giao dịch 185.000đ chưa được xác nhận.", "resolvedAt": null, "resourceId"

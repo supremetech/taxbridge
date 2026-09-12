@@ -1,0 +1,1927 @@
+{
+  "SC-DASH": {
+    "V1-formula": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "DASH-REVENUE",
+          "target": "dash",
+          "path": "revenue",
+          "op": "eq",
+          "value": 1420000,
+          "note": "450k+720k+250k; DRAFT/REJECTED/DEPOSIT/OWNER_MONEY/UNKNOWN đều bị loại",
+          "ok": true,
+          "actual": "1420000"
+        },
+        {
+          "rule": "DASH-EXPENSE",
+          "target": "dash",
+          "path": "expense",
+          "op": "eq",
+          "value": 220000,
+          "note": "purchase DRAFT 180k và REJECTED 111k không tính",
+          "ok": true,
+          "actual": "220000"
+        },
+        {
+          "rule": "DASH-COLLECTED",
+          "target": "dash",
+          "path": "collected",
+          "op": "eq",
+          "value": 720000,
+          "note": "S3 paymentStatus=UNKNOWN vào revenue nhưng KHÔNG vào collected",
+          "ok": true,
+          "actual": "720000"
+        },
+        {
+          "rule": "DASH-RECEIVABLE",
+          "target": "dash",
+          "path": "receivable",
+          "op": "eq",
+          "value": 700000,
+          "note": "= revenue − collected",
+          "ok": true,
+          "actual": "700000"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "target": "dash",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash",
+          "path": "draftCount",
+          "op": "eq",
+          "value": 2,
+          "ok": true,
+          "actual": "2"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "drafts",
+          "path": "",
+          "op": "len",
+          "value": 2,
+          "note": "draftCount phải khớp số phần tử thật của danh sách DRAFT",
+          "ok": true,
+          "actual": "len=2 [{'amount': 180000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': None, 'description': 'P2 purchase con DRAFT', 'eventId': 'ev_3282a0f00bb2', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:06:00+07:00', 'paymentMethod': 'CASH', 'paymentStatus': 'PAID', 'source': 'APP', 'status': 'DRAFT', 'type': 'PURCHASE'}, {'amount': 999000, 'captureType': 'TEXT', 'confidence': 0.99, 'counterparty': None, 'description': 'S4 sale con DRAFT', 'eventId': 'ev_e1ba3847cda5', 'evidenceText': 'Bán 1 hộp trà 100 nghìn tiền mặt', 'evidenceUrl': None, 'occurredAt': '2026-09-12T08:03:00+07:00', 'paymentMethod': 'CASH', 'paymentStatus': 'PAID', 'source': 'APP', 'status': 'DRAFT', 'type': 'SALE'}]"
+        },
+        {
+          "rule": "DASH-SHAPE",
+          "target": "dash",
+          "path": "date",
+          "op": "eq",
+          "value": "2026-09-12",
+          "ok": true,
+          "actual": "'2026-09-12'"
+        },
+        {
+          "rule": "DASH-REVENUE",
+          "target": "dash2",
+          "path": "revenue",
+          "op": "eq",
+          "value": 2419000,
+          "note": "confirm S4 ⇒ tính lại khi đọc, không ledger",
+          "ok": true,
+          "actual": "2419000"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash2",
+          "path": "draftCount",
+          "op": "eq",
+          "value": 1,
+          "ok": true,
+          "actual": "1"
+        },
+        {
+          "rule": "DASH-RECEIVABLE",
+          "target": "dash2",
+          "path": "receivable",
+          "op": "eq",
+          "value": 1699000,
+          "ok": false,
+          "actual": "700000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 450000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "450000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "description",
+          "op": "eq",
+          "value": "S1 sale confirmed unpaid",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'S1 sale confirmed unpaid'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "Khach A",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'Khach A'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s1__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:00:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 720000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "720000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "description",
+          "op": "eq",
+          "value": "S2 sale confirmed paid",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'S2 sale confirmed paid'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "Khach B",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'Khach B'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s2__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:01:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:01:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 250000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "250000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "description",
+          "op": "eq",
+          "value": "S3 sale confirmed paymentStatus UNKNOWN",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'S3 sale confirmed paymentStatus UNKNOWN'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "counterparty",
+          "op": "eq",
+          "value": "Khach C",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'Khach C'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "UNKNOWN",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNKNOWN'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNKNOWN",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNKNOWN'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s3__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:02:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:02:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s4__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s4__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 999000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "999000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s4__put",
+          "path": "description",
+          "op": "eq",
+          "value": "S4 sale con DRAFT",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'S4 sale con DRAFT'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s4__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s4__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s4__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:03:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:03:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s5__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s5__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 888000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "888000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s5__put",
+          "path": "description",
+          "op": "eq",
+          "value": "S5 sale bi REJECTED",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'S5 sale bi REJECTED'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s5__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s5__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "s5__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:04:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:04:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p1__put",
+          "path": "type",
+          "op": "eq",
+          "value": "PURCHASE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PURCHASE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p1__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 220000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "220000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p1__put",
+          "path": "description",
+          "op": "eq",
+          "value": "P1 purchase confirmed",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'P1 purchase confirmed'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p1__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p1__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p1__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:05:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:05:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p2__put",
+          "path": "type",
+          "op": "eq",
+          "value": "PURCHASE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PURCHASE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p2__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 180000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "180000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p2__put",
+          "path": "description",
+          "op": "eq",
+          "value": "P2 purchase con DRAFT",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'P2 purchase con DRAFT'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p2__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p2__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p2__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:06:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:06:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p3__put",
+          "path": "type",
+          "op": "eq",
+          "value": "PURCHASE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PURCHASE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p3__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 111000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "111000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p3__put",
+          "path": "description",
+          "op": "eq",
+          "value": "P3 purchase bi REJECTED",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'P3 purchase bi REJECTED'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p3__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p3__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "p3__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:07:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:07:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x1__put",
+          "path": "type",
+          "op": "eq",
+          "value": "DEPOSIT",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'DEPOSIT'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x1__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 380000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "380000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x1__put",
+          "path": "description",
+          "op": "eq",
+          "value": "X1 dat coc",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'X1 dat coc'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x1__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "BANK",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'BANK'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x1__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x1__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:08:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:08:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x2__put",
+          "path": "type",
+          "op": "eq",
+          "value": "OWNER_MONEY",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'OWNER_MONEY'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x2__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 500000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "500000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x2__put",
+          "path": "description",
+          "op": "eq",
+          "value": "X2 chu ho bo tien vao quy",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'X2 chu ho bo tien vao quy'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x2__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x2__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x2__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:09:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:09:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x3__put",
+          "path": "type",
+          "op": "eq",
+          "value": "UNKNOWN",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNKNOWN'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x3__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 123000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "123000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x3__put",
+          "path": "description",
+          "op": "eq",
+          "value": "X3 khong ro",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'X3 khong ro'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x3__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "UNKNOWN",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNKNOWN'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x3__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "UNPAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'UNPAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "x3__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T08:10:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T08:10:00+07:00'"
+        }
+      ],
+      "steps": {
+        "s1__put": {
+          "status": 200,
+          "body": {
+            "amount": 450000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach A",
+            "description": "S1 sale confirmed unpaid",
+            "eventId": "ev_b67a98f2ba56",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 320
+        },
+        "s1": {
+          "status": 200,
+          "body": {
+            "amount": 450000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach A",
+            "description": "S1 sale confirmed unpaid",
+            "eventId": "ev_b67a98f2ba56",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:00:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 320
+        },
+        "s2__put": {
+          "status": 200,
+          "body": {
+            "amount": 720000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach B",
+            "description": "S2 sale confirmed paid",
+            "eventId": "ev_6d36ca262a10",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:01:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 283
+        },
+        "s2": {
+          "status": 200,
+          "body": {
+            "amount": 720000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach B",
+            "description": "S2 sale confirmed paid",
+            "eventId": "ev_6d36ca262a10",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:01:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 283
+        },
+        "s3__put": {
+          "status": 200,
+          "body": {
+            "amount": 250000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach C",
+            "description": "S3 sale confirmed paymentStatus UNKNOWN",
+            "eventId": "ev_23673229ce08",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:02:00+07:00",
+            "paymentMethod": "UNKNOWN",
+            "paymentStatus": "UNKNOWN",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 257
+        },
+        "s3": {
+          "status": 200,
+          "body": {
+            "amount": 250000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": "Khach C",
+            "description": "S3 sale confirmed paymentStatus UNKNOWN",
+            "eventId": "ev_23673229ce08",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:02:00+07:00",
+            "paymentMethod": "UNKNOWN",
+            "paymentStatus": "UNKNOWN",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 257
+        },
+        "s4__put": {
+          "status": 200,
+          "body": {
+            "amount": 999000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "S4 sale con DRAFT",
+            "eventId": "ev_e1ba3847cda5",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:03:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 281
+        },
+        "s4": {
+          "status": 200,
+          "body": {
+            "amount": 999000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "S4 sale con DRAFT",
+            "eventId": "ev_e1ba3847cda5",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:03:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 281
+        },
+        "s5__put": {
+          "status": 200,
+          "body": {
+            "amount": 888000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "S5 sale bi REJECTED",
+            "eventId": "ev_b6b7f3b2071e",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:04:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 280
+        },
+        "s5": {
+          "status": 200,
+          "body": {
+            "amount": 888000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "S5 sale bi REJECTED",
+            "eventId": "ev_b6b7f3b2071e",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:04:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 280
+        },
+        "p1__put": {
+          "status": 200,
+          "body": {
+            "amount": 220000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "P1 purchase confirmed",
+            "eventId": "ev_c23db325a861",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:05:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 242
+        },
+        "p1": {
+          "status": 200,
+          "body": {
+            "amount": 220000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "P1 purchase confirmed",
+            "eventId": "ev_c23db325a861",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:05:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 242
+        },
+        "p2__put": {
+          "status": 200,
+          "body": {
+            "amount": 180000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "P2 purchase con DRAFT",
+            "eventId": "ev_3282a0f00bb2",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:06:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 354
+        },
+        "p2": {
+          "status": 200,
+          "body": {
+            "amount": 180000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "P2 purchase con DRAFT",
+            "eventId": "ev_3282a0f00bb2",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:06:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 354
+        },
+        "p3__put": {
+          "status": 200,
+          "body": {
+            "amount": 111000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "P3 purchase bi REJECTED",
+            "eventId": "ev_e6f0a0dcc4a2",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:07:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 247
+        },
+        "p3": {
+          "status": 200,
+          "body": {
+            "amount": 111000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "P3 purchase bi REJECTED",
+            "eventId": "ev_e6f0a0dcc4a2",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:07:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "PURCHASE"
+          },
+          "ms": 247
+        },
+        "x1__put": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "X1 dat coc",
+            "eventId": "ev_b7023e3afcca",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:08:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "DEPOSIT"
+          },
+          "ms": 263
+        },
+        "x1": {
+          "status": 200,
+          "body": {
+            "amount": 380000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "X1 dat coc",
+            "eventId": "ev_b7023e3afcca",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:08:00+07:00",
+            "paymentMethod": "BANK",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "DEPOSIT"
+          },
+          "ms": 263
+        },
+        "x2__put": {
+          "status": 200,
+          "body": {
+            "amount": 500000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "X2 chu ho bo tien vao quy",
+            "eventId": "ev_5c9d88e53f53",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:09:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "OWNER_MONEY"
+          },
+          "ms": 251
+        },
+        "x2": {
+          "status": 200,
+          "body": {
+            "amount": 500000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "X2 chu ho bo tien vao quy",
+            "eventId": "ev_5c9d88e53f53",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:09:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "OWNER_MONEY"
+          },
+          "ms": 251
+        },
+        "x3__put": {
+          "status": 200,
+          "body": {
+            "amount": 123000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "X3 khong ro",
+            "eventId": "ev_e197a1dd5778",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:10:00+07:00",
+            "paymentMethod": "UNKNOWN",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "UNKNOWN"
+          },
+          "ms": 249
+        },
+        "x3": {
+          "status": 200,
+          "body": {
+            "amount": 123000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "X3 khong ro",
+            "eventId": "ev_e197a1dd5778",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:10:00+07:00",
+            "paymentMethod": "UNKNOWN",
+            "paymentStatus": "UNPAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "UNKNOWN"
+          },
+          "ms": 249
+        },
+        "dash": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 720000,
+            "date": "2026-09-12",
+            "draftCount": 2,
+            "expense": 220000,
+            "receivable": 700000,
+            "revenue": 1420000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 251
+        },
+        "drafts": {
+          "status": 200,
+          "body": [
+            {
+              "amount": 180000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": null,
+              "description": "P2 purchase con DRAFT",
+              "eventId": "ev_3282a0f00bb2",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:06:00+07:00",
+              "paymentMethod": "CASH",
+              "paymentStatus": "PAID",
+              "source": "APP",
+              "status": "DRAFT",
+              "type": "PURCHASE"
+            },
+            {
+              "amount": 999000,
+              "captureType": "TEXT",
+              "confidence": 0.99,
+              "counterparty": null,
+              "description": "S4 sale con DRAFT",
+              "eventId": "ev_e1ba3847cda5",
+              "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+              "evidenceUrl": null,
+              "occurredAt": "2026-09-12T08:03:00+07:00",
+              "paymentMethod": "CASH",
+              "paymentStatus": "PAID",
+              "source": "APP",
+              "status": "DRAFT",
+              "type": "SALE"
+            }
+          ],
+          "ms": 307
+        },
+        "confirmS4": {
+          "status": 200,
+          "body": {
+            "amount": 999000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "S4 sale con DRAFT",
+            "eventId": "ev_e1ba3847cda5",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T08:03:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "CONFIRMED",
+            "type": "SALE"
+          },
+          "ms": 260
+        },
+        "dash2": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 1719000,
+            "date": "2026-09-12",
+            "draftCount": 1,
+            "expense": 220000,
+            "receivable": 700000,
+            "revenue": 2419000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 308
+        }
+      },
+      "durationMs": 30210,
+      "mode": "assert"
+    },
+    "V2-date-filter": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "DASH-DATE-FILTER",
+          "target": "yday",
+          "path": "revenue",
+          "op": "eq",
+          "value": 100000,
+          "note": "biên cuối ngày 23:59:59 vẫn thuộc hôm qua",
+          "ok": true,
+          "actual": "100000"
+        },
+        {
+          "rule": "DASH-DATE-FILTER",
+          "target": "tday",
+          "path": "revenue",
+          "op": "eq",
+          "value": 200000,
+          "note": "biên đầu ngày 00:00:00 thuộc hôm nay",
+          "ok": true,
+          "actual": "200000"
+        },
+        {
+          "rule": "DASH-DATE-FILTER",
+          "target": "tmr",
+          "path": "revenue",
+          "op": "eq",
+          "value": 300000,
+          "ok": true,
+          "actual": "300000"
+        },
+        {
+          "rule": "DASH-DATE-FILTER",
+          "target": "nodate",
+          "path": "revenue",
+          "op": "eq",
+          "value": 200000,
+          "note": "thiếu date = hôm nay Asia/Ho_Chi_Minh",
+          "ok": true,
+          "actual": "200000"
+        },
+        {
+          "rule": "DASH-DATE-FILTER",
+          "target": "nodate",
+          "path": "date",
+          "op": "eq",
+          "value": "2026-09-12",
+          "ok": true,
+          "actual": "'2026-09-12'"
+        },
+        {
+          "rule": "DASH-DATE-FILTER",
+          "target": "far",
+          "path": "revenue",
+          "op": "eq",
+          "value": 0,
+          "note": "ngày không có dữ liệu trả 0, không lỗi",
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "baddate.status",
+          "op": "eq",
+          "value": 400,
+          "ok": true,
+          "actual": "400"
+        },
+        {
+          "rule": "ERR-CODE-CONFORM",
+          "target": "baddate",
+          "path": "code",
+          "op": "eq",
+          "value": "VALIDATION_ERROR",
+          "ok": true,
+          "actual": "'VALIDATION_ERROR'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d1__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d1__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 100000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "100000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d1__put",
+          "path": "description",
+          "op": "eq",
+          "value": "hom qua",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'hom qua'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d1__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d1__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d1__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-11T23:59:59+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-11T23:59:59+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d2__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d2__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 200000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "200000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d2__put",
+          "path": "description",
+          "op": "eq",
+          "value": "hom nay dau ngay",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'hom nay dau ngay'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d2__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d2__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d2__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-12T00:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-12T00:00:00+07:00'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d3__put",
+          "path": "type",
+          "op": "eq",
+          "value": "SALE",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'SALE'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d3__put",
+          "path": "amount",
+          "op": "eq",
+          "value": 300000,
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "300000"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d3__put",
+          "path": "description",
+          "op": "eq",
+          "value": "ngay mai",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'ngay mai'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d3__put",
+          "path": "paymentMethod",
+          "op": "eq",
+          "value": "CASH",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'CASH'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d3__put",
+          "path": "paymentStatus",
+          "op": "eq",
+          "value": "PAID",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'PAID'"
+        },
+        {
+          "rule": "EVENT-PUT-ECHO",
+          "target": "d3__put",
+          "path": "occurredAt",
+          "op": "eq",
+          "value": "2026-09-13T08:00:00+07:00",
+          "note": "PUT phải áp dụng đúng field được phép",
+          "ok": true,
+          "actual": "'2026-09-13T08:00:00+07:00'"
+        }
+      ],
+      "steps": {
+        "d1__put": {
+          "status": 200,
+          "body": {
+            "amount": 100000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "hom qua",
+            "eventId": "ev_8428698ecee8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-11T23:59:59+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 253
+        },
+        "d1": {
+          "status": 200,
+          "body": {
+            "amount": 100000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "hom qua",
+            "eventId": "ev_8428698ecee8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-11T23:59:59+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 253
+        },
+        "d2__put": {
+          "status": 200,
+          "body": {
+            "amount": 200000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "hom nay dau ngay",
+            "eventId": "ev_81ee109443a8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T00:00:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 279
+        },
+        "d2": {
+          "status": 200,
+          "body": {
+            "amount": 200000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "hom nay dau ngay",
+            "eventId": "ev_81ee109443a8",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-12T00:00:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 279
+        },
+        "d3__put": {
+          "status": 200,
+          "body": {
+            "amount": 300000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "ngay mai",
+            "eventId": "ev_eba3b46d9b17",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-13T08:00:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 256
+        },
+        "d3": {
+          "status": 200,
+          "body": {
+            "amount": 300000,
+            "captureType": "TEXT",
+            "confidence": 0.99,
+            "counterparty": null,
+            "description": "ngay mai",
+            "eventId": "ev_eba3b46d9b17",
+            "evidenceText": "Bán 1 hộp trà 100 nghìn tiền mặt",
+            "evidenceUrl": null,
+            "occurredAt": "2026-09-13T08:00:00+07:00",
+            "paymentMethod": "CASH",
+            "paymentStatus": "PAID",
+            "source": "APP",
+            "status": "DRAFT",
+            "type": "SALE"
+          },
+          "ms": 256
+        },
+        "yday": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 100000,
+            "date": "2026-09-11",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 100000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 251
+        },
+        "tday": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 200000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 200000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 275
+        },
+        "tmr": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 300000,
+            "date": "2026-09-13",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 300000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 269
+        },
+        "nodate": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 200000,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 200000,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 268
+        },
+        "far": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 0,
+            "date": "2026-08-13",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 0,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 239
+        },
+        "baddate": {
+          "status": 400,
+          "body": {
+            "code": "VALIDATION_ERROR",
+            "message": "date phải có dạng YYYY-MM-DD."
+          },
+          "ms": 212
+        }
+      },
+      "durationMs": 8759,
+      "mode": "assert"
+    },
+    "V3-empty-business": {
+      "status": "done",
+      "asserts": [
+        {
+          "rule": "DASH-SHAPE",
+          "target": "dash.status",
+          "op": "eq",
+          "value": 200,
+          "ok": true,
+          "actual": "200"
+        },
+        {
+          "rule": "DASH-REVENUE",
+          "target": "dash",
+          "path": "revenue",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-EXPENSE",
+          "target": "dash",
+          "path": "expense",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-COLLECTED",
+          "target": "dash",
+          "path": "collected",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-RECEIVABLE",
+          "target": "dash",
+          "path": "receivable",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-BANKIN",
+          "target": "dash",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash",
+          "path": "draftCount",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dash",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 0,
+          "ok": true,
+          "actual": "0"
+        },
+        {
+          "rule": "DASH-SHAPE",
+          "target": "events",
+          "path": "",
+          "op": "len",
+          "value": 0,
+          "ok": true,
+          "actual": "len=0 []"
+        },
+        {
+          "rule": "DASH-SHAPE",
+          "target": "movs",
+          "path": "",
+          "op": "len",
+          "value": 0,
+          "ok": true,
+          "actual": "len=0 []"
+        }
+      ],
+      "steps": {
+        "dash": {
+          "status": 200,
+          "body": {
+            "bankIn": 0,
+            "collected": 0,
+            "date": "2026-09-12",
+            "draftCount": 0,
+            "expense": 0,
+            "receivable": 0,
+            "revenue": 0,
+            "unmatchedMoneyCount": 0
+          },
+          "ms": 273
+        },
+        "events": {
+          "status": 200,
+          "body": [],
+          "ms": 349
+        },
+        "movs": {
+          "status": 200,
+          "body": [],
+          "ms": 236
+        }
+      },
+      "durationMs": 860,
+      "mode": "assert"
+    }
+  }
+}

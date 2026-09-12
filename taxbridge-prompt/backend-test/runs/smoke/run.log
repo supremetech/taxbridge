@@ -1,0 +1,33 @@
+health 200 218ms (cold start, loại khỏi percentile)
+
+=== SC-DASH — Dashboard: 7 con số trên Home
+  SC-DASH/V1-formula                         s1         200   320ms
+  SC-DASH/V1-formula                         s2         200   283ms
+  SC-DASH/V1-formula                         s3         200   257ms
+  SC-DASH/V1-formula                         s4         200   281ms
+  SC-DASH/V1-formula                         s5         200   280ms
+  SC-DASH/V1-formula                         p1         200   242ms
+  SC-DASH/V1-formula                         p2         200   354ms
+  SC-DASH/V1-formula                         p3         200   247ms
+  SC-DASH/V1-formula                         x1         200   263ms
+  SC-DASH/V1-formula                         x2         200   251ms
+  SC-DASH/V1-formula                         x3         200   249ms
+  SC-DASH/V1-formula                         dash       200   251ms
+  SC-DASH/V1-formula                         drafts     200   307ms
+  SC-DASH/V1-formula                         confirmS4  200   260ms
+  SC-DASH/V1-formula                         dash2      200   308ms
+  → V1-formula: 80/81 assert đạt — SAI 1
+  SC-DASH/V2-date-filter                     d1         200   253ms
+  SC-DASH/V2-date-filter                     d2         200   279ms
+  SC-DASH/V2-date-filter                     d3         200   256ms
+  SC-DASH/V2-date-filter                     yday       200   251ms
+  SC-DASH/V2-date-filter                     tday       200   275ms
+  SC-DASH/V2-date-filter                     tmr        200   269ms
+  SC-DASH/V2-date-filter                     nodate     200   268ms
+  SC-DASH/V2-date-filter                     far        200   239ms
+  SC-DASH/V2-date-filter                     baddate    400   212ms
+  → V2-date-filter: 26/26 assert đạt
+  SC-DASH/V3-empty-business                  dash       200   273ms
+  SC-DASH/V3-empty-business                  events     200   349ms
+  SC-DASH/V3-empty-business                  movs       200   236ms
+  → V3-empty-business: 10/10 assert đạt

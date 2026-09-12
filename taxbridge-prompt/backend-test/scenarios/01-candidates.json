@@ -1,0 +1,156 @@
+{
+  "scenarioId": "SC-CAND",
+  "title": "Candidate cho tiền vào: lọc pool, chấm điểm, xếp hạng, không tự ghép",
+  "intent": "Thuật toán candidate là trái tim UC4. Lệch trọng số ⇒ gợi ý sai đơn. Lọc pool hỏng ⇒ gợi ý ghép vào đơn đã thu tiền rồi, tiền bị đếm hai lần. Ngưỡng sai ⇒ UC5 hiện candidate rác và hero 'khoản này không khớp đơn nào' tan. Mọi kỳ vọng neo theo ${AMT} là số tiền AI đọc được, không hard-code số trên ảnh — AI đọc lệch thì variation BLOCKED chứ không FAIL.",
+  "ruleRefs": ["CAND-SCORE-FORMULA", "CAND-THRESHOLD", "CAND-FILTER-ELIGIBLE", "CAND-LIMIT-3", "CAND-SORT-DESC", "CAND-SHAPE", "CAND-NO-AUTO"],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-weights",
+      "name": "Dò từng trọng số: 1.0 / 0.9 / 0.7",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK ⇒ không kết luận được gì về backend"},
+                      {"path": "resultType", "op": "eq", "value": "MONEY_MOVEMENT", "onFail": "block"}]},
+        {"id": "mv0", "call": "GET /api/money-movements/${movId}", "save": {"AMT": "$.amount"}},
+        {"id": "e1", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don trung tien trung ten cung ngay", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "e2", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don trung tien trung ten khac ngay", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today-1}T08:00:00+07:00", "confirm": true}},
+        {"id": "e3", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don trung tien khac ten cung ngay", "counterparty": "Hoa Ban", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"}
+      ],
+      "expect": [
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "status", "op": "eq", "value": "UNMATCHED"},
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "matchedEventId", "op": "isNull"},
+        {"rule": "CAND-LIMIT-3", "target": "mov", "path": "candidates", "op": "len", "value": 3},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${e1}].score", "op": "approx", "value": 1.0, "note": "0.6 tiền + 0.3 tên + 0.1 cùng ngày"},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${e2}].score", "op": "approx", "value": 0.9, "note": "thiếu 0.1 cùng ngày"},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${e3}].score", "op": "approx", "value": 0.7, "note": "thiếu 0.3 trùng tên"},
+        {"rule": "CAND-SORT-DESC", "target": "mov", "path": "candidates[0].eventId", "op": "eq", "value": "${e1}"},
+        {"rule": "CAND-SORT-DESC", "target": "mov", "path": "candidates[*].score", "op": "monotonicDesc"},
+        {"rule": "CAND-SHAPE", "target": "mov", "path": "candidates[0].amount", "op": "eq", "value": "${AMT}"},
+        {"rule": "CAND-SHAPE", "target": "mov", "path": "candidates[0].description", "op": "notNull"}
+      ]
+    },
+    {
+      "variationId": "V2-threshold",
+      "name": "Biên ngưỡng: 0.4 và 0.3 được giữ, 0.1 bị loại",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "mv0", "call": "GET /api/money-movements/${movId}", "save": {"AMT": "$.amount"}},
+        {"id": "e04", "seedEvent": {"type": "SALE", "amount": "${AMT-1}", "description": "lech 1 dong, trung ten, cung ngay", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "e03", "seedEvent": {"type": "SALE", "amount": "${AMT-1}", "description": "lech 1 dong, trung ten, khac ngay", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today-1}T08:00:00+07:00", "confirm": true}},
+        {"id": "e01", "seedEvent": {"type": "SALE", "amount": "${AMT-1}", "description": "lech 1 dong, khac ten, cung ngay", "counterparty": "Hoa Ban", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"}
+      ],
+      "expect": [
+        {"rule": "CAND-THRESHOLD", "target": "mov", "path": "candidates", "op": "len", "value": 2, "note": "chỉ 0.4 và 0.3 vượt ngưỡng"},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${e04}].score", "op": "approx", "value": 0.4},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${e03}].score", "op": "approx", "value": 0.3, "note": "biên bao gồm: >= 0.3"},
+        {"rule": "CAND-THRESHOLD", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${e01}", "note": "0.1 phải bị loại; lọt vào ⇒ code dùng score>0 chứ không phải >=0.3 ⇒ hero UC5 hỏng"},
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "matchedEventId", "op": "isNull"}
+      ]
+    },
+    {
+      "variationId": "V3-pool-filter",
+      "name": "Bảy mồi nhử: chỉ SALE + CONFIRMED + UNPAID được vào pool",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "mv0", "call": "GET /api/money-movements/${movId}", "save": {"AMT": "$.amount"}},
+        {"id": "bPaid", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "moi nhu: da PAID", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "PAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "bDraft", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "moi nhu: con DRAFT", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": false}},
+        {"id": "bRej", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "moi nhu: bi REJECTED", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": "reject"}},
+        {"id": "bPur", "seedEvent": {"type": "PURCHASE", "amount": "${AMT}", "description": "moi nhu: PURCHASE", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "bDep", "seedEvent": {"type": "DEPOSIT", "amount": "${AMT}", "description": "moi nhu: DEPOSIT", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "bOwn", "seedEvent": {"type": "OWNER_MONEY", "amount": "${AMT}", "description": "moi nhu: OWNER_MONEY", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "bUnk", "seedEvent": {"type": "UNKNOWN", "amount": "${AMT}", "description": "moi nhu: type UNKNOWN", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "good", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "doi chung duong hop le", "counterparty": "Hoa Ban", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"}
+      ],
+      "expect": [
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates", "op": "len", "value": 1, "note": "7 mồi nhử đều trùng tiền + trùng tên + cùng ngày nên sẽ ăn 1.0 nếu filter hỏng"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[0].eventId", "op": "eq", "value": "${good}"},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[0].score", "op": "approx", "value": 0.7},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bPaid}", "note": "đơn đã thu tiền lọt vào ⇒ tiền bị đếm hai lần"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bDraft}"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bRej}"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bPur}"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bDep}"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bOwn}"},
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates[*].eventId", "op": "notContains", "value": "${bUnk}"}
+      ]
+    },
+    {
+      "variationId": "V4-hero-no-candidate",
+      "name": "UC5: khoản 380k không khớp đơn 450k nào ⇒ candidates rỗng",
+      "mode": "assert",
+      "act": [
+        {"id": "e450", "seedEvent": {"type": "SALE", "amount": 450000, "description": "don ban 450k cho chi Lan", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M4"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK 380k"}]},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}",
+         "precheck": [{"path": "amount", "op": "neq", "value": 450000, "onFail": "block", "why": "AI đọc nhầm thành 450k thì mất ý nghĩa kịch bản"}]},
+        {"id": "dash", "call": "GET /api/dashboard?date=${today}"}
+      ],
+      "expect": [
+        {"rule": "CAND-THRESHOLD", "target": "mov", "path": "candidates", "op": "len", "value": 0, "note": "chỉ cùng ngày = 0.1 < 0.3; có candidate ở đây là hỏng hero UC5"},
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "status", "op": "eq", "value": "UNMATCHED"},
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "matchedEventId", "op": "isNull"},
+        {"rule": "DASH-BANKIN", "target": "dash", "path": "bankIn", "op": "eq", "value": 380000, "note": "tiền vào ngân hàng tăng ngay khi capture"},
+        {"rule": "DASH-REVENUE", "target": "dash", "path": "revenue", "op": "eq", "value": 450000, "note": "doanh thu KHÔNG đổi vì khoản tiền chưa được phân loại"},
+        {"rule": "DASH-COUNTS", "target": "dash", "path": "unmatchedMoneyCount", "op": "eq", "value": 1}
+      ]
+    },
+    {
+      "variationId": "V5-ambiguous-two-candidates",
+      "name": "Hai đơn cùng mệnh giá: trả đủ 2 candidate, tuyệt đối không tự ghép",
+      "mode": "assert",
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M3"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK 600k"}]},
+        {"id": "mv0", "call": "GET /api/money-movements/${movId}", "save": {"AMT": "$.amount"}},
+        {"id": "eThu", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don cua chi Thu", "counterparty": "chị Thu", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "eHa", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "don cua chi Ha", "counterparty": "chị Hà", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:01:00+07:00", "confirm": true}},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"},
+        {"id": "movAgain", "call": "GET /api/money-movements/${movId}"},
+        {"id": "list", "call": "GET /api/money-movements?status=UNMATCHED"}
+      ],
+      "expect": [
+        {"rule": "CAND-FILTER-ELIGIBLE", "target": "mov", "path": "candidates", "op": "len", "value": 2, "note": "memo CHUYEN TIEN không trùng tên ai nên cả hai đều 0.7"},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${eThu}].score", "op": "approx", "value": 0.7},
+        {"rule": "CAND-SCORE-FORMULA", "target": "mov", "path": "candidates[?eventId=${eHa}].score", "op": "approx", "value": 0.7},
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "status", "op": "eq", "value": "UNMATCHED"},
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "matchedEventId", "op": "isNull"},
+        {"rule": "CAND-SORT-DESC", "target": "movAgain", "path": "candidates[0].eventId", "op": "sameAs", "refTarget": "mov", "refPath": "candidates[0].eventId", "note": "hòa điểm: spec không định nghĩa tie-break, nhưng thứ tự phải ỔN ĐỊNH giữa hai lần đọc"},
+        {"rule": "CAND-ONLY-WHEN-UNMATCHED", "target": "list", "path": "[0].candidates", "op": "len", "value": 2, "note": "candidates cũng phải có trong danh sách, không chỉ ở detail"}
+      ]
+    },
+    {
+      "variationId": "P1-name-normalize",
+      "name": "PROBE — similar() chuẩn hoá chuỗi tới đâu",
+      "mode": "probe",
+      "probe": {
+        "question": "similar() so token BẰNG hay so CHỨA? Có bỏ dấu, bỏ hoa/thường, bỏ tiền tố (chị/anh/o) không?",
+        "observe": ["mov.candidates[*].eventId", "mov.candidates[*].score"],
+        "impact": "Nếu không bỏ dấu thì mọi so tên đều trượt, điểm kẹt ở 0.7 và thứ tự candidate sai khi có nhiều đơn cùng mệnh giá."
+      },
+      "act": [
+        {"id": "up", "capture": {"type": "IMAGE_TRANSFER", "evidence": "M1"}, "save": {"movId": "$.resultId"},
+         "precheck": [{"path": "status", "op": "eq", "value": "DONE", "onFail": "block", "why": "AI không đọc được ảnh CK"}]},
+        {"id": "mv0", "call": "GET /api/money-movements/${movId}", "save": {"AMT": "$.amount"}},
+        {"id": "nDau", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "ten co dau", "counterparty": "Lân", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "nPrefix", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "ten co tien to", "counterparty": "chị Lan", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "nSub", "seedEvent": {"type": "SALE", "amount": "${AMT}", "description": "token chua chu lan", "counterparty": "Lanh", "paymentMethod": "BANK", "paymentStatus": "UNPAID", "occurredAt": "${today}T08:00:00+07:00", "confirm": true}},
+        {"id": "mov", "call": "GET /api/money-movements/${movId}"}
+      ],
+      "expect": [
+        {"rule": "CAND-NO-AUTO", "target": "mov", "path": "matchedEventId", "op": "isNull", "note": "bất biến này vẫn chấm dù variation là probe"},
+        {"rule": "CAND-LIMIT-3", "target": "mov", "path": "candidates", "op": "len", "value": 3}
+      ]
+    }
+  ]
+}
