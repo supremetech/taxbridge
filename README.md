@@ -55,24 +55,14 @@ All 14 demo use cases with their expected numbers: [`CLAUDE.md` §9](taxbridge-p
 
 ## 4. Architecture
 
-```text
-taxbridge/                     monorepo, a single .git
-├── taxbridge-app/             Flutter · Material 3 · Riverpod 3 · go_router · Dio  (REST only)
-├── taxbridge-server/          Python 3.12 · Flask · Firebase Functions gen2 · Firestore · Storage · OpenAI
-└── taxbridge-prompt/          source of truth: contract, plans, feature map, test suites
-```
+![TaxBridge system architecture — the Flutter app and the Zalo bot call one Flask API on Firebase Functions, which reads and writes Firestore and Cloud Storage and calls OpenAI; taxbridge-prompt is the shared source of truth](docs/diagrams/system-architecture.png)
 
-```text
- text / voice / photo / Zalo ──▶ POST /api/captures ──▶ AI extraction (synchronous)
-                                        │
-                          ┌─────────────┴─────────────┐
-                          ▼                           ▼
-                   BusinessEvent DRAFT          MoneyMovement UNMATCHED
-                          │ confirm                   │ match / classify
-                          └─────────────┬─────────────┘
-                                        ▼
-                            Dashboard  →  Close day  →  Reports
-```
+One monorepo, a single `.git`: [`taxbridge-app/`](taxbridge-app/) (Flutter · Material 3 · Riverpod 3 ·
+go_router · Dio — REST only) · [`taxbridge-server/`](taxbridge-server/) (Python 3.12 · Flask · Firebase
+Functions gen2 · Firestore · Storage · OpenAI) · [`taxbridge-prompt/`](taxbridge-prompt/) (source of truth:
+contract, plans, feature map, test suites).
+
+![TaxBridge capture pipeline — a text, voice, photo or Zalo capture goes through POST /api/captures and synchronous AI extraction into either a BusinessEvent DRAFT (confirm) or a MoneyMovement UNMATCHED (match / classify); both feed the dashboard, then close day and reports](docs/diagrams/capture-pipeline.png)
 
 - AI: `gpt-5.6-terra` (vision/text, Responses API + Pydantic) · `gpt-transcribe` (audio, `vi`).
 - Every figure is **computed on read** from Firestore — no ledger, no background jobs.
