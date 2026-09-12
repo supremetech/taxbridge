@@ -1,0 +1,122 @@
+[
+  {
+    "username": "tbtest_09121329a020_v1weights",
+    "businessId": "biz_22431900bb1b"
+  },
+  {
+    "username": "tbtest_09121329a020_v2threshold",
+    "businessId": "biz_74d28f30e1ac"
+  },
+  {
+    "username": "tbtest_09121329a020_v3poolfilter",
+    "businessId": "biz_5d41224076bd"
+  },
+  {
+    "username": "tbtest_09121329a020_v4heronocandidate",
+    "businessId": "biz_13fb71ddbac0"
+  },
+  {
+    "username": "tbtest_09121329a020_v5ambiguoustwocandidates",
+    "businessId": "biz_beca2a9b188b"
+  },
+  {
+    "username": "tbtest_09121329a020_p1namenormalize",
+    "businessId": "biz_c91632f39b6a"
+  },
+  {
+    "username": "tbtest_09121329a020_v1matcheffects",
+    "businessId": "biz_1e4dd6014336"
+  },
+  {
+    "username": "tbtest_09121329a020_v2classifydeposit",
+    "businessId": "biz_efd444882bcf"
+  },
+  {
+    "username": "tbtest_09121329a020_v3classifyownermoney",
+    "businessId": "biz_0146d18ab6e9"
+  },
+  {
+    "username": "tbtest_09121329a020_v4bankinallstatus",
+    "businessId": "biz_c7a31c6f0398"
+  },
+  {
+    "username": "tbtest_09121329a020_v5stateguards",
+    "businessId": "biz_f2081ff9bc83"
+  },
+  {
+    "username": "tbtest_09121329a020_v6invalidinput",
+    "businessId": "biz_74131c601a02"
+  },
+  {
+    "username": "tbtest_09121329a020_p2matchtarget",
+    "businessId": "biz_fbd5d9052436"
+  },
+  {
+    "username": "tbtest_09121329a020_v1generateandresolve",
+    "businessId": "biz_ca10cab73208"
+  },
+  {
+    "username": "tbtest_09121329a020_v2classifykeepssummary",
+    "businessId": "biz_87bb49119534"
+  },
+  {
+    "username": "tbtest_09121329a020_v3recloseupsert",
+    "businessId": "biz_8f5d1c38df69"
+  },
+  {
+    "username": "tbtest_09121329a020_v4historyanderrors",
+    "businessId": "biz_8bf4a80936fb"
+  },
+  {
+    "username": "tbtest_09121329a020_v1formula",
+    "businessId": "biz_30b87c47969c"
+  },
+  {
+    "username": "tbtest_09121329a020_v2datefilter",
+    "businessId": "biz_86f7c88c511f"
+  },
+  {
+    "username": "tbtest_09121329a020_v3emptybusiness",
+    "businessId": "biz_edf150e6cbea"
+  },
+  {
+    "username": "tbtest_09121329a020_v1imagedatewins",
+    "businessId": "biz_f42e02a6ac72"
+  },
+  {
+    "username": "tbtest_09121329a020_v2textwithoutdateistoday",
+    "businessId": "biz_4ec58dcdfb1d"
+  },
+  {
+    "username": "tbtest_09121329a020_p3textwithdate",
+    "businessId": "biz_628dcf53621c"
+  },
+  {
+    "username": "tbtest_09121329a020_v1reporttotals",
+    "businessId": "biz_2b2417152413"
+  },
+  {
+    "username": "tbtest_09121329a020_v2reportvalidation",
+    "businessId": "biz_1968df9cdec2"
+  },
+  {
+    "username": "tbtest_09121329a020_v3pendingalldays",
+    "businessId": "biz_30a823f94b4e"
+  },
+  {
+    "username": "tbtest_09121329a020_v1batchanddedupe",
+    "businessId": "biz_e2a270e66d14"
+  },
+  {
+    "username": "tbtest_09121329a020_v2rejectsinglereceipt",
+    "businessId": "biz_c6fa226447ce"
+  },
+  {
+    "username": "tbtest_09121329a020_v3batchthensingle",
+    "businessId": "biz_806da2d4ac5f"
+  },
+  {
+    "username": "tbtest_09121329a020_v4outdirectionnotinbankin",
+    "businessId": "biz_1ada2b5e55e8"
+  }
+]

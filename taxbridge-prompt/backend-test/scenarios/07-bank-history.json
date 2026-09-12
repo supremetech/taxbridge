@@ -1,0 +1,348 @@
+{
+  "scenarioId": "SC-BATCH",
+  "title": "Ảnh lịch sử chuyển khoản → nhiều movement + chống trùng (Phase 2 ①)",
+  "intent": "UC14. Chủ hộ chụp màn hình lịch sử CK để đối soát cả ngày một lần. Hai rủi ro: (a) chụp lại lần nữa mà hệ thống tạo trùng thì tiền vào bị đếm hai lần — con số ngân hàng sai gấp đôi; (b) gửi nhầm ảnh hóa đơn vào nhánh này mà AI vẫn cố đọc ra một dòng thì sinh movement rác. Đây là nhánh duy nhất trong PoC có dedupe nên phải khoá lại bằng test.",
+  "ruleRefs": [
+    "BATCH-RESULT",
+    "BATCH-DEDUPE",
+    "BATCH-REJECT-NON-LIST",
+    "CAPTURE-RESULT-SHAPE",
+    "DASH-BANKIN"
+  ],
+  "isolation": "perVariation",
+  "variations": [
+    {
+      "variationId": "V1-batch-and-dedupe",
+      "name": "Lần đầu tạo N movement; gửi lại đúng ảnh đó không tạo thêm cái nào",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "up1",
+          "capture": {
+            "type": "IMAGE_BANK_HISTORY",
+            "evidence": "BANK_HISTORY"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh lịch sử CK"
+            },
+            {
+              "path": "resultType",
+              "op": "eq",
+              "value": "MONEY_MOVEMENT_BATCH",
+              "onFail": "block"
+            }
+          ]
+        },
+        {
+          "id": "movs1",
+          "call": "GET /api/money-movements"
+        },
+        {
+          "id": "up2",
+          "capture": {
+            "type": "IMAGE_BANK_HISTORY",
+            "evidence": "BANK_HISTORY"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "lần gửi lại cũng phải đọc được thì mới kiểm được dedupe"
+            }
+          ]
+        },
+        {
+          "id": "movs2",
+          "call": "GET /api/money-movements"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "BATCH-RESULT",
+          "target": "up1",
+          "path": "resultType",
+          "op": "eq",
+          "value": "MONEY_MOVEMENT_BATCH"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "up1",
+          "path": "resultId",
+          "op": "isNull",
+          "note": "batch dùng resultIds, không dùng resultId"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "up1",
+          "path": "skippedCount",
+          "op": "eq",
+          "value": 0,
+          "note": "account mới nên chưa có gì để trùng"
+        },
+        {
+          "rule": "CAPTURE-RESULT-SHAPE",
+          "target": "up1",
+          "path": "occurredAt",
+          "op": "notNull"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "movs1",
+          "path": "[0].captureType",
+          "op": "eq",
+          "value": "IMAGE_BANK_HISTORY"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "movs1",
+          "path": "[0].status",
+          "op": "eq",
+          "value": "UNMATCHED"
+        },
+        {
+          "rule": "BATCH-DEDUPE",
+          "target": "up2",
+          "path": "resultIds",
+          "op": "len",
+          "value": 0,
+          "note": "gửi lại cùng ảnh: KHÔNG được tạo movement nào"
+        },
+        {
+          "rule": "BATCH-DEDUPE",
+          "target": "up2",
+          "path": "status",
+          "op": "eq",
+          "value": "DONE",
+          "note": "trùng hết vẫn là DONE, không phải FAILED"
+        },
+        {
+          "rule": "BATCH-DEDUPE",
+          "target": "movs2",
+          "path": "",
+          "op": "sameAs",
+          "refTarget": "movs1",
+          "refPath": "",
+          "note": "danh sách movement không đổi sau lần gửi thứ hai"
+        }
+      ]
+    },
+    {
+      "variationId": "V2-reject-single-receipt",
+      "name": "Gửi nhầm ảnh hóa đơn vào nhánh batch ⇒ FAILED, không tạo movement rác",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "up",
+          "capture": {
+            "type": "IMAGE_BANK_HISTORY",
+            "evidence": "RECEIPT_DEMO"
+          },
+          "allowError": true
+        },
+        {
+          "id": "movs",
+          "call": "GET /api/money-movements"
+        },
+        {
+          "id": "events",
+          "call": "GET /api/events"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "BATCH-REJECT-NON-LIST",
+          "target": "up.status",
+          "op": "eq",
+          "value": 200,
+          "note": "AI từ chối vẫn là HTTP 200"
+        },
+        {
+          "rule": "BATCH-REJECT-NON-LIST",
+          "target": "up",
+          "path": "status",
+          "op": "eq",
+          "value": "FAILED"
+        },
+        {
+          "rule": "BATCH-REJECT-NON-LIST",
+          "target": "up",
+          "path": "error",
+          "op": "eq",
+          "value": "UNRECOGNIZED_IMAGE"
+        },
+        {
+          "rule": "BATCH-REJECT-NON-LIST",
+          "target": "movs",
+          "path": "",
+          "op": "len",
+          "value": 0,
+          "note": "không được sinh movement rác từ hóa đơn một giao dịch"
+        },
+        {
+          "rule": "BATCH-REJECT-NON-LIST",
+          "target": "events",
+          "path": "",
+          "op": "len",
+          "value": 0
+        }
+      ]
+    },
+    {
+      "variationId": "V3-batch-then-single",
+      "name": "Ảnh CK đơn lẻ vẫn đi nhánh cũ, không bị dedupe nhầm",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "batch",
+          "capture": {
+            "type": "IMAGE_BANK_HISTORY",
+            "evidence": "BANK_HISTORY"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh lịch sử CK"
+            }
+          ]
+        },
+        {
+          "id": "single",
+          "capture": {
+            "type": "IMAGE_TRANSFER",
+            "evidence": "M4"
+          },
+          "save": {
+            "movId": "$.resultId"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh CK đơn lẻ"
+            }
+          ]
+        },
+        {
+          "id": "mov",
+          "call": "GET /api/money-movements/${movId}"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "BATCH-RESULT",
+          "target": "single",
+          "path": "resultType",
+          "op": "eq",
+          "value": "MONEY_MOVEMENT",
+          "note": "IMAGE_TRANSFER giữ nhánh v1"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "single",
+          "path": "skippedCount",
+          "op": "eq",
+          "value": 0,
+          "note": "ảnh đơn lẻ không dedupe (CLAUDE.md §6)"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "mov",
+          "path": "captureType",
+          "op": "eq",
+          "value": "IMAGE_TRANSFER"
+        },
+        {
+          "rule": "BATCH-RESULT",
+          "target": "mov",
+          "path": "status",
+          "op": "eq",
+          "value": "UNMATCHED"
+        }
+      ]
+    },
+    {
+      "variationId": "V4-out-direction-not-in-bankin",
+      "name": "Dòng chuyển đi trong ảnh lịch sử KHÔNG được cộng vào tiền vào",
+      "mode": "assert",
+      "act": [
+        {
+          "id": "up",
+          "capture": {
+            "type": "IMAGE_BANK_HISTORY",
+            "evidence": "BANK_HISTORY"
+          },
+          "precheck": [
+            {
+              "path": "status",
+              "op": "eq",
+              "value": "DONE",
+              "onFail": "block",
+              "why": "AI không đọc được ảnh lịch sử CK"
+            }
+          ]
+        },
+        {
+          "id": "movs",
+          "call": "GET /api/money-movements",
+          "precheck": [
+            {
+              "path": "[*].direction",
+              "op": "contains",
+              "value": "OUT",
+              "onFail": "block",
+              "why": "ảnh không cho ra dòng chuyển đi nào thì không kiểm được rule bankIn chỉ cộng IN"
+            },
+            {
+              "path": "[?direction=OUT].amount",
+              "op": "eq",
+              "value": 2000000,
+              "onFail": "block",
+              "why": "AI đọc số tiền dòng OUT khác fixture ⇒ không neo được kỳ vọng"
+            },
+            {
+              "path": "[?direction=OUT].occurredAt",
+              "op": "contains",
+              "value": "2026-09-10",
+              "onFail": "block",
+              "why": "AI đọc ngày dòng OUT khác fixture"
+            }
+          ]
+        },
+        {
+          "id": "dashOut",
+          "call": "GET /api/dashboard?date=2026-09-10"
+        }
+      ],
+      "expect": [
+        {
+          "rule": "DASH-BANKIN-IN-ONLY",
+          "target": "dashOut",
+          "path": "bankIn",
+          "op": "eq",
+          "value": 1200000,
+          "note": "ngày 10/09 có 1.200.000 IN và 2.000.000 OUT; cộng nhầm OUT sẽ ra 3.200.000"
+        },
+        {
+          "rule": "DASH-COUNTS",
+          "target": "dashOut",
+          "path": "unmatchedMoneyCount",
+          "op": "eq",
+          "value": 2,
+          "note": "spec đếm mọi movement UNMATCHED, không lọc theo chiều"
+        }
+      ]
+    }
+  ]
+}

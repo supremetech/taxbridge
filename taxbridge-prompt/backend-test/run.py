@@ -235,7 +235,8 @@ class Runner:
         if "text" in cap:
             return self.api("POST", "/api/captures", token,
                             json_body={"type": cap["type"], "text": cap["text"]})
-        f = self.ev_root / self.evidence[cap["evidence"]]["file"]
+        e = self.evidence[cap["evidence"]]
+        f = (ROOT / e["dir"] / e["file"]).resolve() if "dir" in e else self.ev_root / e["file"]
         body, ctype = multipart({"type": cap["type"]}, f)
         return self.api("POST", "/api/captures", token, raw_body=body, ctype=ctype)
 
@@ -301,7 +302,9 @@ class Runner:
                     raise Blocked(f"precheck {sid}.{pc.get('path')} — {pc.get('why','')} "
                                   f"(thực tế {actual})")
             for k, jp in (step.get("save") or {}).items():
-                ctx["vars"][k] = get_path(r["body"], jp.lstrip("$."))
+                jp, _, fmt = jp.partition("|")
+                val = get_path(r["body"], jp.lstrip("$."))
+                ctx["vars"][k] = val[:10] if fmt == "date" and val else val
             self.say(f"  {label:42s} {sid:10s} {r['status']} {r['ms']:5d}ms")
 
         results = []
@@ -358,8 +361,15 @@ class Runner:
         for f in scen_files:
             scen = json.loads(f.read_text())
             for var in scen["variations"]:
-                ids = set()
+                ids, known = set(), {"runId"}
                 for s in var.get("seed", []) + var.get("act", []):
+                    # biến phải được định nghĩa TRƯỚC khi dùng (bắt lỗi ${MDATE} dùng sớm)
+                    for used in re.findall(r"\$\{([A-Za-z_][\w]*)", json.dumps(s, ensure_ascii=False)):
+                        if used not in known and used != "today" and not used.startswith(("today", "env", "evidence")):
+                            errs.append(f"{scen['scenarioId']}/{var['variationId']}: "
+                                        f"bước {s['id']} dùng ${{{used}}} trước khi có")
+                    known.add(s["id"])
+                    known.update((s.get("save") or {}).keys())
                     ids.add(s["id"])
                     ids.add(s["id"] + "__put")
                 for a in var.get("expect", []):
