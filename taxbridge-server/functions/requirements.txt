@@ -1,0 +1,8 @@
+firebase-functions>=0.4.2
+firebase-admin>=6.5.0
+flask>=3.0.0
+openai>=1.99.0
+pydantic>=2.7.0
+python-dotenv>=1.0.0
+requests>=2.32.0
+imageio-ffmpeg>=0.5.1
