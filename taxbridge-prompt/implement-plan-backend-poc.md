@@ -307,12 +307,16 @@ Payload thật, field, media URL, remux, probe body rỗng, secret header — `c
 ```text
 POST /api/zalo/webhook
 1. Header X-Bot-Api-Secret-Token != ZALO_WEBHOOK_SECRET → 401.
-2. Body rỗng / không có message / không có text|photo_url|voice_url → 200 {"ok": true}.
+2. Body rỗng / không có message / không có message.from.id → 200 {"ok": true}.
 3. Normalize → shape zalo/normalized_*.json; upsert zalo_users/{zaloId} (displayName, lastSeenAt).
-4. linkedBusinessId == null → lưu zalo_unlinked_messages/{messageId} → 200.
+   messageType suy từ field có mặt: voice_url→AUDIO, photo_url→IMAGE, sticker→STICKER,
+   text→TEXT, còn lại→OTHER. Sticker/loại lạ VẪN normalize + upsert user (nếu bỏ qua thì
+   user nhắn sticker trước sẽ không hiện ở dropdown Register — UC8 hỏng).
+4. linkedBusinessId == null → lưu zalo_unlinked_messages/{messageId} → 200 (mọi messageType).
 5. Đã link → text: process_capture(TEXT)
              photo_url: GET bytes → process_capture(IMAGE_UNKNOWN)
              voice_url: GET bytes → aac_to_m4a → process_capture(AUDIO)
+             STICKER | OTHER: không gọi AI, không tạo capture (không có giao dịch để trích).
    source=ZALO, zaloMessageId=messageId.
 6. Luôn 200 {"ok": true}, kể cả AI lỗi (đã ghi capture.error).
 ```

@@ -168,7 +168,9 @@ Cấu trúc trong `fixtures/zalo/webhook_*.json` **giữ nguyên**, chỉ thay `
 | Việc | Chi tiết |
 |---|---|
 | `zaloId` | `message.from.id` (20 hex). `zalo_users/{zaloId}`, `displayName` = `message.from.display_name`. `chat.id == from.id` với chat PRIVATE; dùng `chat.id` nếu muốn `sendMessage` trả lời. |
-| `messageType` | Suy từ field có mặt: `voice_url` → `AUDIO`, `photo_url` → `IMAGE`, `text` → `TEXT`. Đừng dựa vào `event_name` một mình — Zalo có thể thêm event mới. |
+| `messageType` | Suy từ field có mặt: `voice_url` → `AUDIO`, `photo_url` → `IMAGE`, `sticker` → `STICKER`, `text` → `TEXT`, còn lại → `OTHER`. Đừng dựa vào `event_name` một mình — Zalo có thể thêm event mới. |
+| Sticker & loại lạ | `STICKER` và `OTHER` **vẫn được normalize và vẫn upsert `zalo_users`** — nếu bỏ qua thì user nhắn sticker trước sẽ không bao giờ hiện ở dropdown Register (UC8). Chưa link → vẫn lưu `zalo_unlinked_messages`. Đã link → **không** gọi AI, **không** tạo capture (sticker không có giao dịch). |
+| `sticker` | Zalo **không công bố** schema của field này. `normalize` đọc phòng thủ: `sticker` là dict (`url`/`image_url`/`icon_url`/`href`, hoặc `id`), là string, hay `sticker_url`/`sticker_id` phẳng đều lấy được → `stickerUrl`; không đọc được thì `stickerUrl: null` nhưng **vẫn** là `STICKER`. |
 | Media URL | **Public, `GET` trực tiếp không cần token** (đã test 11/09: ảnh JPEG 1920×2560 ~690 KB; voice 21 KB). Có thể hết hạn → tải ngay trong request webhook. |
 | Voice format | **Raw ADTS AAC** (16 kHz mono, `.aac`). **Đã test 11/09 với OpenAI**: gửi `.aac` → `400 Unsupported file format aac`; đổi tên `.m4a` không remux → `400 corrupted`. **Bắt buộc remux** sang M4A không re-encode (`-c:a copy`, ~20 ms). **Đã deploy thử lên Functions gen2 (python312, asia-southeast1) 11/09**: `imageio-ffmpeg` chạy được (binary `ffmpeg-linux-x86_64-v7.0.2` trong `/layers/google.python.pip/...`), remux 10–175 ms, secret `OPENAI_API_KEY` mount OK, raw POST body đi qua OK, transcript TTS ra đúng. Cold start tổng ~17 s (instance 23 s tuổi, transcribe lần đầu 6,5 s); warm ~1 s. Snippet ở dưới. |
 | `date` | epoch ms → `occurredAt` ISO `+07:00`. |
@@ -200,7 +202,13 @@ text = client.audio.transcriptions.create(
 ```
 
 `fixtures/zalo/normalized_*.json` là shape nội bộ sau normalize (plan backend mục 9):
-`zaloId, displayName, chatId, messageId, messageType, text, imageUrl, audioUrl, sentAt, rawPayload`.
+`zaloId, displayName, chatId, messageId, messageType, text, imageUrl, audioUrl, stickerUrl,
+sentAt, rawPayload`.
+
+⚠️ `webhook_sticker.json` / `normalized_sticker.json` là payload **dựng tay** theo tài liệu
+SDK (`event_name: message.sticker.received`, dữ liệu ở `message.sticker`), chưa bắt được
+message sticker thật — khác ba bộ text/image/voice lấy từ webhook thật 10/09. Bắt được
+payload thật thì thay lại và chỉnh `_sticker_url` nếu tên field khác.
 
 Payload `user_send_text` + `app_id` là format **Zalo OA API** (bản cũ hỗ trợ song song);
 PoC **không** dùng OA, bỏ qua nếu gặp.

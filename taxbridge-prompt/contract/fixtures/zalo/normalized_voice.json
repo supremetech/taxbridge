@@ -7,7 +7,8 @@
   "text": null,
   "imageUrl": null,
   "audioUrl": "https://f2-voice-aac-dl.zdn.vn/2019236892853799970/c627c0a7304ad3148a5b.aac",
-  "sentAt": "2026-09-10T16:46:12+07:00",
+  "stickerUrl": null,
+  "sentAt": "2026-09-10T16:47:14+07:00",
   "rawPayload": {
     "event_name": "message.voice.received",
     "message": {
