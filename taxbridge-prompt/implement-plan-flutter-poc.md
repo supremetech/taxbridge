@@ -150,6 +150,8 @@ Thực tế khi code (12/09, dựng lại từ đầu trong monorepo `taxbridge/
 người dùng còn ở màn Capture/Detail và banner mất vế `Tiền vào +380.000đ`. `DEMO=true` ở mode
 text: nút **Dùng file demo** điền sẵn câu UC2 (Simulator không gõ được tiếng Việt). Mock:
 candidate = SALE CONFIRMED UNPAID cùng số tiền; dashboard/summary tính từ state như backend.
+Đã chạy app với Functions prod (12/09 11:15): UC1–UC7 đúng số, vision đọc đúng 3 ảnh demo,
+evidence URL Storage hiển thị được; `API_BASE_URL` mặc định = prod URL.
 
 Multipart:
 
