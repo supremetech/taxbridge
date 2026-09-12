@@ -1,0 +1,51 @@
+{
+  "caseId": "M11",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "OWNER_INCOMING_NOISE_MEMO",
+  "occurredAt": "2026-09-08T16:05:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M11_in_noise_memo.jpg",
+    "screenshotType": "owner_incoming",
+    "ownerNameHint": "LE TRONG SONG HAN",
+    "nameVisibleOnScreen": "PHAM THI THU",
+    "memoOnScreen": "hom qua em tuyet voi lam"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 180000,
+    "memo": "hom qua em tuyet voi lam",
+    "counterparty": "PHAM THI THU",
+    "occurredAt": "2026-09-08T16:05:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "màn hình (dòng người nhận / người gửi)",
+    "mustNotReturn": null,
+    "why": "Memo là lời nhắn vu vơ, không có thông tin giao dịch → không được suy ra loại/chiều từ memo."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "classificationType": "UNKNOWN"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "none",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "counterparty"
+  ],
+  "softFields_gradedByHuman": [
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "counterparty": "human — chấp nhận hoa/thường, rút gọn tên",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "memo nhiễu giữ nguyên văn; counterparty lấy từ dòng 'Tên người gửi'."
+}

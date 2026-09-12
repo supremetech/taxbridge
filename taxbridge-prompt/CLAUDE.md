@@ -27,7 +27,7 @@ taxbridge/                          git · MONOREPO (một .git ở đây) · br
 │   ├── implement-plan-backend-poc.md   §1–11 v1 · §12–17 Phase 2
 │   ├── implement-plan-flutter-poc.md   §1–9 v1 · §10–14 Phase 2
 │   ├── requirements-phase2.md      phân tích + quyết định 5 yêu cầu `note.md` → UC10–14
-│   ├── test-data/                  bộ eval AI 21 case + score.py (README riêng); test-data-eval-plan.md = lý do thiết kế
+│   ├── test-data/                  bộ eval AI 25 case + score.py (README riêng); test-data-eval-plan.md = lý do thiết kế
 │   ├── hackathon-prep-checklist.md   việc tối 11/09 · time-box build day (§4) · video script
 │   └── demo-assets/                sale_voice.{m4a,aac} + receipt.jpg · transfer_match.jpg · transfer_deposit.jpg (+ bank_history.jpg Phase 2)
 ├── taxbridge-server/
@@ -117,17 +117,23 @@ Cloud Storage · OpenAI. File theo plan mục 1 (`app/*_service.py` + `app/route
   `process_capture()` dùng chung cho app và Zalo. Bằng chứng: `evidenceText` (câu gốc /
   transcript) + `evidenceUrl` (Storage download URL có token, public với ai có link — chấp
   nhận PoC) copy từ capture lên event/movement; contract §5.1, plan BE §4.2.
-- AI: `SALE` + "chuyển khoản" → `paymentMethod=BANK`, `paymentStatus=UNPAID`; chỉ `PAID`
+- AI: hóa đơn = phiếu do **cửa hàng khác phát hành** (tên đầu phiếu) → `PURCHASE`, counterparty =
+  bên phát hành; "HÓA ĐƠN BÁN LẺ" không có nghĩa hộ đang bán.
+  `SALE` + "chuyển khoản" → `paymentMethod=BANK`, `paymentStatus=UNPAID`; chỉ `PAID`
   khi nói rõ đã nhận; không nói hình thức → `UNKNOWN`/`UNKNOWN`. "450 nghìn" = 450000,
-  "1 triệu 2" = 1200000, "1 triệu 250" = 1250000, "300k" = 300000. Ảnh CK khách chụp: tên
-  hiển thị là chủ shop → `counterparty` lấy từ nội dung CK. `occurredAt`: ảnh = ngày in trên
+  "1 triệu 2" = 1200000, "1 triệu 250" = 1250000, "300k" = 300000. Ảnh CK: **chiều tiền theo
+  dấu / nhãn số tiền** (`−`, "Chuyển đến" → `OUT`, counterparty = người nhận; `+`, "Nhận tiền"
+  → `IN`; không dấu = khách chụp gửi shop → `IN`, counterparty = người gửi). Nội dung CK có thể
+  rỗng / vu vơ / **ghi ngược chiều** → không dùng memo để quyết chiều tiền. Backend truyền tên
+  chủ hộ (`displayName` Zalo hoặc `businesses.ownerName`) vào prompt để biết bên nào là chủ
+  (contract §5.1b, sửa 12/09 sau khi bot đọc sai ảnh MoMo thật). `occurredAt`: ảnh = ngày in trên
   chứng từ; text/voice chỉ khi nói rõ; còn lại now(); ngoài [now−365d, now+1d] → now()
   (Phase 2 ②, plan BE §12; v1 luôn now()). Đủ rule (đánh dấu *eval*) ở plan BE §4.1.
 - Dashboard: `revenue` = CONFIRMED SALE; `expense` = CONFIRMED PURCHASE; `collected` =
   CONFIRMED SALE PAID; `receivable = revenue − collected`; **`bankIn` = mọi movement IN
   bất kể status**; `draftCount`; `unmatchedMoneyCount`. Tính khi đọc, không ledger.
 - Match: movement `MATCHED` + event `paymentStatus=PAID`. Classify `DEPOSIT`/`OWNER_MONEY`
-  **không** động vào revenue.
+  **không** động vào revenue. Movement `OUT`: không có candidate, `match` → `409`, chỉ classify.
 - Close day: upsert `daily_records/{date}` đúng shape DTO (nested `summary`). `sync_record(date)`
   sau mọi tạo / confirm / reject / match / classify / đổi ngày: record đã có → warning mới cho
   DRAFT/UNMATCHED, warning hết lý do → `RESOLVED` + `resolvedAt`, recompute `summary`; chưa đóng →
@@ -142,7 +148,11 @@ Cloud Storage · OpenAI. File theo plan mục 1 (`app/*_service.py` + `app/route
   Reply theo bảng §6.1. Secret `ZALO_BOT_TOKEN` đã cấp IAM 12/09.
 - Mọi việc xong **trước khi trả response** (upload Storage, gọi API…): Functions gen2
   đóng băng CPU sau response.
-- OpenAI (pin trong `config.py`): vision/text **`gpt-5.6-terra`**, `reasoning.effort="low"`,
+- OpenAI (pin trong `config.py`): vision/text **`gpt-5.6-terra`**, `reasoning.effort="low"`
+  (12/09 thử `"none"`: local 17/17 case y hệt `low`, nhưng trên prod đọc `receipt.jpg` thành
+  `SALE` 5/5 → giữ `low`; 5.6 không nhận `minimal`). **Đổi model / effort / prompt thì phải đo
+  lại trên prod** — local đúng không suy ra được prod. Phải fallback model → ghi
+  `captures/{id}.modelErrors` (log Functions không đọc được text),
   Responses API `responses.parse` + Pydantic; audio **`gpt-transcribe`** với
   `languages=["vi"]` + `prompt`/`keywords` (không có param `language` số ít) rồi qua prompt
   extract như text. Fallback: vision `gpt-5.6-luna`; audio `gpt-4o-transcribe` `language="vi"`.

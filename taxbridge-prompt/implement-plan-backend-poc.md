@@ -181,19 +181,37 @@ chạy `test-data/` trên backend cũ 11/09 (11/21 pass,
 - SALE + "chuyển khoản / ck / banking" → `BANK` + `UNPAID`; chỉ `PAID` khi nói rõ "đã nhận /
   đã thanh toán" hoặc tiền mặt. Không nói hình thức thanh toán → `paymentMethod=UNKNOWN`
   và `paymentStatus=UNKNOWN`, không đoán *(eval T2)*. PURCHASE có phiếu/hóa đơn → `PAID`.
-- Hóa đơn: chủ hộ chụp hóa đơn do cửa hàng khác phát hành → chủ hộ là người mua → `PURCHASE`,
-  `counterparty` = cửa hàng phát hành (không lấy tên khách trên phiếu — receipt.jpg từng bị đọc
-  thành SALE/"Anh Tuấn"). `amount` = "Tổng cộng / Thành tiền"; không lấy "Tiền khách đưa" /
-  "Tiền thối" *(eval R2)*.
-- Ảnh chuyển khoản — đọc theo góc nhìn **chủ shop**, không phải góc nhìn người chụp màn hình:
-  - `direction=IN` là **mặc định**; màn hình "Chuyển khoản thành công" khách chụp gửi cho shop
-    vẫn là tiền VÀO shop. `OUT` chỉ khi rõ chính chủ shop trả tiền đi *(eval M1/M6 — đo 12/09:
-    không có câu này thì model trả `OUT` cho cả `transfer_match` lẫn `transfer_deposit`,
-    `bankIn` = 0 và hero chết)*.
-  - `counterparty` = **người gửi** ("Từ / Nguồn tiền"). Tên ở dòng "Đến / Người nhận /
-    Người thụ hưởng" là chủ shop — không bao giờ lấy làm `counterparty` *(eval M1/M6 — đo 12/09:
-    model từng trả `MAI ANH TUAN` = chủ shop)*. Ảnh không hiện tên người gửi → lấy tên từ nội dung
-    CK ("LAN 3HOP" → "LAN"); nội dung không có tên người → `null`.
+- Hóa đơn: phân biệt **bên phát hành** (tên in to ở ĐẦU phiếu, kèm địa chỉ / ĐT / MST) với bên
+  mua (dòng "Khách hàng / Người mua"). Chủ hộ cầm phiếu do cửa hàng khác phát hành → chủ hộ là
+  người MUA → `PURCHASE`, `counterparty` = bên phát hành; tên ở dòng "Khách hàng" là chính chủ hộ,
+  không bao giờ lấy làm `counterparty`. Tiêu đề **"HÓA ĐƠN BÁN LẺ"** chỉ nói phiếu do bên bán lập,
+  KHÔNG phải hộ đang bán — chỉ `SALE` khi tên đầu phiếu đúng là cửa hàng của chủ hộ
+  *(đo 12/09 trên prod: thiếu câu này, `receipt.jpg` ra `SALE` / "Anh Tuấn" 5/5 lần dù local đúng
+  5/5 — prompt phải dứt khoát, đừng dựa vào việc local chạy đúng)*. `amount` = "Tổng cộng /
+  Thành tiền"; không lấy "Tiền khách đưa" / "Tiền thối" *(eval R2)*.
+- Ảnh chuyển khoản — chiều tiền theo góc nhìn **chủ hộ**, xét theo đúng thứ tự (sửa 12/09 chiều,
+  sau khi bot Zalo đọc ảnh MoMo thật `−100.000đ "CHUYỂN ĐẾN HẠNH"` thành "Tiền vào từ LE TRONG
+  SONG HAN" — rule "luôn IN" của v1 chỉ đúng cho ảnh do KHÁCH chụp):
+  1. **Dấu / nhãn số tiền là bằng chứng mạnh nhất**: `−`, "Chuyển đến / Chuyển tiền / Thanh toán"
+     → `OUT`, `counterparty` = người **nhận**; `+`, "Nhận tiền / Báo có" → `IN`,
+     `counterparty` = người **gửi** *(eval M8/M10 — ảnh chủ hộ tự chụp trong app ngân hàng, ví)*.
+  2. Ảnh **không có dấu** +/− (màn "Chuyển khoản thành công" khách chụp gửi cho shop, dòng
+     "Người nhận" chính là chủ hộ) → `IN`, `counterparty` = người gửi *(eval M1/M6 — đo 12/09:
+     không có câu này thì model trả `OUT` cho cả `transfer_match` lẫn `transfer_deposit`,
+     `bankIn` = 0 và hero chết; và từng trả `MAI ANH TUAN` = chủ shop làm counterparty)*.
+  3. Nếu biết **tên chủ hộ** (`_owner_line`, xem dưới): bên mang tên đó là chủ hộ, không bao giờ
+     là `counterparty`; tiền về phía chủ hộ → `IN`, rời chủ hộ → `OUT`. Rule này thắng mọi suy đoán.
+  4. **Nội dung CK (memo) không quyết định chiều tiền** và không ghi đè tên hai bên đã in trên
+     ảnh: memo có thể rỗng *(M10)*, vu vơ *(M11 "hôm qua em tuyệt vời lắm")*, hoặc ghi **ngược**
+     *(M8 "A chuyển tiền cho B" trong khi B mới là người trả)*. Chỉ dùng memo để lấy tên khi ảnh
+     không hiện tên bên kia ("LAN 3HOP" → "LAN"); không có tên người → `null`.
+- **Tên chủ hộ vào prompt**: `extract_*(..., owner_name)` chèn một dòng `Tên chủ hộ (chủ tài khoản
+  đang dùng app này): "<tên>". Bên mang tên này là CHỦ HỘ, không bao giờ là counterparty.`
+  Nguồn: Zalo `message.displayName`; app đọc `businesses/{id}.ownerName` (set lúc `register` có
+  `zaloId`, lấy `zalo_users.displayName`). Không biết tên → bỏ dòng này, rule 1–2 vẫn đủ (đo 12/09:
+  M8–M11 đúng cả khi không có tên).
+- "khách **đặt** hàng / đặt 2 cân" vẫn là `SALE`; chỉ "cọc / đặt cọc / tiền cọc" mới `DEPOSIT`
+  *(eval T5 — đo 12/09: thiếu câu này model trả `DEPOSIT` cho "Chị Hà đặt 2 cân macca")*.
   - Ngày: **Phase 2 ②** đọc ngày (+ giờ) in trên ảnh → `occurredDate`; text/voice chỉ khi nói rõ
     (prompt nhận `Hôm nay là YYYY-MM-DD` để quy đổi "hôm qua"); không có → `null` (mục 12).
 - Không chắc → `UNKNOWN`, `confidence` thấp; không bịa số, không biến số lượng / mã vạch /
@@ -608,6 +626,32 @@ bằng Zalo trên điện thoại.
 Kết quả 12/09: `smoke.sh` **145 pass · 0 fail** local (Firestore emulator + `flask run`) và
 **146 pass · 0 fail** trên prod sau khi deploy (thêm 1 assert `evidenceUrl` mở được — emulator
 không có Storage).
+
+### Phase 10 — chiều tiền vào / tiền ra (sửa sau test Zalo thật, 12/09 chiều)
+
+Bot đọc ảnh MoMo thật `−100.000đ "CHUYỂN ĐẾN HẠNH"` thành `🏦 Tiền vào 100.000đ từ LE TRONG
+SONG HAN` (= chính chủ hộ): rule v1 "ảnh CK luôn `IN`, counterparty = người gửi" chỉ đúng cho ảnh
+do KHÁCH chụp, sai khi chủ hộ tự chụp giao dịch trong app ngân hàng / ví của mình.
+
+- [x] Prompt `extract_transfer` + `SYSTEM_PROMPT` viết lại theo 4 rule ở mục 4.1 (dấu/nhãn →
+      chiều tiền; memo không quyết định chiều; tên chủ hộ thắng mọi suy đoán).
+- [x] `owner_name` chạy suốt `process_capture` → mọi `extract_*` ảnh; Zalo lấy `displayName`,
+      app lấy `businesses/{id}.ownerName` (set lúc register có `zaloId`).
+- [x] Movement `OUT`: `candidates` luôn rỗng, `match` → `409 INVALID_STATE`, reply Zalo đổi thành
+      `🏦 Tiền ra <amount>đ cho <counterparty> …` (contract §5.1b + §6.1).
+- [x] Thử `REASONING_EFFORT` `none` → **quay lại `low`**: local 17/17 giống `low`, nhưng trên
+      prod `receipt.jpg` ra `SALE`. Bài học: đổi model/effort phải đo **trên prod**, không chỉ local.
+- [x] Rule hóa đơn viết lại theo bên phát hành (mục 4.1) — sửa `receipt.jpg` ra `SALE` trên prod.
+- [x] `openai_client.LAST_ERRORS` → ghi `captures/{id}.modelErrors` khi phải dùng model fallback
+      (`firebase functions:log` không in được text log, đây là cách duy nhất lần ra trên prod).
+- [x] `requirements.txt`: `openai>=3.13.0` (sàn = version đã verify local).
+- [x] Eval: thêm `test-data` case **M8–M11** + 4 ảnh MoMo dựng lại (memo ngược / đủ / rỗng /
+      nhiễu); sửa prompt cho T5 ("đặt hàng" ≠ "đặt cọc"). Chạy tay 17/17 đúng.
+- [x] `smoke.sh` thêm khối "Tiền ra" (8 assert) → **153 pass · 0 fail** local,
+      **154 pass · 0 fail** prod sau khi deploy (12/09 chiều).
+- [x] `openapi.yaml` version 2.0.0: khối "Có gì mới ở Phase 2" liệt kê 3 endpoint mới + field mới,
+      example cho `Pending`, mô tả `Direction` theo dấu +/−.
+- [ ] Nhắn Zalo thật từ điện thoại để xác nhận câu trả lời đã đúng chiều.
 
 ### Deploy
 

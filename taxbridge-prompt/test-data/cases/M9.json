@@ -1,0 +1,51 @@
+{
+  "caseId": "M9",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "OWNER_INCOMING_QR",
+  "occurredAt": "2026-09-03T07:35:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M9_owner_in_qr.jpg",
+    "screenshotType": "owner_incoming",
+    "ownerNameHint": "LE TRONG SONG HAN",
+    "nameVisibleOnScreen": "NGUYEN THANH MINH",
+    "memoOnScreen": "NGUYEN THANH MINH chuyen tien den LE TRONG SONG HAN - PSP2612616400000165"
+  },
+  "expectedOutput": {
+    "direction": "IN",
+    "amount": 100000,
+    "memo": "NGUYEN THANH MINH chuyen tien den LE TRONG SONG HAN - PSP2612616400000165",
+    "counterparty": "NGUYEN THANH MINH",
+    "occurredAt": "2026-09-03T07:35:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "màn hình (dòng người nhận / người gửi)",
+    "mustNotReturn": "LE TRONG SONG HAN",
+    "why": "Dấu '+' và 'NHẬN TIỀN QUA MÃ QR TỪ …' → IN; counterparty là người gửi, không phải chủ hộ."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "classificationType": "UNKNOWN"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "none",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "counterparty"
+  ],
+  "softFields_gradedByHuman": [
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "counterparty": "human — chấp nhận hoa/thường, rút gọn tên",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "Ca thuận: bot trả đúng ngay từ 12/09. Giữ để chống hồi quy khi sửa rule OUT."
+}

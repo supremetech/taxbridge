@@ -156,8 +156,17 @@ def _bank_history(ref, capture_id: str, business_id: str, source: str, rows: lis
                    result_ids=ids, skipped=skipped)
 
 
+def _owner_name(business_id: str, owner_name: str | None) -> str | None:
+    """Tên chủ hộ cho prompt ảnh: Zalo truyền displayName; app lấy `ownerName` của business."""
+    if owner_name:
+        return owner_name
+    doc = business(business_id).get()
+    return doc.to_dict().get("ownerName") if doc.exists else None
+
+
 def process_capture(business_id: str, source: str, capture_type: str, text: str | None = None,
-                    file_bytes: bytes | None = None, zalo_message_id: str | None = None) -> dict:
+                    file_bytes: bytes | None = None, zalo_message_id: str | None = None,
+                    owner_name: str | None = None) -> dict:
     capture_id = new_id("cap")
     ref = business(business_id).collection("captures").document(capture_id)
 
@@ -171,6 +180,7 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
              "status": "PROCESSING", "resultType": None, "resultId": None, "resultIds": [],
              "skippedCount": 0, "occurredAt": None, "error": None, "createdAt": now_iso()})
 
+    owner = _owner_name(business_id, owner_name) if capture_type.startswith("IMAGE_") else None
     transcript = None
     try:
         if capture_type == "TEXT":
@@ -180,13 +190,13 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
             ref.update({"transcript": transcript})
             extraction = openai_client.extract_event(text=transcript)
         elif capture_type == "IMAGE_RECEIPT":
-            extraction = openai_client.extract_event(image=file_bytes)
+            extraction = openai_client.extract_event(image=file_bytes, owner_name=owner)
         elif capture_type == "IMAGE_TRANSFER":
-            extraction = openai_client.extract_transfer(file_bytes)
+            extraction = openai_client.extract_transfer(file_bytes, owner_name=owner)
         elif capture_type == "IMAGE_BANK_HISTORY":
-            extraction = openai_client.extract_bank_history(file_bytes)
+            extraction = openai_client.extract_bank_history(file_bytes, owner_name=owner)
         else:                                   # IMAGE_UNKNOWN — ảnh từ Zalo
-            out = openai_client.extract_image(file_bytes)
+            out = openai_client.extract_image(file_bytes, owner_name=owner)
             if out.kind == "RECEIPT" and out.event:
                 extraction, capture_type = out.event, "IMAGE_RECEIPT"
             elif out.kind == "TRANSFER" and out.transfer:
@@ -197,7 +207,10 @@ def process_capture(business_id: str, source: str, capture_type: str, text: str 
             ref.update({"type": capture_type})
     except Exception:
         logging.exception("AI lỗi khi xử lý capture %s", capture_id)
+        ref.update({"modelErrors": openai_client.LAST_ERRORS[:]})
         return _result(ref, capture_id, error="AI_EXTRACTION_FAILED")
+    if openai_client.LAST_ERRORS:                 # đã phải dùng model fallback — ghi lại lý do
+        ref.update({"modelErrors": openai_client.LAST_ERRORS[:]})
 
     if isinstance(extraction, openai_client.BankHistoryExtraction):
         return _bank_history(ref, capture_id, business_id, source, extraction.transfers, file_url)

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: TaxBridge API (PoC)
-  version: "1.0.0"
+  version: "2.0.0"
   description: |
     API cho TaxBridge — agent ghi nhận giao dịch cho hộ kinh doanh Việt Nam.
 
@@ -20,6 +20,25 @@ info:
     Gửi header `X-Session-Token: <token>` lấy từ `/register` hoặc `/login`. Backend tự resolve
     `accountId` / `businessId`, **client không bao giờ gửi `businessId`**. Token không hết hạn
     trong PoC. Gặp `401` thì app xoá session và quay về màn Login.
+
+    ### Có gì mới ở Phase 2 (12/09/2026)
+
+    | Endpoint mới | Làm gì |
+    |---|---|
+    | `GET /api/reports?from&to` | Báo cáo theo khoảng ngày: `summary`, `byDay`, `byType` |
+    | `GET /api/pending` | Tồn đọng **mọi ngày**: nháp chưa xác nhận + tiền chưa phân loại |
+    | `POST /api/zalo-users/{zaloId}/replay` | Xử lý lại tin nhắn Zalo gửi **trước khi** liên kết |
+
+    Đổi trên endpoint cũ:
+
+    - `CaptureResult` thêm `occurredAt`, `resultIds`, `skippedCount`.
+    - `Dashboard` thêm `pastDraftCount`, `pastUnmatchedCount`.
+    - `POST /captures` nhận thêm `IMAGE_BANK_HISTORY` (ảnh danh sách giao dịch ngân hàng) →
+      `resultType: MONEY_MOVEMENT_BATCH`, nhiều movement một lần, bỏ dòng đã có trong sổ.
+    - `occurredAt` giờ là **ngày in trên chứng từ**, không còn luôn là `now()`.
+    - `MoneyMovement.direction` đọc theo dấu `+`/`−` trên ảnh nên **tiền ra (`OUT`) được ghi
+      nhận**: không có `candidates`, `match` trả `409`, chỉ `classify`.
+    - Webhook Zalo: bot **trả lời ngay trong Zalo** sau mỗi tin nhắn.
 
     ### Capture xử lý đồng bộ
     `POST /captures` gọi AI ngay trong request (2–9 s). **AI lỗi không trả 5xx**: vẫn `200` với
@@ -40,9 +59,9 @@ tags:
   - name: Money
     description: Tiền vào ngân hàng — ghép hoặc phân loại
   - name: Reports
-    description: Dashboard, đóng ngày, lịch sử ngày
+    description: Dashboard, đóng ngày, lịch sử ngày, báo cáo theo khoảng, tồn đọng
   - name: Zalo
-    description: Webhook Zalo Bot Platform
+    description: Webhook Zalo Bot Platform, bot trả lời, replay tin nhắn cũ
   - name: Meta
     description: Health check và tài liệu
 
@@ -190,7 +209,7 @@ paths:
         | `TEXT` | extract event từ câu | `BusinessEvent` DRAFT |
         | `AUDIO` | transcribe → extract | `BusinessEvent` DRAFT |
         | `IMAGE_RECEIPT` | đọc hoá đơn | `BusinessEvent` DRAFT (thường `PURCHASE`) |
-        | `IMAGE_TRANSFER` | đọc biên lai CK | `MoneyMovement` UNMATCHED |
+        | `IMAGE_TRANSFER` | đọc biên lai CK | `MoneyMovement` UNMATCHED (`IN` hoặc `OUT`) |
         | `IMAGE_BANK_HISTORY` | đọc danh sách giao dịch ngân hàng | N `MoneyMovement` UNMATCHED |
 
         `occurredAt` = **ngày in trên chứng từ** (Phase 2 ②); text/voice chỉ khi người nói nêu rõ
@@ -445,6 +464,9 @@ paths:
       description: |
         Movement `UNMATCHED` → `MATCHED` + `matchedEventId`; event tương ứng chuyển
         `paymentStatus = PAID` (⇒ `collected` tăng, `receivable` giảm).
+
+        Chỉ ghép được **tiền vào**: movement `direction: OUT` → `409 INVALID_STATE`
+        (tiền ra xử lý bằng `classify`).
       requestBody:
         required: true
         content:
@@ -858,6 +880,11 @@ components:
     Direction:
       type: string
       enum: [IN, OUT]
+      description: |
+        Đọc từ **dấu / nhãn số tiền trên ảnh**, không đọc từ nội dung chuyển khoản:
+        `−` / "Chuyển đến" → `OUT` (`counterparty` = người nhận); `+` / "Nhận tiền" → `IN`;
+        ảnh không có dấu (khách chụp gửi shop) → `IN` (`counterparty` = người gửi).
+        Chỉ `IN` tính vào `bankIn` và có `candidates`.
     Source:
       type: string
       enum: [APP, ZALO]
@@ -1025,7 +1052,9 @@ components:
             - { type: "null" }
         candidates:
           type: array
-          description: Luôn có key; `[]` khi không có gợi ý hoặc khi đã xử lý.
+          description: |
+            Luôn có key; `[]` khi không có gợi ý, khi đã xử lý, hoặc khi `direction: OUT`
+            (tiền ra không ghép với đơn bán, chỉ phân loại).
           items: { $ref: "#/components/schemas/MatchCandidate" }
       required: [movementId, direction, amount, memo, counterparty, occurredAt, source,
                  captureType, evidenceText, evidenceUrl, status, matchedEventId,
@@ -1168,6 +1197,39 @@ components:
           type: array
           items: { $ref: "#/components/schemas/PendingDate" }
       required: [draftEvents, unmatchedMovements, byDate]
+      example:
+        draftEvents:
+          - eventId: ev_007
+            type: PURCHASE
+            status: DRAFT
+            amount: 180000
+            description: Mua túi giấy
+            counterparty: Tạp hóa Cô Sáu
+            paymentMethod: CASH
+            paymentStatus: PAID
+            occurredAt: "2026-09-11T17:20:00+07:00"
+            source: APP
+            captureType: IMAGE_RECEIPT
+            evidenceText: null
+            evidenceUrl: null
+            confidence: 0.71
+        unmatchedMovements:
+          - movementId: mov_002
+            direction: IN
+            amount: 380000
+            memo: COC MINH
+            counterparty: NGUYEN VAN MINH
+            occurredAt: "2026-09-11T11:02:00+07:00"
+            source: APP
+            captureType: IMAGE_TRANSFER
+            evidenceText: null
+            evidenceUrl: null
+            status: UNMATCHED
+            matchedEventId: null
+            classificationType: null
+            candidates: []
+        byDate:
+          - { date: "2026-09-11", draftCount: 1, unmatchedCount: 1 }
 
     ReplayResult:
       type: object

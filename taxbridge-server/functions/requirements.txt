@@ -1,7 +1,7 @@
 firebase-functions>=0.4.2
 firebase-admin>=6.5.0
 flask>=3.0.0
-openai>=1.99.0
+openai>=3.13.0        # sàn = version đã verify local; tránh prod resolve bản khác
 pydantic>=2.7.0
 python-dotenv>=1.0.0
 requests>=2.32.0

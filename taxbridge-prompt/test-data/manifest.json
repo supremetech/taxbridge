@@ -6,12 +6,12 @@
   "business": "Hộ kinh doanh Đặc sản Tây Bắc Hương Núi",
   "ownerNameOnTransferScreenshots": "DINH QUOC BAO",
   "synthetic": true,
-  "caseCount": 21,
+  "caseCount": 25,
   "byCaptureType": {
     "TEXT": 6,
     "AUDIO": 4,
     "IMAGE_RECEIPT": 3,
-    "IMAGE_TRANSFER": 7,
+    "IMAGE_TRANSFER": 11,
     "CLOSE_DAY": 1
   },
   "scenarioTags": {
@@ -31,7 +31,11 @@
     "MATCH_BY_AMOUNT_ONLY": 1,
     "MISSING_PAYMENT_METHOD": 1,
     "NO_BUSINESS_INTENT": 1,
+    "OWNER_INCOMING_NOISE_MEMO": 1,
+    "OWNER_INCOMING_QR": 1,
     "OWNER_MONEY_TEXT": 1,
+    "OWNER_OUTGOING_EMPTY_MEMO": 1,
+    "OWNER_OUTGOING_MISLEADING_MEMO": 1,
     "UNMATCHED_NO_HINT": 1,
     "UNMATCHED_TO_DEPOSIT": 1,
     "UNMATCHED_TO_OWNER": 1
@@ -68,5 +72,6 @@
     "pass": 11,
     "total": 21,
     "note": "backend cũ trước khi làm lại theo plan; chỉ có report.md"
-  }
+  },
+  "ownerNameOnMomoScreenshots": "LE TRONG SONG HAN"
 }

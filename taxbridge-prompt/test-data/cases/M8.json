@@ -1,0 +1,51 @@
+{
+  "caseId": "M8",
+  "captureType": "IMAGE_TRANSFER",
+  "scenarioTag": "OWNER_OUTGOING_MISLEADING_MEMO",
+  "occurredAt": "2026-08-14T12:43:00+07:00",
+  "input": {
+    "evidenceFile": "evidence/synthetic_transfer_M8_owner_out.jpg",
+    "screenshotType": "owner_outgoing",
+    "ownerNameHint": "LE TRONG SONG HAN",
+    "nameVisibleOnScreen": "NGUYEN THI KIEU HANH",
+    "memoOnScreen": "LE TRONG SONG HAN chuyen tien qua MoMo"
+  },
+  "expectedOutput": {
+    "direction": "OUT",
+    "amount": 100000,
+    "memo": "LE TRONG SONG HAN chuyen tien qua MoMo",
+    "counterparty": "NGUYEN THI KIEU HANH",
+    "occurredAt": "2026-08-14T12:43:00+07:00",
+    "status": "UNMATCHED"
+  },
+  "counterpartyTrap": {
+    "expectedSource": "màn hình (dòng người nhận / người gửi)",
+    "mustNotReturn": "LE TRONG SONG HAN",
+    "why": "Chủ hộ tự chụp giao dịch của mình: dấu '−' và tiêu đề 'CHUYỂN ĐẾN HẠNH' quyết định chiều tiền. Memo ghi tên CHỦ HỘ nên nếu đọc theo memo sẽ ra IN từ chính chủ hộ — đúng lỗi gặp trên Zalo thật 12/09."
+  },
+  "expectedMatching": {
+    "expectedCandidateEventIds": [],
+    "autoMatchAllowed": false,
+    "expectedTop1": null
+  },
+  "expectedUserAction": {
+    "action": "classify",
+    "classificationType": "OTHER"
+  },
+  "expectedFinalStatus": "CLASSIFIED",
+  "effectOnRevenue": "none",
+  "criticalFields": [
+    "direction",
+    "amount",
+    "counterparty"
+  ],
+  "softFields_gradedByHuman": [
+    "memo"
+  ],
+  "tolerance": {
+    "amount": "exact",
+    "counterparty": "human — chấp nhận hoa/thường, rút gọn tên",
+    "occurredAt": "±5 phút"
+  },
+  "notes": "Bản dựng lại ảnh MoMo thật user gửi 12/09. Bẫy: memo 'LE TRONG SONG HAN chuyen tien qua MoMo' ghi tên chủ hộ; counterparty đúng là người NHẬN."
+}

@@ -55,7 +55,8 @@ def similar(a: str | None, b: str | None) -> bool:
 
 
 def candidates_for(business_id: str, movement: dict, events: list[dict] | None = None) -> list[dict]:
-    if movement["status"] != "UNMATCHED":
+    # Chỉ tiền VÀO mới ghép được với đơn bán chưa thu; tiền RA chỉ phân loại.
+    if movement["status"] != "UNMATCHED" or movement["direction"] != "IN":
         return []
     events = events if events is not None else event_service.all_events(business_id)
     scored = []
@@ -106,6 +107,8 @@ def match(business_id: str, movement_id: str, event_id: str) -> dict:
     movement = get(business_id, movement_id)
     if movement["status"] != "UNMATCHED":
         raise errors.invalid_state("Khoản tiền đã được xử lý.")
+    if movement["direction"] != "IN":
+        raise errors.invalid_state("Chỉ ghép được tiền vào với đơn bán.")
     event = event_service.get(business_id, event_id)
 
     patch = {"status": "MATCHED", "matchedEventId": event_id}

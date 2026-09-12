@@ -68,7 +68,8 @@ Bạn trích xuất giao dịch cho hộ kinh doanh Việt Nam. Người nói / 
 Phân loại:
 - "bán / khách lấy / khách mua" → SALE.
 - "mua / nhập hàng", hoặc phiếu thu, hóa đơn do CỬA HÀNG KHÁC phát hành → PURCHASE.
-- "cọc / đặt cọc" → DEPOSIT.
+- "cọc / đặt cọc / tiền cọc" → DEPOSIT. Nhưng "khách ĐẶT hàng / đặt 2 cân" là đơn bán
+  bình thường → SALE, không phải DEPOSIT (eval T5).
 - "rút tiền / góp vốn / tiền nhà / bỏ vào quỹ / tiền cá nhân" → OWNER_MONEY.
 - Không rõ là giao dịch gì → UNKNOWN, amount = 0, confidence thấp.
 
@@ -84,25 +85,37 @@ Thanh toán:
 - KHÔNG nói hình thức thanh toán → paymentMethod=UNKNOWN và paymentStatus=UNKNOWN. Không đoán.
 - PURCHASE có phiếu / hóa đơn trên tay → PAID.
 
-Hóa đơn, phiếu thu (ảnh):
-- Chủ hộ chụp chứng từ do cửa hàng khác phát hành → chủ hộ là NGƯỜI MUA → PURCHASE.
-- counterparty = tên cửa hàng phát hành phiếu, KHÔNG lấy tên khách in trên phiếu.
+Hóa đơn, phiếu thu (ảnh) — xác định ai PHÁT HÀNH phiếu trước khi chọn loại:
+- BÊN PHÁT HÀNH = tên in to ở ĐẦU phiếu, kèm địa chỉ / điện thoại / MST. Dòng
+  "Khách hàng / Người mua" là bên MUA.
+- Chủ hộ đang cầm phiếu do CỬA HÀNG KHÁC phát hành → chủ hộ chính là bên MUA → **PURCHASE**,
+  counterparty = BÊN PHÁT HÀNH ở đầu phiếu. Tên ở dòng "Khách hàng / Người mua" là chủ hộ,
+  TUYỆT ĐỐI KHÔNG lấy làm counterparty.
+- Tiêu đề "HÓA ĐƠN BÁN LẺ / HÓA ĐƠN BÁN HÀNG / PHIẾU BÁN HÀNG" chỉ nói phiếu do bên BÁN lập —
+  KHÔNG có nghĩa hộ kinh doanh đang bán. Đừng vì chữ "bán" mà trả SALE.
+- Chỉ trả SALE khi tên ở ĐẦU phiếu đúng là cửa hàng của chính chủ hộ (hoặc trùng tên chủ hộ).
 - amount = dòng "Tổng cộng / Thành tiền / Tổng tiền". KHÔNG lấy "Tiền khách đưa", "Tiền thối lại".
 
-Ảnh chuyển khoản — đọc theo góc nhìn CHỦ SHOP, không phải góc nhìn người chụp màn hình:
+Ảnh chuyển khoản / biên lai — chiều tiền đọc theo góc nhìn CHỦ HỘ, theo đúng thứ tự sau:
 
-- direction=IN là MẶC ĐỊNH. Ảnh chuyển khoản gần như luôn là KHÁCH trả tiền cho shop:
-  màn hình "Chuyển khoản thành công" khách chụp gửi cho shop, biên lai "báo có", "nhận tiền",
-  dấu "+". Màn hình ghi "Chuyển tiền thành công" KHÔNG có nghĩa là OUT — đó là khách chuyển
-  ĐẾN shop, tiền vẫn VÀO shop → IN.
-- direction=OUT chỉ khi có bằng chứng rõ chính chủ shop là người trả tiền đi. Nếu chỉ có ảnh,
-  luôn trả IN.
-- counterparty = NGƯỜI GỬI tiền (khách), lấy ở dòng "Từ / Nguồn tiền / Tài khoản nguồn".
-  Tên ở dòng "Đến / Người nhận / Tài khoản nhận / Người thụ hưởng" là CHỦ SHOP —
-  TUYỆT ĐỐI KHÔNG lấy tên đó làm counterparty.
-  Ảnh chỉ hiện tên người nhận mà không hiện tên người gửi → lấy tên người từ nội dung
-  chuyển khoản (ví dụ "LAN 3HOP" → "LAN"); nội dung không có tên người → null.
-- memo = nội dung chuyển khoản, giữ nguyên như in trên ảnh.
+1. DẤU và NHÃN của số tiền là bằng chứng mạnh nhất, xét trước hết:
+   - "−100.000đ", "Chuyển đến …", "Chuyển tiền tới", "Thanh toán", "Trừ tiền" → tiền RỜI khỏi
+     chủ hộ → direction=OUT, counterparty = NGƯỜI NHẬN.
+   - "+100.000đ", "Nhận tiền …", "Báo có", "Tiền vào", "Nhận từ" → direction=IN,
+     counterparty = NGƯỜI GỬI.
+2. Ảnh KHÔNG có dấu +/− và không có nhãn chiều tiền (màn "Chuyển khoản thành công" do KHÁCH
+   chụp rồi gửi cho shop, dòng "Người nhận" chính là chủ hộ) → direction=IN,
+   counterparty = người GỬI.
+3. Nếu đề bài cho TÊN CHỦ HỘ: bên nào mang tên đó là chủ hộ, TUYỆT ĐỐI không lấy làm
+   counterparty; bên còn lại mới là counterparty. Tiền đi VỀ phía chủ hộ → IN, RỜI khỏi chủ
+   hộ → OUT. Quy tắc này thắng mọi suy đoán khác.
+4. Nội dung chuyển khoản (memo) KHÔNG quyết định chiều tiền và KHÔNG ghi đè tên hai bên đã in
+   rõ trên ảnh. Memo có thể rỗng, có thể là lời nhắn vu vơ ("hôm qua em tuyệt vời lắm"), có thể
+   ghi NGƯỢC ("A chuyển tiền cho B" trong khi giao dịch là B trả cho A) — gặp mâu thuẫn thì
+   tin dấu / nhãn / tên hai bên, bỏ qua memo.
+   Chỉ dùng memo để lấy tên khi ảnh không hiện tên bên kia ("LAN 3HOP" → "LAN"); không có tên
+   người → null.
+- memo = nội dung chuyển khoản giữ nguyên như in trên ảnh; không có nội dung → null.
 
 Ngày giao dịch (occurredDate):
 - Ảnh: lấy ngày (và giờ nếu có) IN TRÊN chứng từ, đổi "11/09/2026 11:02" → "2026-09-11T11:02".
@@ -131,7 +144,21 @@ def _content(instruction: str, image: bytes | None):
     return parts
 
 
+def _owner_line(owner_name: str | None) -> str:
+    """Tên chủ hộ để model biết bên nào là chủ, bên nào là counterparty (rule 3)."""
+    if not owner_name:
+        return ""
+    return (f'\nTên chủ hộ (chủ tài khoản đang dùng app này): "{owner_name}". '
+            "Bên mang tên này là CHỦ HỘ, không bao giờ là counterparty.")
+
+
+# Lỗi của lần gọi model gần nhất; `capture_service` ghi vào capture doc để đọc được trên prod
+# (firebase functions:log không in nổi text). Rơi xuống fallback là im lặng nên rất khó lần.
+LAST_ERRORS: list[str] = []
+
+
 def _parse(text_format, instruction: str, image: bytes | None):
+    LAST_ERRORS.clear()
     last = None
     for model in (VISION_MODEL, VISION_FALLBACK_MODEL):
         try:
@@ -144,38 +171,47 @@ def _parse(text_format, instruction: str, image: bytes | None):
             return resp.output_parsed
         except Exception as e:
             logging.warning("model %s lỗi: %s", model, e)
+            LAST_ERRORS.append(f"{model}: {type(e).__name__}: {e}"[:500])
             last = e
     raise last
 
 
-def extract_event(text: str | None = None, image: bytes | None = None) -> EventExtraction:
+def extract_event(text: str | None = None, image: bytes | None = None,
+                  owner_name: str | None = None) -> EventExtraction:
     if image is not None:
-        instruction = "Đây là ảnh chứng từ của hộ kinh doanh. Trích xuất giao dịch."
+        instruction = ("Đây là ảnh chứng từ của hộ kinh doanh. Trích xuất giao dịch.\n"
+                       "Nếu là hóa đơn / phiếu thu: xem tên ở ĐẦU phiếu (bên phát hành). Khác "
+                       "cửa hàng của chủ hộ → PURCHASE, counterparty = tên đầu phiếu, kể cả khi "
+                       "tiêu đề ghi 'HÓA ĐƠN BÁN LẺ'."
+                       + _owner_line(owner_name))
     else:
         instruction = f"Hôm nay là {today()}.\nCâu chủ hộ vừa ghi lại:\n{text}"
     return _parse(EventExtraction, instruction, image)
 
 
-def extract_transfer(image: bytes) -> TransferExtraction:
+def extract_transfer(image: bytes, owner_name: str | None = None) -> TransferExtraction:
     return _parse(TransferExtraction,
-                  "Đây là ảnh biên lai / màn hình chuyển khoản ngân hàng mà CHỦ SHOP nhận được "
-                  "từ khách. Trích xuất số tiền, chiều tiền và nội dung chuyển khoản.\n"
-                  "Nhắc lại hai lỗi hay gặp:\n"
-                  "1. Khách chụp màn hình 'Chuyển khoản thành công' của khách → tiền VÀO shop "
-                  "→ direction='IN' (không phải OUT).\n"
-                  "2. Tên ở dòng người NHẬN là chủ shop → không được dùng làm counterparty; "
-                  "counterparty là người GỬI, hoặc lấy từ nội dung CK, hoặc null.", image)
+                  "Ảnh biên lai / màn hình chi tiết giao dịch ngân hàng hoặc ví điện tử. "
+                  "Trích xuất số tiền, CHIỀU TIỀN, tên bên kia và nội dung chuyển khoản.\n"
+                  "Ba lỗi hay gặp, kiểm lại trước khi trả lời:\n"
+                  "1. Số tiền có dấu '−' hoặc nhãn 'Chuyển đến / Chuyển tiền / Thanh toán' là "
+                  "tiền RA (direction='OUT'), counterparty là NGƯỜI NHẬN — đừng mặc định 'IN'.\n"
+                  "2. Khách chụp màn hình 'Chuyển khoản thành công' (không có dấu +/−) gửi cho "
+                  "shop → tiền VÀO shop, direction='IN', counterparty là người GỬI.\n"
+                  "3. Nội dung chuyển khoản có thể rỗng, vu vơ, hoặc ghi ngược chiều — không "
+                  "được dùng memo để quyết định chiều tiền hay đổi tên hai bên."
+                  + _owner_line(owner_name), image)
 
 
-def extract_image(image: bytes) -> ImageExtraction:
+def extract_image(image: bytes, owner_name: str | None = None) -> ImageExtraction:
     return _parse(ImageExtraction,
                   "Ảnh chủ hộ gửi qua Zalo. Xác định kind: RECEIPT (hóa đơn, phiếu thu, "
                   "chứng từ mua bán), TRANSFER (biên lai / màn hình chuyển khoản), OTHER "
                   "(mọi ảnh khác). RECEIPT → điền event; TRANSFER → điền transfer; "
-                  "OTHER → cả hai null.", image)
+                  "OTHER → cả hai null." + _owner_line(owner_name), image)
 
 
-def extract_bank_history(image: bytes) -> BankHistoryExtraction:
+def extract_bank_history(image: bytes, owner_name: str | None = None) -> BankHistoryExtraction:
     return _parse(BankHistoryExtraction,
                   "Ảnh danh sách giao dịch trong app ngân hàng / sao kê của CHỦ SHOP. "
                   "Mỗi dòng = một transfer: amount (int), direction ('+' / 'nhận' / 'báo có' "
@@ -185,7 +221,8 @@ def extract_bank_history(image: bytes) -> BankHistoryExtraction:
                   "Không gộp dòng, không bịa dòng.\n"
                   "CHỈ đọc ảnh là DANH SÁCH nhiều giao dịch. Hóa đơn, phiếu thu, biên lai của "
                   "một giao dịch, màn hình 'chuyển khoản thành công', hay ảnh bất kỳ khác → "
-                  "trả transfers RỖNG, không suy diễn thành một dòng.", image)
+                  "trả transfers RỖNG, không suy diễn thành một dòng."
+                  + _owner_line(owner_name), image)
 
 
 def transcribe(m4a: bytes) -> str:

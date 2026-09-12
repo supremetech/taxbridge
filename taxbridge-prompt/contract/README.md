@@ -156,6 +156,25 @@ lúc tạo, `PUT` không sửa được. App hiện khối **Bằng chứng** �
   app: `http` → network, `asset://` → asset. Bản ghi không có file demo tương ứng
   (`ev_003`, `ev_006`, `ev_007`, `mov_003`, `mov_004`) → `evidenceUrl: null` (`ev_003` vẫn có transcript).
 
+### 5.1b Chiều tiền của `MoneyMovement` (sửa 12/09 sau test Zalo thật)
+
+`direction` đọc từ **dấu và nhãn số tiền trên ảnh**, không đọc từ nội dung chuyển khoản:
+
+| Trên ảnh | `direction` | `counterparty` |
+|---|---|---|
+| `−100.000đ`, "Chuyển đến …", "Thanh toán" | `OUT` | người **nhận** |
+| `+100.000đ`, "Nhận tiền …", "Báo có" | `IN` | người **gửi** |
+| Không có dấu (khách chụp "Chuyển khoản thành công" gửi cho shop) | `IN` | người **gửi** |
+
+Nội dung chuyển khoản có thể rỗng, vu vơ, hoặc ghi **ngược** chiều thật ("A chuyển tiền cho B"
+trong khi giao dịch là B trả cho A) → chỉ dùng để lấy tên khi ảnh không hiện tên bên kia.
+Backend truyền thêm **tên chủ hộ** vào prompt khi biết (`displayName` Zalo, hoặc
+`businesses/{id}.ownerName` set lúc register có `zaloId`): bên mang tên đó là chủ hộ, không bao
+giờ là `counterparty`.
+
+Hệ quả với movement `OUT`: **không có `candidates`** (chỉ tiền vào mới ghép được với đơn bán),
+`match` trả `409 INVALID_STATE`, `bankIn` không đổi — xử lý bằng `classify`.
+
 ### 5.2 Ngày nghiệp vụ — `occurredAt` (Phase 2 ②)
 
 | Nguồn | `occurredAt` |
@@ -259,8 +278,9 @@ curl -s "https://bot-api.zapps.me/bot$ZALO_BOT_TOKEN/sendMessage" \
 |---|---|
 | Chưa link | `TaxBridge chưa liên kết Zalo này. Mở app → Đăng ký → chọn "<displayName>" ở mục Zalo account.` |
 | DONE · EVENT | `✅ Đã ghi nháp: <Loại> <amount>đ · <counterparty> · <thanh toán>. Mở app để xác nhận.` |
-| DONE · MOVEMENT có candidate | `🏦 Tiền vào <amount>đ từ <counterparty> — có <n> đơn có thể khớp. Mở app để ghép.` |
-| DONE · MOVEMENT không candidate | `🏦 Tiền vào <amount>đ từ <counterparty> — chưa rõ là khoản gì. Mở app để phân loại.` |
+| DONE · MOVEMENT IN có candidate | `🏦 Tiền vào <amount>đ từ <counterparty> — có <n> đơn có thể khớp. Mở app để ghép.` |
+| DONE · MOVEMENT IN không candidate | `🏦 Tiền vào <amount>đ từ <counterparty> — chưa rõ là khoản gì. Mở app để phân loại.` |
+| DONE · MOVEMENT OUT | `🏦 Tiền ra <amount>đ cho <counterparty> — chưa rõ là khoản gì. Mở app để phân loại.` (tiền ra không bao giờ có candidate) |
 | FAILED | `❌ Chưa đọc được giao dịch. Nhắn rõ hơn, ví dụ: "bán 3 hộp collagen 450 nghìn ck".` |
 | STICKER / OTHER | không trả lời |
 
