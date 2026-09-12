@@ -612,12 +612,20 @@ paths:
       description: |
         Xác thực bằng header `X-Bot-Api-Secret-Token` so khớp thẳng với `ZALO_WEBHOOK_SECRET`.
 
-        - Body rỗng (health probe) → `200`, không parse.
+        - Body rỗng (health probe) hoặc không có `message.from.id` → `200`, không parse.
         - Zalo user chưa link account → lưu vào `zalo_unlinked_messages` để hiện ở màn Register.
         - Đã link → đẩy vào chung pipeline capture với `source=ZALO`; ảnh đi đường
           `IMAGE_UNKNOWN` (AI tự phân loại RECEIPT / TRANSFER / OTHER), voice `.aac`
           được remux sang `.m4a` trước khi transcribe.
         - **Luôn trả `200`** kể cả khi AI lỗi, để Zalo không gửi lại.
+
+        `messageType` suy từ field có mặt: `voice_url` → `AUDIO`, `photo_url` → `IMAGE`,
+        `sticker` → `STICKER`, `text` → `TEXT`, còn lại → `OTHER`.
+
+        **Sticker và loại chưa hỗ trợ** vẫn được ghi nhận (upsert `zalo_users`, lưu
+        `zalo_unlinked_messages` nếu chưa link) — nếu bỏ qua thì user nhắn sticker trước sẽ
+        không hiện ở dropdown Register. Nhưng **không gọi AI và không tạo capture**, vì
+        sticker không có giao dịch để trích.
       security:
         - zaloWebhookSecret: []
       requestBody:
@@ -635,6 +643,17 @@ paths:
                     message_id: m1a2b3c4d5e6f7081920
                     from: { id: a1b2c3d4e5f60718293a, is_bot: false, display_name: Nguyễn Văn A }
                     text: Bán 2 hộp collagen 300 nghìn tiền mặt
+              sticker:
+                summary: Sticker — chỉ ghi nhận người gửi, không gọi AI
+                value:
+                  event_name: message.sticker.received
+                  message:
+                    date: 1789033700000
+                    chat: { chat_type: PRIVATE, id: a1b2c3d4e5f60718293a }
+                    message_id: m4d5e6f7081920314253
+                    from: { id: a1b2c3d4e5f60718293a, is_bot: false, display_name: Nguyễn Văn A }
+                    message_type: CHAT_STICKER
+                    sticker: { id: "18104", url: https://zalo-sticker.zdn.vn/sticker/18104.png }
               image:
                 value:
                   event_name: message.image.received

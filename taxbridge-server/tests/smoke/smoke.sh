@@ -200,6 +200,15 @@ eq "body rỗng (probe) → 200" \
 eq "user trong /zalo-users/unlinked" \
    "$(curl -sS "$B/api/zalo-users/unlinked" | jq -r --arg id "$ZID" 'any(.[]; .zaloId == $id)')" "true"
 
+# Sticker: không phải giao dịch, nhưng user gửi sticker TRƯỚC vẫn phải hiện ở dropdown Register.
+ZID2="$(LC_ALL=C tr -dc 'a-f0-9' < /dev/urandom | head -c 20)"
+jq --arg id "$ZID2" --arg m "s${ZID2}1" \
+   '.message.from.id=$id | .message.chat.id=$id | .message.message_id=$m' \
+   "$FX/zalo/webhook_sticker.json" > "$TMP/wh_sticker.json"
+eq "webhook sticker → ok" "$(zalo "$TMP/wh_sticker.json" | jq -r .ok)" "true"
+eq "user gửi sticker vẫn vào dropdown" \
+   "$(curl -sS "$B/api/zalo-users/unlinked" | jq -r --arg id "$ZID2" 'any(.[]; .zaloId == $id)')" "true"
+
 # ------------------------------------------------------------- UC9 Zalo đã link
 uc "UC9 · Zalo user đã link nhắn bot"
 U2="${U}_zalo"
@@ -217,6 +226,14 @@ api GET "/api/events?status=DRAFT" > "$TMP/zev.json"
 eq "có draft từ Zalo" "$(jq -r 'length >= 1' "$TMP/zev.json")" "true"
 eq "draft.source"      "$(jq -r '.[0].source' "$TMP/zev.json")" "ZALO"
 eq "draft.captureType" "$(jq -r '.[0].captureType' "$TMP/zev.json")" "TEXT"
+
+# Đã link mà gửi sticker → không gọi AI, không sinh event rác.
+BEFORE="$(api GET /api/events | jq -r 'length')"
+jq --arg id "$ZID" --arg m "s${ZID}9" \
+   '.message.from.id=$id | .message.chat.id=$id | .message.message_id=$m' \
+   "$FX/zalo/webhook_sticker.json" > "$TMP/wh_sticker2.json"
+eq "sticker của user đã link → ok" "$(zalo "$TMP/wh_sticker2.json" | jq -r .ok)" "true"
+eq "sticker không tạo event rác" "$(api GET /api/events | jq -r 'length')" "$BEFORE"
 
 if [ "${ZALO_MEDIA:-0}" = "1" ]; then
   jq --arg id "$ZID" --arg m "m${ZID}3" \

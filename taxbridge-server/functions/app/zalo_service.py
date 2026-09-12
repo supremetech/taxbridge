@@ -11,18 +11,57 @@ import requests
 from .capture_service import process_capture
 from .firestore import TZ, db, now_iso
 
+# Message đẩy được vào pipeline capture; còn lại (STICKER, OTHER) chỉ ghi nhận người gửi.
+CAPTURE_TYPES = {"TEXT", "IMAGE", "AUDIO"}
+
+
+def _sticker_url(msg: dict) -> str | None:
+    """Zalo không công bố shape của `sticker`, nên đọc phòng thủ: dict, string, hay *_id đều nhận."""
+    sticker = msg.get("sticker")
+    if isinstance(sticker, str):
+        return sticker
+    if isinstance(sticker, dict):
+        for key in ("url", "sticker_url", "image_url", "icon_url", "href"):
+            if isinstance(sticker.get(key), str):
+                return sticker[key]
+        for key in ("id", "sticker_id"):
+            if sticker.get(key) is not None:
+                return str(sticker[key])
+    for key in ("sticker_url", "sticker_id"):
+        if msg.get(key) is not None:
+            return str(msg[key])
+    return None
+
+
+def _message_type(msg: dict, event_name: str, sticker_url: str | None) -> str:
+    """Suy từ field có mặt, không dựa vào `event_name` một mình (Zalo có thể thêm event mới)."""
+    if msg.get("voice_url"):
+        return "AUDIO"
+    if msg.get("photo_url"):
+        return "IMAGE"
+    if (sticker_url is not None or "sticker" in msg
+            or event_name.endswith("sticker.received")
+            or msg.get("message_type") == "CHAT_STICKER"):
+        return "STICKER"
+    if msg.get("text"):
+        return "TEXT"
+    return "OTHER"
+
 
 def normalize(payload: dict | None) -> dict | None:
-    """Trả shape `fixtures/zalo/normalized_*.json`, hoặc None nếu không phải message xử lý được."""
+    """Trả shape `fixtures/zalo/normalized_*.json`, hoặc None nếu không phải message của user.
+
+    Nhận **mọi** message có người gửi, kể cả sticker hay loại chưa biết (`OTHER`): user phải
+    được ghi nhận vào `zalo_users` thì mới hiện ở dropdown Register (UC8), dù message đầu tiên
+    họ gửi không phải giao dịch.
+    """
     msg = (payload or {}).get("message") or {}
     sender = msg.get("from") or {}
     zalo_id = sender.get("id")
-    text, photo_url, voice_url = msg.get("text"), msg.get("photo_url"), msg.get("voice_url")
-    if not zalo_id or not (text or photo_url or voice_url):
+    if not zalo_id:
         return None
 
-    # Suy messageType từ field có mặt, không dựa vào event_name.
-    message_type = "AUDIO" if voice_url else "IMAGE" if photo_url else "TEXT"
+    sticker_url = _sticker_url(msg)
     sent_at = now_iso()
     if isinstance(msg.get("date"), (int, float)):
         sent_at = datetime.fromtimestamp(msg["date"] / 1000, TZ).isoformat(timespec="seconds")
@@ -30,8 +69,10 @@ def normalize(payload: dict | None) -> dict | None:
     return {"zaloId": zalo_id, "displayName": sender.get("display_name"),
             "chatId": (msg.get("chat") or {}).get("id") or zalo_id,
             "messageId": msg.get("message_id") or f"zm_{int(datetime.now().timestamp() * 1000)}",
-            "messageType": message_type, "text": text, "imageUrl": photo_url,
-            "audioUrl": voice_url, "sentAt": sent_at, "rawPayload": payload}
+            "messageType": _message_type(msg, (payload or {}).get("event_name") or "", sticker_url),
+            "text": msg.get("text"), "imageUrl": msg.get("photo_url"),
+            "audioUrl": msg.get("voice_url"), "stickerUrl": sticker_url,
+            "sentAt": sent_at, "rawPayload": payload}
 
 
 def download(url: str) -> bytes:
@@ -79,6 +120,13 @@ def handle(payload: dict | None) -> None:
         # Chưa link: lưu lại để hiện trong dropdown Register (UC8). Không xử lý lại sau khi link.
         db.collection("zalo_unlinked_messages").document(message["messageId"]).set(
             {**message, "receivedAt": now_iso()})
+        return
+
+    if message["messageType"] not in CAPTURE_TYPES:
+        # Sticker / loại chưa biết: không có giao dịch để trích. Không gọi AI (tốn tiền, dễ ra
+        # draft rác), không tạo capture. `lastSeenAt` đã cập nhật ở _upsert_user là đủ.
+        logging.info("Zalo message %s loại %s — bỏ qua, không phải giao dịch",
+                     message["messageId"], message["messageType"])
         return
 
     try:
