@@ -13,6 +13,10 @@ contract/
     └── zalo/          payload webhook Zalo Bot THẬT + bản normalize nội bộ
 ```
 
+Bản OpenAPI đọc bằng trình duyệt: `GET /api/docs` (Swagger UI) — spec viết tay ở
+`taxbridge-server/functions/app/openapi.yaml`, **sinh ra từ chính contract này**, nên đổi
+contract thì sửa file spec luôn (không có bước generate tự động).
+
 Cách dùng:
 
 - **Flutter**: `tool/sync_fixtures.sh` copy `fixtures/` → `assets/fixtures/`;
@@ -41,7 +45,8 @@ Cách dùng:
 - Mọi API nghiệp vụ gửi header **`X-Session-Token: <token>`**. Backend resolve
   `accountId`/`businessId` từ `sessions/{token}`; **client không gửi `businessId`**.
 - Public (không token): `GET /api/health`, `POST /api/register`, `POST /api/login`,
-  `GET /api/zalo-users/unlinked`, `POST /api/zalo/webhook`.
+  `GET /api/zalo-users/unlinked`, `POST /api/zalo/webhook`, `GET /api/docs`,
+  `GET /api/openapi.yaml`.
 - `401` → app xóa session, về Login.
 
 ## 3. Status code và error code

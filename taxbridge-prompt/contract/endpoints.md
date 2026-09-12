@@ -5,6 +5,8 @@
 | Method | Path | Auth | Request fixture | Response | Response fixture |
 |---|---|---|---|---|---|
 | GET | `/api/health` | — | — | `200 {"ok": true}` | — |
+| GET | `/api/docs` | — | — | `200 text/html` Swagger UI | — |
+| GET | `/api/openapi.yaml` | — | — | `200 application/yaml` | — |
 | POST | `/api/register` | — | `register_request.json` | `201 Session` | `session.json` |
 | POST | `/api/login` | — | `login_request.json` | `200 Session` | `session.json` |
 | POST | `/api/logout` | B | — | `204` | — |
