@@ -1,0 +1,14 @@
+{
+  "captureId": "cap_020",
+  "status": "DONE",
+  "resultType": "MONEY_MOVEMENT_BATCH",
+  "resultId": null,
+  "resultIds": [
+    "mov_101",
+    "mov_102",
+    "mov_103"
+  ],
+  "skippedCount": 2,
+  "occurredAt": "2026-09-11T12:00:00+07:00",
+  "error": null
+}

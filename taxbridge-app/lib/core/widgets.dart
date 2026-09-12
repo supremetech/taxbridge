@@ -43,7 +43,8 @@ Widget statusChip(BuildContext context, String status) => Chip(
   materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
 );
 
-/// 4 số summary + dòng Thuế khoán ước tính (Close day + Record detail).
+/// 4 số summary + dòng Thuế khoán ước tính (Close day + Record detail + Báo cáo).
+/// [bankIn] có → thêm dòng 🏦 Tiền vào ngân hàng (Báo cáo).
 class SummaryGrid extends StatelessWidget {
   const SummaryGrid({
     super.key,
@@ -51,12 +52,14 @@ class SummaryGrid extends StatelessWidget {
     required this.collected,
     required this.receivable,
     required this.expense,
+    this.bankIn,
   });
 
   final int revenue;
   final int collected;
   final int receivable;
   final int expense;
+  final int? bankIn;
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +96,16 @@ class SummaryGrid extends StatelessWidget {
             cell('Chi phí', expense),
           ],
         ),
+        if (bankIn != null)
+          ListTile(
+            leading: const Text('🏦', style: TextStyle(fontSize: 20)),
+            title: const Text('Tiền vào ngân hàng'),
+            trailing: Text(
+              vnd(bankIn!),
+              style: Theme.of(context).textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.bold),
+            ),
+          ),
         ListTile(
           dense: true,
           leading: const Icon(Icons.receipt_long_outlined),

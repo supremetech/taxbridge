@@ -6,5 +6,7 @@
   "receivable": 250000,
   "bankIn": 4950000,
   "draftCount": 1,
-  "unmatchedMoneyCount": 1
+  "unmatchedMoneyCount": 1,
+  "pastDraftCount": 0,
+  "pastUnmatchedCount": 0
 }

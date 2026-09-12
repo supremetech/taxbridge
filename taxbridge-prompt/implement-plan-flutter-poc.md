@@ -470,6 +470,9 @@ Home:
   Home 11/09 đã có từ lúc detail mở? Không — nên detail **đọc dashboard ngày đó trước khi mutation**
   (`ref.read(apiProvider).dashboard(d)`) và `prevDashboardProvider.set(...)` rồi mới gọi API;
   Home render lần kế so với mốc này. (v1 chỉ so được vì luôn là hôm nay.)
+  **Thực tế (`prepareReturnToDate` ở `providers.dart`):** mốc đọc *ngay trước mutation* đã gồm bản ghi
+  (bankIn +380k) → delta `Tiền vào` = 0; phải trừ phần đóng góp của chính bản ghi (`bankIn` / `unmatched` /
+  `drafts`) để "giả" mốc trước capture. Home đã có mốc cùng ngày (luồng v1) thì giữ nguyên.
 - Capture: `DONE` → detail như v1; SnackBar phụ `Ghi vào ngày 11/09/2026` khi `occurredAt` khác hôm nay.
 - Event Detail: thêm ô **Ngày** (`InputDecorator` + `showDatePicker`, chỉ khi DRAFT) → PUT
   `occurredAt` (giữ giờ cũ, đổi ngày). Movement Detail: hiện `displayTime(occurredAt)` dưới số tiền.
@@ -555,23 +558,28 @@ Capture: mode thứ 5 `history` (`/capture?mode=history`), input như receipt, g
 
 ### Phase 7 — ② Home theo ngày (~45 phút; ⑤ không có UI)
 
-- [ ] Model `CaptureResult` 3 field, `Dashboard` 2 field; `selectedDateProvider`; Home hàng ngày ‹ › Hôm nay.
-- [ ] Detail set ngày + mốc `prevDashboard` trước mutation; Event Detail ô **Ngày**; Close day theo ngày.
-- [ ] Mock: fixture đã có ngày 11/09 → Home mock mở hôm nay trống, lật về 11/09 thấy số — chấp nhận
-      (hoặc `FakeTaxBridgeApi` dời fixture về hôm nay khi `USE_MOCK`; chọn cách 2 nếu còn thời gian).
-- [ ] Chạy kịch bản `feature-map/doc-date-home.md` trên Simulator (`DEMO=true`, backend local).
+- [x] Model `CaptureResult` 3 field, `Dashboard` 2 field; `selectedDateProvider`; Home hàng ngày ‹ › Hôm nay.
+- [x] Detail set ngày + mốc `prevDashboard` trước mutation (`prepareReturnToDate` ở `providers.dart`); Event Detail ô **Ngày**; Close day theo ngày.
+- [x] Mock: `FakeTaxBridgeApi` tính dashboard / report / pending **theo ngày** từ fixture (ngày 11/09); Home mock
+      mở hôm nay trống, lật về 11/09 thấy số. Ảnh demo giữ `occurredAt` 11/09 của fixture (đúng UC10).
+- [x] Chạy kịch bản `feature-map/doc-date-home.md` trên Simulator với `USE_MOCK=true DEMO=true` (12/09): hero banner
+      về Home 11/09 OK. Chưa chạy với backend local. Lưu ý: `ref.listen(dashboardProvider)` phải bỏ qua
+      `AsyncLoading` (Riverpod giữ value cũ → `hasValue` true) nếu không mốc banner bị set sai.
 
 ### Phase 8 — ④ Báo cáo + ③ Tồn đọng / replay (~60 phút)
 
-- [ ] Mục 11: model, provider, màn Báo cáo, preset, nút Home.
-- [ ] Mục 12: model, màn Tồn đọng, card cảnh báo Home, badge; replay sau register.
-- [ ] `tool/sync_fixtures.sh` chạy lại (fixture mới); mock đọc `report.json` / `pending.json`.
+- [x] Mục 11: model, provider, màn Báo cáo, preset, nút Home.
+- [x] Mục 12: model, màn Tồn đọng, card cảnh báo Home, badge; replay sau register.
+- [x] `tool/sync_fixtures.sh` chạy lại (fixture mới); mock tính report / pending từ events + movements (không đọc
+      `report.json` / `pending.json` vì số phải khớp state sau mutation), `replay_result.json` đọc trực tiếp.
 
 ### Phase 9 — ① Đối soát lịch sử (~50 phút)
 
-- [ ] Capture mode `history` + asset `bank_history.jpg` (copy từ `demo-assets/` khi BE làm xong).
-- [ ] Màn Đối soát; `go('/reconcile')` sau batch.
-- [ ] Chạy `feature-map/bank-history-reconcile.md`.
+- [x] Capture mode `history`; asset `bank_history.jpg` **chưa có** trong `demo-assets/` — nút Dùng file demo báo
+      `Chưa có file demo …`, copy vào `assets/demo/` khi BE render xong.
+- [x] Màn Đối soát; `go('/reconcile')` sau batch.
+- [x] Chạy `feature-map/bank-history-reconcile.md` trên mock (ảnh thư viện thay `bank_history.jpg`): Ghép / Phân loại /
+      Xong → Home 11/09 OK. Chưa chạy với backend thật.
 
 ### Freeze v2
 

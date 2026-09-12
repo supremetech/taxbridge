@@ -55,15 +55,16 @@ class _MovementList extends ConsumerWidget {
               )
             : ListView.builder(
                 itemCount: items.length,
-                itemBuilder: (_, i) => _MovementCard(items[i]),
+                itemBuilder: (_, i) => MovementCard(items[i]),
               ),
       ),
     );
   }
 }
 
-class _MovementCard extends StatelessWidget {
-  const _MovementCard(this.m);
+/// Public để màn Tồn đọng dùng lại (Phase 2 ③).
+class MovementCard extends StatelessWidget {
+  const MovementCard(this.m, {super.key});
   final MoneyMovement m;
 
   @override

@@ -27,6 +27,14 @@ class _MovementDetailScreenState extends ConsumerState<MovementDetailScreen> {
   }) async {
     setState(() => _busy = true);
     try {
+      // Home về ngày bản ghi (ảnh demo in 11/09) và lấy mốc để banner hero đúng.
+      final m = ref.read(movementProvider(widget.id)).value;
+      await prepareReturnToDate(
+        ref,
+        m?.occurredAt,
+        bankIn: m?.direction == 'IN' ? m!.amount : 0,
+        unmatched: 1,
+      );
       await fn();
       invalidateAll(ref);
       if (!mounted) return;
@@ -93,6 +101,11 @@ class _MovementDetailScreenState extends ConsumerState<MovementDetailScreen> {
           [m.counterparty, m.memo].whereType<String>().join(' · '),
           style: theme.textTheme.bodyLarge,
         ),
+        if (m.occurredAt != null)
+          Text(
+            '${m.direction == 'OUT' ? '↗ Tiền ra · ' : ''}${displayTime(m.occurredAt)}',
+            style: theme.textTheme.bodyMedium,
+          ),
         const SizedBox(height: 8),
         Wrap(
           spacing: 8,
