@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/format.dart';
 import '../../core/providers.dart';
 import '../../core/widgets.dart';
 import '../../models/zalo_user.dart';
@@ -45,7 +46,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
     setState(() => _busy = true);
     try {
-      final s = await ref.read(apiProvider).register(u, _pass.text, _zaloId);
+      final api = ref.read(apiProvider);
+      final s = await api.register(u, _pass.text, _zaloId);
+      // Lưu token trước để interceptor gắn header; chưa set state (router sẽ redirect
+      // ngay khi có session → màn này unmount trước khi replay xong).
+      await ref.read(sessionStoreProvider).save(s);
+      // Phase 2 ③b: xử lý lại tin nhắn Zalo gửi trước khi liên kết; lỗi bỏ qua.
+      var replayed = 0;
+      if (_zaloId != null) {
+        try {
+          replayed = (await api.replayZalo(_zaloId!)).replayed;
+        } catch (_) {}
+      }
+      if (!mounted) return;
+      if (replayed > 0) {
+        showInfo(context, 'Đã xử lý $replayed tin nhắn Zalo cũ');
+      }
+      ref.read(selectedDateProvider.notifier).set(todayKey());
       await ref.read(sessionProvider.notifier).signIn(s);
       if (mounted) context.go('/home');
     } catch (e) {

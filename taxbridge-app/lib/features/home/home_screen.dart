@@ -48,9 +48,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final prev = ref.read(prevDashboardProvider);
     if (prev == null || prev.sameAs(d)) {
       if (prev == null) {
-        WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.read(prevDashboardProvider.notifier).set(d),
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) ref.read(prevDashboardProvider.notifier).set(d);
+        });
       }
       return;
     }
@@ -67,20 +67,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     });
   }
 
+  /// Lật ngày: không banner delta khi đổi ngày (mốc cũ thuộc ngày khác).
+  void _changeDate(void Function(SelectedDate n) fn) {
+    ref.read(prevDashboardProvider.notifier).set(null);
+    setState(() => _animFrom = null);
+    fn(ref.read(selectedDateProvider.notifier));
+  }
+
   Future<void> _logout() async {
     try {
       await ref.read(apiProvider).logout();
     } catch (_) {}
     ref.read(prevDashboardProvider.notifier).set(null);
+    ref.read(selectedDateProvider.notifier).set(todayKey());
     await ref.read(sessionProvider.notifier).signOut();
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
+    final selected = ref.watch(selectedDateProvider);
+    final isToday = selected == todayKey();
     final dash = ref.watch(dashboardProvider);
+    // Bỏ qua AsyncLoading (Riverpod giữ value cũ nên hasValue vẫn true) — nếu không
+    // mốc prevDashboard bị set bằng dashboard cũ (ngày khác / user khác) → banner sai.
     ref.listen(dashboardProvider, (_, next) {
-      if (next.hasValue) _onData(next.value!);
+      if (next.hasValue && !next.isLoading) _onData(next.value!);
     });
 
     return Scaffold(
@@ -122,8 +134,37 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         ),
                       ),
               ),
+              Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Ngày trước',
+                    icon: const Icon(Icons.chevron_left),
+                    onPressed: () => _changeDate((n) => n.shift(-1)),
+                  ),
+                  Expanded(
+                    child: Text(
+                      displayDateLong(selected),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Ngày sau',
+                    icon: const Icon(Icons.chevron_right),
+                    onPressed: isToday
+                        ? null
+                        : () => _changeDate((n) => n.shift(1)),
+                  ),
+                  if (!isToday)
+                    TextButton(
+                      onPressed: () => _changeDate((n) => n.set(todayKey())),
+                      child: const Text('Hôm nay'),
+                    ),
+                ],
+              ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
                 child: Text(
                   'Xin chào, ${session?.username ?? ''}',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -200,7 +241,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ],
               ),
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: FilledButton.tonal(
+                  onPressed: () => context.push('/capture?mode=history'),
+                  style: FilledButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text('📑 Đối soát lịch sử chuyển khoản'),
+                ),
+              ),
               const Divider(height: 24),
+              if (d.pendingCount > 0)
+                Card(
+                  color: Theme.of(context).colorScheme.tertiaryContainer,
+                  child: ListTile(
+                    leading: const Text('⚠', style: TextStyle(fontSize: 20)),
+                    title: Text(_pendingText(d)),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.push('/pending'),
+                  ),
+                ),
               Row(
                 children: [
                   _Nav(
@@ -221,6 +282,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   _Nav('Lịch sử ngày', 0, () => context.push('/daily-history')),
                 ],
               ),
+              Row(
+                children: [
+                  _Nav('Báo cáo', 0, () => context.push('/reports')),
+                  _Nav(
+                    'Tồn đọng',
+                    d.pendingCount,
+                    () => context.push('/pending'),
+                  ),
+                ],
+              ),
               const SizedBox(height: 24),
             ],
           ),
@@ -228,6 +299,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       ),
     );
   }
+}
+
+/// `Còn 1 giao dịch · 1 khoản tiền chưa xử lý từ các ngày trước`
+String _pendingText(Dashboard d) {
+  final parts = [
+    if (d.pastDraftCount > 0) 'Còn ${d.pastDraftCount} giao dịch',
+    if (d.pastUnmatchedCount > 0)
+      '${d.pastDraftCount > 0 ? '' : 'Còn '}${d.pastUnmatchedCount} khoản tiền',
+  ];
+  return '${parts.join(' · ')} chưa xử lý từ các ngày trước';
 }
 
 /// Số tiền chạy 600 ms từ giá trị cũ → mới.
