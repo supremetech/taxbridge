@@ -248,8 +248,10 @@ curl -s "https://bot-api.zapps.me/bot$ZALO_BOT_TOKEN/sendMessage" \
 ```
 
 - `chat_id` = `chatId` sau normalize (= `message.chat.id`, với chat PRIVATE = `from.id`).
-- Kiểu Telegram Bot API (xác nhận qua SDK python-zalo-bot / zalo-bot-sdk 12/09). Response
-  mong đợi `{"ok": true, "result": {...}}` — **ghi lại shape thật vào đây sau lần gọi đầu**.
+- Kiểu Telegram Bot API (xác nhận qua SDK python-zalo-bot / zalo-bot-sdk 12/09). Lỗi cũng trả
+  **HTTP 200**, phân biệt bằng `ok` trong body — đừng đọc status code. Shape thật đo 12/09 với
+  `chat_id` giả: `{"ok":false,"description":"The chat_id is invaild","error_code":410}` (lỗi
+  chính tả là của Zalo). Ca thành công (`{"ok":true,"result":{…}}`) chờ ghi lại từ máy thật.
 - Gọi trong request webhook, trước khi trả `200`. Lỗi / token rỗng → log, webhook vẫn `200`.
 - Nội dung theo kết quả (`zalo_service.reply_text`, plan BE §16):
 

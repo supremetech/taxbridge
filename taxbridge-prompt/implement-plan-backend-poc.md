@@ -492,12 +492,14 @@ def report(business_id, from_, to):
 Dùng lại `dashboard_service._summary` (đổi thành public `summary()`). Không index Firestore:
 đọc cả collection rồi lọc (PoC, vài trăm doc).
 
-## 14. Tồn đọng + replay Zalo (③) — `dashboard_service`, `routes/pending.py`, `zalo_service`, `routes/zalo.py`
+## 14. Tồn đọng + replay Zalo (③) — `dashboard_service`, `report_service`, `routes/pending.py`, `zalo_service`, `routes/zalo.py`
 
 `dashboard()` thêm `pastDraftCount` / `pastUnmatchedCount`: đếm DRAFT / UNMATCHED có
 `date_of(occurredAt) < date` (đọc cả collection một lần, tách 2 nhóm; tránh đọc 2 lần).
 
-`GET /api/pending` → `pending.json`: `draftEvents` = `to_dto` mọi DRAFT sort `occurredAt` **tăng**;
+`GET /api/pending` → `pending.json` (hàm `pending()` đặt ở `report_service`, không ở
+`dashboard_service`: nó cần `to_dto` của event / movement mà hai module đó lại import
+`dashboard_service` → vòng import): `draftEvents` = `to_dto` mọi DRAFT sort `occurredAt` **tăng**;
 `unmatchedMovements` = `list_movements(status="UNMATCHED")` đảo chiều sort (kèm candidates);
 `byDate` = đếm theo ngày, sort tăng.
 
@@ -526,7 +528,10 @@ class BankHistoryExtraction(BaseModel):
 `extract_bank_history(image)` instruction: "Ảnh danh sách giao dịch trong app ngân hàng / sao kê
 của CHỦ SHOP. Mỗi dòng = một transfer: amount (int), direction (`+`/"nhận"/"báo có" → IN;
 `-`/"chuyển đi"/"thanh toán" → OUT), memo nguyên văn, counterparty nếu có, occurredDate từ cột
-ngày. Bỏ dòng số dư / tiêu đề / dòng không có số tiền. Không gộp, không bịa."
+ngày. Bỏ dòng số dư / tiêu đề / dòng không có số tiền. Không gộp, không bịa." Thêm (đo 12/09:
+thiếu câu này thì `receipt.jpg` gửi nhầm type ra 1 dòng thay vì FAILED): "CHỈ đọc ảnh là DANH
+SÁCH nhiều giao dịch; hóa đơn / biên lai một giao dịch / màn hình 'chuyển khoản thành công' →
+`transfers` rỗng."
 
 `process_capture` nhánh `IMAGE_BANK_HISTORY`:
 
@@ -578,24 +583,30 @@ bằng Zalo trên điện thoại.
 
 ### Phase 7 — ② ngày chứng từ + ⑤ Zalo reply (~45 phút)
 
-- [ ] Mục 12: schema + prompt + `resolve_occurred_at`; `CaptureResult` thêm 3 field; `sync_record`
+- [x] Mục 12: schema + prompt + `resolve_occurred_at`; `CaptureResult` thêm 3 field; `sync_record`
       thay `resolve_warnings`; `update` đổi ngày sync 2 ngày.
-- [ ] Mục 16: `reply` / `reply_text`; `main.py` thêm secret; `.env` local có `ZALO_BOT_TOKEN`.
-- [ ] `smoke.sh` UC10 + UC11; chạy lại UC1–9 (số cũ không đổi vì fixture/ảnh cùng ngày 11/09 →
+- [x] Mục 16: `reply` / `reply_text`; `main.py` thêm secret; `.env` local có `ZALO_BOT_TOKEN`.
+- [x] `smoke.sh` UC10 + UC11; chạy lại UC1–9 (số cũ không đổi vì fixture/ảnh cùng ngày 11/09 →
       **dashboard trong smoke đọc `date=2026-09-11` cho UC4–6**, còn text/voice vẫn hôm nay).
-- [ ] `openapi.yaml` cập nhật (CaptureResult, prompt không đổi spec).
+      `match` sync cả ngày của movement lẫn ngày của event (hai ngày có thể khác nhau).
+- [x] `openapi.yaml` cập nhật (CaptureResult, prompt không đổi spec).
 
 ### Phase 8 — ④ báo cáo + ③ tồn đọng / replay (~40 phút)
 
-- [ ] Mục 13: `report_service` + route; smoke UC12.
-- [ ] Mục 14: `dashboard` 2 field; `/api/pending`; `replay`; smoke UC13.
-- [ ] `openapi.yaml`: `Report`, `Pending`, `ReplayResult`, `Dashboard`.
+- [x] Mục 13: `report_service` + route; smoke UC12.
+- [x] Mục 14: `dashboard` 2 field; `/api/pending`; `replay`; smoke UC13.
+- [x] `openapi.yaml`: `Report`, `Pending`, `ReplayResult`, `Dashboard`.
 
 ### Phase 9 — ① lịch sử CK (~40 phút + ảnh demo 20 phút)
 
-- [ ] `demo-assets/bank_history.jpg` (checklist: 5 dòng, 2 trùng UC4/UC5, 1 OUT, ngày 10–11/09).
-- [ ] Mục 15: schema, nhánh capture, dedupe; smoke UC14 (gửi 2 lần).
-- [ ] `openapi.yaml`: `IMAGE_BANK_HISTORY`, `MONEY_MOVEMENT_BATCH`.
+- [x] `demo-assets/bank_history.jpg` (5 dòng đúng `feature-map/bank-history-reconcile.md`:
+      380k `COC MINH` + 450k `LAN 3HOP` + 250k `THAO 1HOP` ngày 11/09; 1.200k `HUE 2 COLLAGEN`
+      + 2.000k OUT `TRA TIEN HANG` ngày 10/09 → 3 mới, 2 trùng UC4/UC5).
+- [x] Mục 15: schema, nhánh capture, dedupe; smoke UC14 (gửi 2 lần).
+- [x] `openapi.yaml`: `IMAGE_BANK_HISTORY`, `MONEY_MOVEMENT_BATCH`.
+
+Kết quả 12/09 (local: Firestore emulator + `flask run`, OpenAI thật): `smoke.sh`
+**145 pass · 0 fail** (9 UC v1 + UC10–14). Chưa chạy trên prod, chưa deploy.
 
 ### Deploy
 

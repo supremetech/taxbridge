@@ -10,14 +10,10 @@ app = create_app()   # create_app() gọi firebase_admin.initialize_app() có gu
 @https_fn.on_request(
     region="asia-southeast1", timeout_sec=120, memory=options.MemoryOption.MB_512,
     min_instances=int(os.environ.get("MIN_INSTANCES", "0")),
-    # ZALO_BOT_TOKEN: bỏ khỏi đây vì PoC không gọi sendMessage nên không code nào đọc nó, mà
-    # deploy lại fail — account thiếu quyền `secretmanager.secrets.setIamPolicy` để cấp cho
-    # service account đọc secret mới tạo (12/09). Cần bot reply → thêm lại tên vào tuple dưới
-    # và nhờ admin chạy:
-    #   gcloud secrets add-iam-policy-binding ZALO_BOT_TOKEN --project hackathon-42790 \
-    #     --member serviceAccount:495996584842-compute@developer.gserviceaccount.com \
-    #     --role roles/secretmanager.secretAccessor
-    secrets=[options.SecretParam(n) for n in ("OPENAI_API_KEY", "ZALO_WEBHOOK_SECRET")])
+    # ZALO_BOT_TOKEN: bot reply (§16). IAM `roles/secretmanager.secretAccessor` đã cấp cho
+    # 495996584842-compute@developer.gserviceaccount.com ngày 12/09 → deploy được.
+    secrets=[options.SecretParam(n)
+             for n in ("OPENAI_API_KEY", "ZALO_WEBHOOK_SECRET", "ZALO_BOT_TOKEN")])
 def api(req: https_fn.Request) -> https_fn.Response:
     with app.request_context(req.environ):
         return app.full_dispatch_request()
