@@ -21,6 +21,7 @@ taxbridge-server/
 │       ├── firestore.py    # db, new_id(), now_iso()
 │       ├── storage.py      # upload bytes → download URL có token (mục 4.2)
 │       ├── openai_client.py           # extract_event / extract_transfer / extract_image / transcribe
+│       ├── errors.py       # ApiError(status, code, message) → `{code, message}`; leaf, mọi module import được
 │       ├── auth_service.py
 │       ├── capture_service.py         # process_capture() dùng chung app + Zalo
 │       ├── event_service.py           # update / confirm / reject
@@ -29,7 +30,8 @@ taxbridge-server/
 │       ├── zalo_service.py            # normalize, download media, aac_to_m4a
 │       └── routes/
 │           auth.py  captures.py  events.py  dashboard.py  reconciliation.py  close_day.py  zalo.py
-└── tests/smoke/smoke.sh    # 9 UC bằng curl + Zalo simulator (contract/endpoints.md)
+├── tests/smoke/smoke.sh    # 9 UC bằng curl + Zalo simulator (contract/endpoints.md)
+└── tests/seed_demo.py      # account demo + 3 daily record cũ cho prod (Phase 6)
 ```
 
 ## 2. Firestore schema
@@ -178,10 +180,16 @@ chạy `test-data/` trên backend cũ 11/09 (11/21 pass,
   `counterparty` = cửa hàng phát hành (không lấy tên khách trên phiếu — receipt.jpg từng bị đọc
   thành SALE/"Anh Tuấn"). `amount` = "Tổng cộng / Thành tiền"; không lấy "Tiền khách đưa" /
   "Tiền thối" *(eval R2)*.
-- Ảnh chuyển khoản: đọc số tiền, nội dung CK; "báo có / nhận tiền / +" → `direction=IN`.
-  Ảnh khách chụp màn hình **chuyển đi** thì tên hiển thị là người nhận = chủ shop:
-  `counterparty` lấy từ nội dung CK, CK không có tên → `null`, không lấy tên người nhận
-  *(eval M1/M6)*. Không đọc ngày giờ trên ảnh (`occurredAt = now()`, mục 4).
+- Ảnh chuyển khoản — đọc theo góc nhìn **chủ shop**, không phải góc nhìn người chụp màn hình:
+  - `direction=IN` là **mặc định**; màn hình "Chuyển khoản thành công" khách chụp gửi cho shop
+    vẫn là tiền VÀO shop. `OUT` chỉ khi rõ chính chủ shop trả tiền đi *(eval M1/M6 — đo 12/09:
+    không có câu này thì model trả `OUT` cho cả `transfer_match` lẫn `transfer_deposit`,
+    `bankIn` = 0 và hero chết)*.
+  - `counterparty` = **người gửi** ("Từ / Nguồn tiền"). Tên ở dòng "Đến / Người nhận /
+    Người thụ hưởng" là chủ shop — không bao giờ lấy làm `counterparty` *(eval M1/M6 — đo 12/09:
+    model từng trả `MAI ANH TUAN` = chủ shop)*. Ảnh không hiện tên người gửi → lấy tên từ nội dung
+    CK ("LAN 3HOP" → "LAN"); nội dung không có tên người → `null`.
+  - Không đọc ngày giờ trên ảnh (`occurredAt = now()`, mục 4).
 - Không chắc → `UNKNOWN`, `confidence` thấp; không bịa số, không biến số lượng / mã vạch /
   giờ thành số tiền *(eval A4/R3)*.
 
@@ -195,7 +203,9 @@ TRANSCRIBE_KEYWORDS = ["chuyển khoản", "tiền mặt", "đặt cọc", "ngh�
 def transcribe(m4a: bytes) -> str:
     kw = dict(model=TRANSCRIBE_MODEL, file=("voice.m4a", m4a), prompt=TRANSCRIBE_PROMPT)
     if TRANSCRIBE_MODEL == "gpt-transcribe":
-        kw.update(languages=["vi"], keywords=TRANSCRIBE_KEYWORDS)
+        # extra_body: `languages`/`keywords` chạy được trên mọi version SDK (requirements
+        # không pin cứng). SDK 3.13 đã có sẵn hai param này — gửi thẳng cũng được.
+        kw["extra_body"] = {"languages": ["vi"], "keywords": TRANSCRIBE_KEYWORDS}
     else:
         kw["language"] = "vi"
     return client.audio.transcriptions.create(**kw).text
@@ -322,8 +332,12 @@ app = create_app()   # create_app() gọi firebase_admin.initialize_app() có gu
 @https_fn.on_request(
     region="asia-southeast1", timeout_sec=120, memory=options.MemoryOption.MB_512,
     min_instances=int(os.environ.get("MIN_INSTANCES", "0")),
-        secrets=[options.SecretParam(n) for n in
-             ("OPENAI_API_KEY", "ZALO_BOT_TOKEN", "ZALO_WEBHOOK_SECRET")])
+    # ZALO_BOT_TOKEN không có ở đây: PoC không gọi sendMessage nên không code nào đọc, mà
+    # deploy 12/09 fail vì account thiếu `secretmanager.secrets.setIamPolicy` để cấp quyền
+    # đọc secret mới tạo cho service account. Cần bot reply → thêm lại + nhờ admin chạy
+    # `gcloud secrets add-iam-policy-binding ZALO_BOT_TOKEN --member serviceAccount:
+    # 495996584842-compute@developer.gserviceaccount.com --role roles/secretmanager.secretAccessor`.
+    secrets=[options.SecretParam(n) for n in ("OPENAI_API_KEY", "ZALO_WEBHOOK_SECRET")])
 def api(req: https_fn.Request) -> https_fn.Response:
     with app.request_context(req.environ):
         return app.full_dispatch_request()
@@ -336,51 +350,55 @@ python-dotenv requests imageio-ffmpeg`. Không thêm thư viện khác.
 
 ### Phase 0 — Tối 11/09: skeleton
 
-- [ ] `main.py`, `create_app()` + guard `initialize_app` + `load_dotenv`, `config.py`,
+- [x] `main.py`, `create_app()` + guard `initialize_app` + `load_dotenv`, `config.py`,
       `firestore.py`, `storage.py`, `/api/health`.
-- [ ] `before_request` resolve session (mục 3). (Không cần seed tay: register có ngay.)
-- [ ] `openai_client.py` với 3 schema + `transcribe`; chạy thử 4 asset demo, đối chiếu số
-      với mục 9 CLAUDE.md.
-- [ ] `requirements.txt`, `.env`, secrets `ZALO_*` (đã có trên Secret Manager).
-- [ ] **Deploy thử 1 lần** (11/09 tối) → URL thật; `smoke.sh` 9 UC PASS trên prod kể cả multipart,
+- [x] `before_request` resolve session (mục 3). (Không cần seed tay: register có ngay.)
+- [x] `openai_client.py` với 3 schema + `transcribe`.
+- [x] Chạy thử 4 asset demo với AI thật, đối chiếu số với mục 9 CLAUDE.md (12/09: đúng hết
+      450k / 450k / 380k / 220k; đã sửa prompt `direction` + `counterparty` ảnh CK, mục 4.1).
+- [x] `requirements.txt`, `.env`, secrets `ZALO_*` (đã có trên Secret Manager).
+- [x] **Deploy thử 1 lần** (11/09 tối) → URL thật; `smoke.sh` 9 UC PASS trên prod kể cả multipart,
       Zalo ảnh/voice (media = Storage download URL `smoke-media/*`), remux ffmpeg. Capture 2–9 s.
       Bẫy đã dính: Cloud Run chặn `Authorization: Bearer` lạ → đổi sang `X-Session-Token` (contract §2).
-- [ ] `tests/smoke/smoke.sh` (9 UC, PASS trên emulator 11/09 tối; ảnh/voice Zalo cần `ZALO_MEDIA`)
+- [x] `tests/smoke/smoke.sh` (9 UC, PASS trên emulator 11/09 tối; ảnh/voice Zalo cần `ZALO_MEDIA`)
       + `tests/smoke/emulator.sh` (Firestore emulator + Flask, không cần ADC).
 
 ### Phase 1 — 09:30 Tracer bullet
 
-- [ ] `POST /api/captures` TEXT → `process_capture` → `events` DRAFT.
-- [ ] `GET /api/events/{id}`, `confirm`.
+- [x] `POST /api/captures` TEXT → `process_capture` → `events` DRAFT.
+- [x] `GET /api/events/{id}`, `confirm`.
 
 ### Phase 2 — 10:15 Auth + events + dashboard
 
-- [ ] `register` / `login` / `logout`, `GET /api/zalo-users/unlinked`.
-- [ ] `GET /api/events?status=`, `PUT`, `reject`.
-- [ ] `GET /api/dashboard` 7 field.
+- [x] `register` / `login` / `logout`, `GET /api/zalo-users/unlinked`.
+- [x] `GET /api/events?status=`, `PUT`, `reject`.
+- [x] `GET /api/dashboard` 7 field.
 
 ### Phase 3 — 11:30 Ảnh + tiền vào
 
-- [ ] Multipart → Storage; `IMAGE_RECEIPT` → event; `IMAGE_TRANSFER` → movement.
-- [ ] `storage.upload` trả download URL có token (mục 4.2); `evidenceText`/`evidenceUrl` trên
+- [x] Multipart → Storage; `IMAGE_RECEIPT` → event; `IMAGE_TRANSFER` → movement.
+- [x] `storage.upload` trả download URL có token (mục 4.2); `evidenceText`/`evidenceUrl` trên
       event/movement (mục 4 bước 3); `smoke.sh` UC2/UC4 assert có key, trên prod thêm
       `curl -sI $evidenceUrl` → 200.
-- [ ] `GET /api/money-movements[?status]`, `/{id}` + candidates, `match`, `classify`.
+- [x] `GET /api/money-movements[?status]`, `/{id}` + candidates, `match`, `classify`.
 
 ### Phase 4 — 12:30 Voice
 
-- [ ] `AUDIO` → transcribe → extract.
+- [x] `AUDIO` → transcribe → extract.
 
 ### Phase 5 — 13:00 Close day + Zalo
 
-- [ ] `close-day` upsert, `daily-records` list/detail, `resolve_warnings` sau mọi mutation.
-- [ ] Zalo webhook (mục 9): secret, probe, normalize, unlinked, linked text/image/voice, remux.
-- [ ] `IMAGE_UNKNOWN` → `kind`.
-- [ ] `source` + `captureType` trên event/movement (mục 2, 4 bước 3); `smoke.sh` UC9 assert
+- [x] `close-day` upsert, `daily-records` list/detail, `resolve_warnings` sau mọi mutation.
+- [x] Zalo webhook (mục 9): secret, probe, normalize, unlinked, linked text/image/voice, remux.
+- [x] `IMAGE_UNKNOWN` → `kind`.
+- [x] `source` + `captureType` trên event/movement (mục 2, 4 bước 3); `smoke.sh` UC9 assert
       `source == "ZALO"` trên draft/movement tạo từ webhook.
 
 ### Phase 6 — 14:00 Deploy & freeze
 
-- [ ] Deploy Functions, `MIN_INSTANCES=1`, trỏ Zalo webhook sang prod, seed prod
-      (2–3 daily record cũ để Lịch sử ngày không trống).
-- [ ] `smoke.sh` chạy đủ 9 UC trên URL thật. **14:30 feature freeze.**
+- [x] Deploy Functions, `MIN_INSTANCES=1`, trỏ Zalo webhook sang prod, seed prod
+      (12/09: webhook đã trỏ sẵn `<base>/api/zalo/webhook`, set lại kèm `secret_token`,
+      Zalo trả `webhook.ok`; seed `tuan/123456` + 3 daily record 09–11/09 bằng
+      `tests/seed_demo.py`, warning rỗng để không có nút Xử lý trỏ vào resource ma).
+- [x] `smoke.sh` chạy đủ 9 UC trên URL thật (12/09: **86 pass · 0 fail**, có
+      `evidenceUrl` Storage trả 200). **14:30 feature freeze.**
