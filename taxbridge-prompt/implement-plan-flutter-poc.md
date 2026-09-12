@@ -427,3 +427,152 @@ API trực tiếp từ widget rồi `ref.invalidate(...)`; chỉ capture có con
       trả field (mock đã có qua fixture).
 - [x] 5 Bằng chứng — §1 `audioplayers`, §2 `evidence_block.dart`, §4 `evidenceText/evidenceUrl`,
       §6 Event/Movement Detail; cần BE Phase 3 trả field (mock qua fixture + file demo).
+
+---
+
+# Phase 2 — bổ sung 12/09 (`requirements-phase2.md`)
+
+Thứ tự: 10 → 11 → 12 → 13 (song song BE 12 → 16 → 13 → 14 → 15). Nhãn mới thuộc bảng `Handles`
+trong `feature-map/` (4 file Phase 2). Mock (`FakeTaxBridgeApi`) đọc fixture mới, state tối thiểu.
+
+## 10. Ngày trên chứng từ (②) — Home theo ngày, Zalo reply không có UI
+
+Model: `CaptureResult` thêm `occurredAt: DateTime?`, `resultIds: List<String>`, `skippedCount: int`.
+`Dashboard` thêm `pastDraftCount`, `pastUnmatchedCount` (mục 12 dùng).
+
+State (§7):
+
+```dart
+/// Ngày Home đang xem; mặc định hôm nay. Detail set về ngày của bản ghi trước khi go('/home').
+class SelectedDate extends Notifier<String> {
+  @override String build() => todayKey();
+  void set(String d) => state = d;
+  void shift(int days) => state = dateKey(DateTime.parse(state).add(Duration(days: days)));
+}
+final selectedDateProvider = NotifierProvider<SelectedDate, String>(SelectedDate.new);
+final dashboardProvider = FutureProvider.autoDispose<Dashboard>(
+    (ref) => ref.watch(apiProvider).dashboard(ref.watch(selectedDateProvider)));
+```
+
+Home:
+
+```text
+│ TaxBridge                           [Logout] │
+│ ‹   Thứ Sáu, 11/09/2026   ›   [Hôm nay]      │   hàng ngày: IconButton ‹ ›, nút Hôm nay (ẩn khi đang hôm nay)
+│ Xin chào, tuan                               │
+```
+
+- Đổi ngày → `prevDashboardProvider.set(null)` (không banner khi lật ngày) và `_animFrom = null`.
+- Auto-refresh 8 s và pull-to-refresh giữ nguyên (theo ngày đang chọn).
+- **Hero giữ được:** `_run` ở Event Detail / Movement Detail, trước `context.go('/home')`:
+  `ref.read(selectedDateProvider.notifier).set(dateKey(record.occurredAt))` — ảnh demo in 11/09 →
+  về Home 11/09 → banner `Tiền vào +380.000đ · Doanh thu không đổi ✓` như v1. `prevDashboard` của
+  Home 11/09 đã có từ lúc detail mở? Không — nên detail **đọc dashboard ngày đó trước khi mutation**
+  (`ref.read(apiProvider).dashboard(d)`) và `prevDashboardProvider.set(...)` rồi mới gọi API;
+  Home render lần kế so với mốc này. (v1 chỉ so được vì luôn là hôm nay.)
+- Capture: `DONE` → detail như v1; SnackBar phụ `Ghi vào ngày 11/09/2026` khi `occurredAt` khác hôm nay.
+- Event Detail: thêm ô **Ngày** (`InputDecorator` + `showDatePicker`, chỉ khi DRAFT) → PUT
+  `occurredAt` (giữ giờ cũ, đổi ngày). Movement Detail: hiện `displayTime(occurredAt)` dưới số tiền.
+- Close day: `POST /api/close-day {date: selectedDate}` (không còn cứng hôm nay); tiêu đề màn hiện ngày.
+
+## 11. Báo cáo theo khoảng (④) — `features/reports/report_screen.dart`, route `/reports`
+
+Model `Report(from, to, days, summary: ReportSummary, byDay: List<ReportDay>, byType: List<ReportType>)`
+theo `fixtures/report.json`. API: `Future<Report> report(String from, String to)`.
+
+```dart
+typedef DateRange = ({String from, String to});
+final reportProvider = FutureProvider.autoDispose.family<Report, DateRange>(
+    (ref, r) => ref.watch(apiProvider).report(r.from, r.to));
+```
+
+```text
+│ Báo cáo                                       │
+│ [Hôm nay] [7 ngày] [Tháng này] [Tháng trước] [Tùy chọn…] │  ChoiceChip; Tùy chọn → showDateRangePicker
+│ 06/09/2026 – 12/09/2026 · 7 ngày              │
+│ SummaryGrid: Doanh thu · Tiền đã thu · Còn phải thu · Chi phí │
+│ 🏦 Tiền vào ngân hàng            4.950.000đ   │
+│ Thuế khoán ước tính (1,5% DT)       72.300đ   │  estTax(summary.revenue)
+│ 4 đơn bán · 2 mua · 1 nháp · 1 tiền vào chưa xử lý │
+│ Theo ngày                                     │
+│ 11/09/2026  DT 4.820.000đ · CP 1.230.000đ  ⚠1 │  chạm → selectedDate = date, go('/home')
+│ Theo loại   Bán hàng 4.820.000đ (4) · Mua hàng 1.230.000đ (2) │
+```
+
+Home: hàng nav thứ 3 `[ Báo cáo ] [ Tồn đọng ⓝ ]`. Preset tính ở client (`format.dart`:
+`rangeToday()`, `rangeLast7()`, `rangeThisMonth()`, `rangeLastMonth()`), `to` không vượt hôm nay.
+
+## 12. Tồn đọng + replay Zalo (③) — `features/pending/pending_screen.dart`, route `/pending`
+
+Model `Pending(draftEvents, unmatchedMovements, byDate: List<PendingDay>)`. API: `pending()`,
+`replayZalo(String zaloId) → ReplayResult(zaloId, replayed, done, failed, skipped)`.
+
+Home: dưới hàng nav, khi `pastDraftCount + pastUnmatchedCount > 0`:
+`Card` màu `tertiaryContainer` — `⚠ Còn 1 giao dịch · 1 khoản tiền chưa xử lý từ các ngày trước`
+→ chạm → `/pending`. Badge nút **Tồn đọng** = tổng 2 số.
+
+```text
+│ Tồn đọng                                      │
+│ 11/09/2026 · 1 nháp · 1 tiền vào              │  header theo byDate (cũ nhất trước)
+│  EventCard(ev_007)  →  /events/ev_007          │  dùng lại EventCard (events) và MovementCard (movements, đổi public)
+│  MovementCard(mov_002) → /movements/mov_002    │
+│ (rỗng) ✓ Không còn giao dịch tồn đọng          │
+```
+
+Sau confirm/match/classify ở detail (mục 10) → về Home ngày bản ghi; `invalidateAll` thêm
+`pendingProvider`, `reportProvider`.
+
+Replay: `RegisterScreen` sau `register(...)` thành công **và** có `zaloId` → gọi `replayZalo(zaloId)`
+(bọc try/catch, lỗi bỏ qua) → SnackBar `Đã xử lý n tin nhắn Zalo cũ` (n = `replayed`, ẩn khi 0) →
+`/home`. Mock: `replay_result.json`.
+
+## 13. Đối soát lịch sử CK (①) — Capture mode `history`, `features/movements/reconcile_screen.dart`
+
+Capture: mode thứ 5 `history` (`/capture?mode=history`), input như receipt, gửi `IMAGE_BANK_HISTORY`;
+`DEMO=true` → `assets/demo/bank_history.jpg`. Home: hàng action thứ 3 nút rộng
+`📑 Đối soát lịch sử chuyển khoản`. Sau `DONE`:
+- `resultType == MONEY_MOVEMENT_BATCH` → `context.go('/reconcile?ids=${resultIds.join(',')}&skipped=$skippedCount')`.
+- `resultIds` rỗng → SnackBar `Không có giao dịch mới (n dòng đã có trong sổ)`, ở lại.
+
+```text
+│ Đối soát 3 giao dịch mới        (2 dòng đã có) │  subtitle từ skipped
+│ 1.200.000đ · HUE 2 COLLAGEN · 10/09 12:00     │  mỗi item = movementProvider(id)
+│   Có thể là: Bán 2 hộp collagen - 1.200.000đ  │  candidates.first nếu có
+│   [Ghép]  [Phân loại ▾]                       │  Ghép = match(candidates.first); Phân loại = bottom sheet 4 nút v1
+│ 250.000đ · THAO 1HOP · 11/09 12:00            │
+│   Chưa rõ là khoản gì. [Phân loại ▾]          │
+│ 2.000.000đ ↗ · TRA TIEN HANG · 10/09  [Phân loại ▾] │  OUT: không candidate
+│ ✓ 380.000đ · Đặt cọc                          │  đã xử lý: chip trạng thái, không nút
+│ [ Xong ]                                       │  → selectedDate = ngày mới nhất trong batch, go('/home')
+```
+
+- Chạm dòng → `/movements/{id}` (detail v1, đủ candidate + 4 nút). Sau mỗi Ghép / Phân loại:
+  `ref.invalidate(movementProvider(id))` + `dashboardProvider`, **không** rời màn.
+- Không auto-match. Mock: batch tạo 3 movement từ `capture_result_batch.json` + 3 fixture nội bộ
+  (1 có candidate cùng số tiền với SALE CONFIRMED UNPAID, 1 IN không candidate, 1 OUT).
+
+## 14. Phases Phase 2 (build day chiều 12/09)
+
+### Phase 7 — ② Home theo ngày (~45 phút; ⑤ không có UI)
+
+- [ ] Model `CaptureResult` 3 field, `Dashboard` 2 field; `selectedDateProvider`; Home hàng ngày ‹ › Hôm nay.
+- [ ] Detail set ngày + mốc `prevDashboard` trước mutation; Event Detail ô **Ngày**; Close day theo ngày.
+- [ ] Mock: fixture đã có ngày 11/09 → Home mock mở hôm nay trống, lật về 11/09 thấy số — chấp nhận
+      (hoặc `FakeTaxBridgeApi` dời fixture về hôm nay khi `USE_MOCK`; chọn cách 2 nếu còn thời gian).
+- [ ] Chạy kịch bản `feature-map/doc-date-home.md` trên Simulator (`DEMO=true`, backend local).
+
+### Phase 8 — ④ Báo cáo + ③ Tồn đọng / replay (~60 phút)
+
+- [ ] Mục 11: model, provider, màn Báo cáo, preset, nút Home.
+- [ ] Mục 12: model, màn Tồn đọng, card cảnh báo Home, badge; replay sau register.
+- [ ] `tool/sync_fixtures.sh` chạy lại (fixture mới); mock đọc `report.json` / `pending.json`.
+
+### Phase 9 — ① Đối soát lịch sử (~50 phút)
+
+- [ ] Capture mode `history` + asset `bank_history.jpg` (copy từ `demo-assets/` khi BE làm xong).
+- [ ] Màn Đối soát; `go('/reconcile')` sau batch.
+- [ ] Chạy `feature-map/bank-history-reconcile.md`.
+
+### Freeze v2
+
+- [ ] Build lên iPhone demo; chạy UC1–14 (UC11 nhắn Zalo thật). Quay video.

@@ -3,5 +3,8 @@
   "status": "FAILED",
   "resultType": null,
   "resultId": null,
-  "error": "AI_EXTRACTION_FAILED"
+  "error": "AI_EXTRACTION_FAILED",
+  "occurredAt": null,
+  "resultIds": [],
+  "skippedCount": 0
 }

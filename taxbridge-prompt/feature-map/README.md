@@ -9,8 +9,8 @@ Vai trò so với tài liệu khác (`CLAUDE.md` §3):
 - **Không** định nghĩa DTO / endpoint / status code — đó là `contract/`; ở đây chỉ link.
 - **Không** mô tả layout màn hình — đó là plan Flutter §6. Nhưng bảng `Handles` ở đây
   **sở hữu** nhãn nút / ô nhập / chip; plan Flutter và code dùng đúng nhãn đó.
-- Chỉ đào sâu hai luồng hero. 7 UC còn lại đã có `contract/endpoints.md` mục "Thứ tự
-  smoke 9 UC" và `tests/smoke/smoke.sh`; không viết thêm feature-map trước build day.
+- v1 chỉ đào sâu hai luồng hero (7 UC còn lại: `contract/endpoints.md` "Thứ tự smoke 9 UC" +
+  `tests/smoke/smoke.sh`). Phase 2 (`requirements-phase2.md`) có 5 file, mỗi yêu cầu một file.
 
 ## Harness thật
 
@@ -43,3 +43,14 @@ Không đưa chi tiết implementation vào đây.
 - [Match or classify incoming money](./match-classify-money.md) — UC4 + UC5 (hero): tiền
   vào từ ảnh chuyển khoản, ghép với đơn đã xác nhận, hoặc phân loại đặt cọc mà doanh thu
   không đổi. Harness: `curl`, đối chiếu trên app ở bước cuối.
+
+### Phase 2 (12/09 chiều, `requirements-phase2.md`)
+
+- [Ghi nhận theo ngày trên chứng từ và Home theo ngày](./doc-date-home.md) — ② UC10: ảnh in
+  11/09 vào sổ 11/09, sổ đã đóng tự cập nhật, Home lật ngày, hero giữ nguyên. Harness: `curl` + Simulator.
+- [Bot trả lời trong Zalo](./zalo-reply.md) — ⑤ UC11: 5 mẫu câu trả lời. Harness: `curl` + điện thoại thật.
+- [Báo cáo theo khoảng thời gian](./report-range.md) — ④ UC12: preset, theo ngày, theo loại. Harness: `curl` + Simulator.
+- [Tồn đọng và tin nhắn Zalo cũ](./pending-backlog.md) — ③ UC13: cảnh báo Home, màn Tồn đọng, replay
+  sau register. Harness: `curl` + Simulator.
+- [Đối soát lịch sử chuyển khoản](./bank-history-reconcile.md) — ① UC14: batch + dedupe + màn Đối soát.
+  Harness: `curl` + Simulator.
