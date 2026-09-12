@@ -1,0 +1,23 @@
+{
+  "movementId": "mov_001",
+  "direction": "IN",
+  "amount": 450000,
+  "memo": "LAN 3HOP",
+  "counterparty": "NGUYEN THI LAN",
+  "occurredAt": "2026-09-11T09:33:00+07:00",
+  "source": "APP",
+  "captureType": "IMAGE_TRANSFER",
+  "evidenceText": null,
+  "evidenceUrl": "asset://demo/transfer_match.jpg",
+  "status": "UNMATCHED",
+  "matchedEventId": null,
+  "classificationType": null,
+  "candidates": [
+    {
+      "eventId": "ev_001",
+      "description": "Bán 3 hộp collagen",
+      "amount": 450000,
+      "score": 0.9
+    }
+  ]
+}

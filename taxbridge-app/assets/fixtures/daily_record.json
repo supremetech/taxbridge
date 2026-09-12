@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-11",
+  "summary": {
+    "revenue": 4820000,
+    "expense": 1230000,
+    "collected": 4570000,
+    "receivable": 250000
+  },
+  "warningCount": 2,
+  "warnings": [
+    {
+      "warningId": "UNMATCHED_MONEY:mov_002",
+      "type": "UNMATCHED_MONEY",
+      "status": "OPEN",
+      "resourceType": "MONEY_MOVEMENT",
+      "resourceId": "mov_002",
+      "amount": 380000,
+      "message": "Khoản tiền 380.000đ chưa được phân loại.",
+      "resolvedAt": null
+    },
+    {
+      "warningId": "DRAFT_EVENT:ev_007",
+      "type": "DRAFT_EVENT",
+      "status": "OPEN",
+      "resourceType": "EVENT",
+      "resourceId": "ev_007",
+      "amount": 180000,
+      "message": "Giao dịch 180.000đ chưa được xác nhận.",
+      "resolvedAt": null
+    }
+  ],
+  "closedAt": "2026-09-11T21:00:00+07:00",
+  "updatedAt": "2026-09-11T21:00:00+07:00"
+}

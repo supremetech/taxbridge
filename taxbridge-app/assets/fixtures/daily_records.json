@@ -1,0 +1,83 @@
+[
+  {
+    "date": "2026-09-11",
+    "summary": {
+      "revenue": 4820000,
+      "expense": 1230000,
+      "collected": 4570000,
+      "receivable": 250000
+    },
+    "warningCount": 2,
+    "warnings": [
+      {
+        "warningId": "UNMATCHED_MONEY:mov_002",
+        "type": "UNMATCHED_MONEY",
+        "status": "OPEN",
+        "resourceType": "MONEY_MOVEMENT",
+        "resourceId": "mov_002",
+        "amount": 380000,
+        "message": "Khoản tiền 380.000đ chưa được phân loại.",
+        "resolvedAt": null
+      },
+      {
+        "warningId": "DRAFT_EVENT:ev_007",
+        "type": "DRAFT_EVENT",
+        "status": "OPEN",
+        "resourceType": "EVENT",
+        "resourceId": "ev_007",
+        "amount": 180000,
+        "message": "Giao dịch 180.000đ chưa được xác nhận.",
+        "resolvedAt": null
+      }
+    ],
+    "closedAt": "2026-09-11T21:00:00+07:00",
+    "updatedAt": "2026-09-11T21:00:00+07:00"
+  },
+  {
+    "date": "2026-09-10",
+    "summary": {
+      "revenue": 3100000,
+      "expense": 640000,
+      "collected": 3100000,
+      "receivable": 0
+    },
+    "warningCount": 0,
+    "warnings": [],
+    "closedAt": "2026-09-10T21:05:00+07:00",
+    "updatedAt": "2026-09-10T21:05:00+07:00"
+  },
+  {
+    "date": "2026-09-09",
+    "summary": {
+      "revenue": 2850000,
+      "expense": 910000,
+      "collected": 2600000,
+      "receivable": 250000
+    },
+    "warningCount": 1,
+    "warnings": [
+      {
+        "warningId": "DRAFT_EVENT:ev_0909_02",
+        "type": "DRAFT_EVENT",
+        "status": "OPEN",
+        "resourceType": "EVENT",
+        "resourceId": "ev_0909_02",
+        "amount": 150000,
+        "message": "Giao dịch 150.000đ chưa được xác nhận.",
+        "resolvedAt": null
+      },
+      {
+        "warningId": "UNMATCHED_MONEY:mov_0909_01",
+        "type": "UNMATCHED_MONEY",
+        "status": "RESOLVED",
+        "resourceType": "MONEY_MOVEMENT",
+        "resourceId": "mov_0909_01",
+        "amount": 500000,
+        "message": "Khoản tiền 500.000đ chưa được phân loại.",
+        "resolvedAt": "2026-09-10T08:15:00+07:00"
+      }
+    ],
+    "closedAt": "2026-09-09T20:50:00+07:00",
+    "updatedAt": "2026-09-10T08:15:00+07:00"
+  }
+]

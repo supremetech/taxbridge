@@ -1,0 +1,29 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "mock",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define=USE_MOCK=true", "--dart-define=DEMO=true"]
+    },
+    {
+      "name": "local",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define=API_BASE_URL=http://127.0.0.1:8787", "--dart-define=DEMO=true"]
+    },
+    {
+      "name": "ngrok",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define=API_BASE_URL=https://REPLACE.ngrok-free.app", "--dart-define=DEMO=true"]
+    },
+    {
+      "name": "prod",
+      "request": "launch",
+      "type": "dart",
+      "toolArgs": ["--dart-define=API_BASE_URL=https://asia-southeast1-hackathon-42790.cloudfunctions.net/api", "--dart-define=DEMO=true"]
+    }
+  ]
+}

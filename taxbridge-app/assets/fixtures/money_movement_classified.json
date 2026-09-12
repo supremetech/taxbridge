@@ -1,0 +1,16 @@
+{
+  "movementId": "mov_002",
+  "direction": "IN",
+  "amount": 380000,
+  "memo": "COC MINH",
+  "counterparty": "NGUYEN VAN MINH",
+  "occurredAt": "2026-09-11T11:02:00+07:00",
+  "source": "APP",
+  "captureType": "IMAGE_TRANSFER",
+  "evidenceText": null,
+  "evidenceUrl": "asset://demo/transfer_deposit.jpg",
+  "status": "CLASSIFIED",
+  "matchedEventId": null,
+  "classificationType": "DEPOSIT",
+  "candidates": []
+}
