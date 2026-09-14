@@ -562,9 +562,11 @@ Capture: mode thứ 5 `history` (`/capture?mode=history`), input như receipt, g
 - [x] Detail set ngày + mốc `prevDashboard` trước mutation (`prepareReturnToDate` ở `providers.dart`); Event Detail ô **Ngày**; Close day theo ngày.
 - [x] Mock: `FakeTaxBridgeApi` tính dashboard / report / pending **theo ngày** từ fixture (ngày 11/09); Home mock
       mở hôm nay trống, lật về 11/09 thấy số. Ảnh demo giữ `occurredAt` 11/09 của fixture (đúng UC10).
-- [x] Chạy kịch bản `feature-map/doc-date-home.md` trên Simulator với `USE_MOCK=true DEMO=true` (12/09): hero banner
-      về Home 11/09 OK. Chưa chạy với backend local. Lưu ý: `ref.listen(dashboardProvider)` phải bỏ qua
-      `AsyncLoading` (Riverpod giữ value cũ → `hasValue` true) nếu không mốc banner bị set sai.
+- [x] Chạy kịch bản `feature-map/doc-date-home.md` trên Simulator: mock (12/09 12:40) và **prod**
+      (`API_BASE_URL=https://asia-southeast1-hackathon-42790.cloudfunctions.net/api DEMO=true`, 12/09 13:40):
+      UC2 → UC4 (CK 450k đọc ngày `11/09 09:33`, ghép) → UC5 (Đặt cọc) → Home 11/09, banner
+      `Tiền vào +380.000đ · Doanh thu không đổi ✓` (log `banner set`, mốc 1.210.000 → 1.590.000). Lưu ý:
+      `ref.listen(dashboardProvider)` phải bỏ qua `AsyncLoading` (Riverpod giữ value cũ → `hasValue` true).
 
 ### Phase 8 — ④ Báo cáo + ③ Tồn đọng / replay (~60 phút)
 
@@ -578,9 +580,13 @@ Capture: mode thứ 5 `history` (`/capture?mode=history`), input như receipt, g
 - [x] Capture mode `history`; asset `bank_history.jpg` **chưa có** trong `demo-assets/` — nút Dùng file demo báo
       `Chưa có file demo …`, copy vào `assets/demo/` khi BE render xong.
 - [x] Màn Đối soát; `go('/reconcile')` sau batch.
-- [x] Chạy `feature-map/bank-history-reconcile.md` trên mock (ảnh thư viện thay `bank_history.jpg`): Ghép / Phân loại /
-      Xong → Home 11/09 OK. Chưa chạy với backend thật.
+- [x] Chạy `feature-map/bank-history-reconcile.md` trên mock và **prod** (12/09 13:43, `assets/demo/bank_history.jpg`):
+      `Đối soát 3 giao dịch mới (2 dòng đã có)`, Phân loại → CLASSIFIED, Xong → Home 11/09; Báo cáo 7 ngày
+      bankIn 3.040.000 = 1.840.000 + 1.200.000, drill 10/09; Tồn đọng 2 ngày; gửi lại → ở lại màn Capture.
 
 ### Freeze v2
 
 - [ ] Build lên iPhone demo; chạy UC1–14 (UC11 nhắn Zalo thật). Quay video.
+      Lưu ý `ios/Runner.xcscheme`: LaunchAction đang để **Debug** (mặc định Flutter). Nếu để Release thì `flutter run`
+      lên Simulator fail (`No Xcode build settings` — Release/Profile chỉ `SUPPORTED_PLATFORMS = iphoneos`);
+      build iPhone thật dùng `flutter run --release` / `flutter build ipa`, không cần sửa scheme.
